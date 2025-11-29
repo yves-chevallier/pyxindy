@@ -25,6 +25,7 @@ def test_build_index_entries_converts_raw_data_using_style():
     assert first.key == ("a",)
     assert first.attribute == "def"
     assert first.locrefs[0].layers == ("13",)
+    assert index.groups[0].entry_count == 3
 
 
 def test_missing_attribute_uses_default_group():

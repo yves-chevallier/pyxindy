@@ -43,6 +43,7 @@ class IndexNode:
 class IndexLetterGroup:
     label: str
     nodes: list[IndexNode]
+    entry_count: int
 
 
 @dataclass(slots=True)

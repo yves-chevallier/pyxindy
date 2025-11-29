@@ -32,10 +32,22 @@ def group_entries_by_letter(
         entries = buckets.get(label, [])
         nodes = build_hierarchy(entries)
         if nodes:
-            result.append(IndexLetterGroup(label=label, nodes=nodes))
+            result.append(
+                IndexLetterGroup(
+                    label=label,
+                    nodes=nodes,
+                    entry_count=len(entries),
+                )
+            )
     if not result and sorted_entries:
         nodes = build_hierarchy(sorted_entries)
-        result.append(IndexLetterGroup(label=fallback_label, nodes=nodes))
+        result.append(
+            IndexLetterGroup(
+                label=fallback_label,
+                nodes=nodes,
+                entry_count=len(sorted_entries),
+            )
+        )
     return result
 
 
