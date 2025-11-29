@@ -1,6 +1,13 @@
 """Index construction helpers."""
 
 from .builder import IndexBuilderError, build_index_entries
-from .models import IndexEntry
+from .models import Index, IndexEntry, IndexLetterGroup, IndexNode
 
-__all__ = ["IndexEntry", "IndexBuilderError", "build_index_entries"]
+__all__ = [
+    "Index",
+    "IndexEntry",
+    "IndexLetterGroup",
+    "IndexNode",
+    "IndexBuilderError",
+    "build_index_entries",
+]

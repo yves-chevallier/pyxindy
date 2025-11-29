@@ -13,8 +13,8 @@ from xindy.locref import (
 )
 from xindy.raw.reader import RawIndexEntry
 
-from .models import IndexEntry
-from .order import sort_entries
+from .grouping import group_entries_by_letter
+from .models import Index, IndexEntry
 
 
 class IndexBuilderError(RuntimeError):
@@ -26,7 +26,7 @@ def build_index_entries(
     style_state: StyleState,
     *,
     default_locclass: str | None = None,
-) -> list[IndexEntry]:
+) -> Index:
     """Convert raw entries into structured :class:`IndexEntry` objects."""
     locclass = _resolve_location_class(style_state, default_locclass)
     entries: list[IndexEntry] = []
@@ -45,7 +45,8 @@ def build_index_entries(
         )
         entry.add_location_reference(locref)
         entries.append(entry)
-    return sort_entries(entries)
+    grouped = group_entries_by_letter(entries, style_state)
+    return Index(groups=grouped, total_entries=len(entries))
 
 
 def _resolve_location_class(

@@ -24,8 +24,8 @@ def test_group_entries_respects_defined_letter_groups_and_hierarchy():
     interpreter = StyleInterpreter()
     state = interpreter.load(DATA_DIR / "simple.xdy")
     raw_entries = load_raw_index(DATA_DIR / "simple.raw")
-    entries = build_index_entries(raw_entries, state)
-    groups = group_entries_by_letter(entries, state)
+    index = build_index_entries(raw_entries, state)
+    groups = index.groups
     labels = [group.label for group in groups]
     assert labels == ["a", "b", "c", "t"]
     a_group_nodes = groups[0].nodes
@@ -36,7 +36,11 @@ def test_group_entries_respects_defined_letter_groups_and_hierarchy():
 
 
 def test_group_entries_falls_back_to_alphabet():
-    state, entries = _load_state_and_entries("attr1.xdy", "attr1.raw", only_numeric=True)
-    groups = group_entries_by_letter(entries, state)
+    state, index = _load_state_and_entries(
+        "attr1.xdy",
+        "attr1.raw",
+        only_numeric=True,
+    )
+    groups = index.groups
     assert groups[0].label.lower().startswith("a")
     assert groups[0].nodes[0].term == "a"

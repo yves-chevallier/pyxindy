@@ -20,9 +20,8 @@ def _load_state_and_entries():
 
 def test_build_index_entries_converts_raw_data_using_style():
     state, raw_entries = _load_state_and_entries()
-    entries = build_index_entries(raw_entries[:3], state)
-    assert len(entries) == 3
-    first = entries[0]
+    index = build_index_entries(raw_entries[:3], state)
+    first = index.groups[0].nodes[0]
     assert first.key == ("a",)
     assert first.attribute == "def"
     assert first.locrefs[0].layers == ("13",)
@@ -31,8 +30,8 @@ def test_build_index_entries_converts_raw_data_using_style():
 def test_missing_attribute_uses_default_group():
     state, raw_entries = _load_state_and_entries()
     entry_without_attr = next(entry for entry in raw_entries if entry.attr is None)
-    entries = build_index_entries([entry_without_attr], state)
-    assert entries[0].attribute == "default"
+    index = build_index_entries([entry_without_attr], state)
+    assert index.groups[0].nodes[0].attribute == "default"
 
 
 def test_unknown_location_class_raises():
@@ -44,6 +43,6 @@ def test_unknown_location_class_raises():
 def test_entries_are_sorted_by_key():
     state, raw_entries = _load_state_and_entries()
     unsorted = list(reversed(raw_entries[:5]))
-    entries = build_index_entries(unsorted, state)
-    keys = [entry.key for entry in entries]
+    index = build_index_entries(unsorted, state)
+    keys = [node.key for node in index.groups[0].nodes]
     assert keys == sorted(keys)

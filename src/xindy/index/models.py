@@ -36,4 +36,16 @@ class IndexNode:
         self.locrefs.extend(refs)
 
 
-__all__ = ["IndexEntry", "IndexNode"]
+@dataclass(slots=True)
+class IndexLetterGroup:
+    label: str
+    nodes: list[IndexNode]
+
+
+@dataclass(slots=True)
+class Index:
+    groups: list[IndexLetterGroup]
+    total_entries: int
+
+
+__all__ = ["Index", "IndexEntry", "IndexLetterGroup", "IndexNode"]
