@@ -1,0 +1,107 @@
+<HTML>
+<HEAD>
+<TITLE>XINDY: Errors and Problems</TITLE>
+</HEAD>
+<BODY>
+<A HREF="xindy-by-topic-2.html"><IMG SRC="prev.gif" ALT="Previous"></A>
+<A HREF="xindy-by-topic-4.html"><IMG SRC="next.gif" ALT="Next"></A>
+<A HREF="xindy-by-topic.html#toc3"><IMG SRC="toc.gif" ALT="Contents"></A>
+<HR>
+<H2><A NAME="s3">3. Errors and Problems</A></H2>
+
+<H2><A NAME="ss3.1">3.1 The keyword mappings don't work as expected!</A></H2>
+
+
+<P>Sometimes the keyword mappings don't work as expected. Especially in
+cases with several regular expressions one might get confused about
+what rule matches exactly when. We have incorporated a detailed
+logging mechanism that lets one step by step follow the rules that
+accomplish the keyword mapping.</P>
+<P>When running <b>xindy</b> you can turn on this feature with the command
+line option `<CODE>-L</CODE>'. This option followed by one of the numbers 1,
+2, or 3 turns on the appropriate debugging level. Turning on level 2
+or 3 and specifying a log-file with the command line option `<CODE>-l</CODE>'
+a trace of the mappings is recorded in the log-file. A sample output
+looks like the following:</P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+Mappings: (add (merge-rule :eregexp `^\\bf{(.*)}' `\1' :again)).
+Mappings: (add (merge-rule :eregexp `^\\&quot;([AEOUaeou])' `\1')).
+ ...
+Mappings: (compare `\&quot;A\&quot;a' :eregexp `^\\bf{(.*)}')
+Mappings: (compare `\&quot;A\&quot;a' :eregexp `^\\&quot;([AEOUaeou])') match!
+Mappings: (compare `\&quot;a' :eregexp `^\\bf{(.*)}')
+Mappings: (compare `\&quot;a' :eregexp `^\\&quot;([AEOUaeou])') match!
+Mappings: (merge-mapping `\&quot;A\&quot;a') -&gt; `Aa'.
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+<P>This trace shows that initially two regular expression mappings have
+been added to the rule set. The second section shows how the keyword
+`
+<CODE>
+\"A\"a
+</CODE>
+' is compared to these rules and substitutions are
+applied as matches are found. In the last line the result of the
+keyword mapping is reported.</P>
+
+
+
+<H2><A NAME="ss3.2">3.2 I'm totally confused by the markup scheme!</A></H2>
+
+
+<P>A very important feature is the ability to <EM>trace</EM> all markup tags
+<b>xindy</b> emits in the markup phase. Simply use the command line
+switch <CODE>-t</CODE> or insert the command</P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+(markup-trace :on)
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+<P>into the index style. This informs <b>xindy</b> to emit additional
+pseudo markup that can be used to understand and debug the
+markup phase. An example output might look like the following:</P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+&lt;INDEX:OPEN&gt;
+  &lt;LETTER-GROUP-LIST:OPEN&gt;
+    &lt;LETTER-GROUP:OPEN [&quot;a&quot;]&gt;
+      &lt;INDEXENTRY-LIST:OPEN [0]&gt;
+        &lt;INDEXENTRY:OPEN [0]&gt;
+          &lt;KEYWORD-LIST:OPEN [0]&gt;
+            &lt;KEYWORD:OPEN [0]&gt;
+ ...
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+<P>The symbolic tags directly lead one to the command that is responsible
+for the definition of that markup tag. For example, the tag
+<CODE>
+LETTER-GROUP-LIST:OPEN
+</CODE>
+ indicates that the command
+<CODE>
+markup-letter-group-list
+</CODE>
+ is responsible for replacing this
+symbolic tag by a real one.
+Give it a try if you find yourself confused by your own markup
+specification.</P>
+
+
+
+
+
+
+
+<HR>
+<A HREF="xindy-by-topic-2.html"><IMG SRC="prev.gif" ALT="Previous"></A>
+<A HREF="xindy-by-topic-4.html"><IMG SRC="next.gif" ALT="Next"></A>
+<A HREF="xindy-by-topic.html#toc3"><IMG SRC="toc.gif" ALT="Contents"></A>
+</BODY>
+</HTML>

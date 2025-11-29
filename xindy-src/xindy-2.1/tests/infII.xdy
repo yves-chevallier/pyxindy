@@ -1,0 +1,141 @@
+;;
+;; This is an example style for xindy describing a particular
+;; TeX-index that was built as part of a scriptum for a Computer
+;; Science lecture at the Technical University of Darmstadt in 1996.
+;;
+
+;; Remember that `;;' serve as comment characters...
+
+;; We start with the description of the location-classes. Our index
+;; contains only page-numbers consisting of arabic numbers.
+
+(define-location-class "page-numbers"  ("arabic-numbers"))
+
+;; Additionally we use the following attributes
+
+(define-attributes (("textbf" "default")))
+
+;; Here follow all letter-groups. The short-cut notation is used here.
+
+(define-letter-groups
+    ("a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m"
+     "n" "o" "p" "q" "r" "s" "t" "u" "v" "w" "x" "y" "z"))
+
+;; We decided not to define the following additional letter groups.
+
+;;(define-letter-group "st"  :after "s" :before "t")
+;;(define-letter-group "sch" :after "s" :before "t")
+;;(define-letter-group "sch" :before "st")
+
+;;
+;; Merge-rules
+;;
+
+;; We merge all words containing uppercase letters into the lowercase
+;; letters. This is TeX-specific stuff for german documents.
+
+(merge-rule "\~"a" "ae")
+(merge-rule "\~"o" "oe")
+(merge-rule "\~"u" "ue")
+(merge-rule "\ss"  "ss")
+(merge-rule "\~"A" "AE")
+(merge-rule "\~"O" "OE")
+(merge-rule "\~"U" "UE")
+(merge-rule "\SS"  "SS")
+
+;; Additionally we must ignore the discretionaty hyphens for the
+;; merging-process, the input-encoding for the german sharp `s' and
+;; remove reading hyphens at in the keywords.
+
+(merge-rule "\\discretionary.*{.*}{.*}{.*}" "")
+(merge-rule "\IeC  {\ss }" "ss" :string)
+(merge-rule "-" "")
+
+;; Finally we removed some mathematical symbolr from the keywords such
+;; that the keyword `$(n+{1\over 2})$' was sorted like `n+over2'.
+;; We use the :string switch to indicate that these are not regular
+;; expressions.
+
+(merge-rule "-" "" :string)
+(merge-rule "$" "" :string)
+(merge-rule "(" "" :string)
+(merge-rule ")" "" :string)
+(merge-rule "{" "" :string)
+(merge-rule "}" "" :string)
+(merge-rule "\" "" :string)
+
+;;
+;; Sort-rules
+;;
+
+;;
+;; The sort-rules map all letters to their lowercase counterpart.
+;;
+
+(sort-rule "A" "a")
+(sort-rule "B" "b")
+(sort-rule "C" "c")
+(sort-rule "D" "d")
+(sort-rule "E" "e")
+(sort-rule "F" "f")
+(sort-rule "G" "g")
+(sort-rule "H" "h")
+(sort-rule "I" "i")
+(sort-rule "J" "j")
+(sort-rule "K" "k")
+(sort-rule "L" "l")
+(sort-rule "M" "m")
+(sort-rule "N" "n")
+(sort-rule "O" "o")
+(sort-rule "P" "p")
+(sort-rule "Q" "q")
+(sort-rule "R" "r")
+(sort-rule "S" "s")
+(sort-rule "T" "t")
+(sort-rule "U" "u")
+(sort-rule "V" "v")
+(sort-rule "W" "w")
+(sort-rule "X" "x")
+(sort-rule "Y" "y")
+(sort-rule "Z" "z")
+
+
+;; That's all for now. We have described everything necessary to load
+;; the raw-index. Still missing is the markup
+
+;; The following markup is similar to the way makeindex tags an index:
+
+(markup-index :open  "\begin{theindex}~n~n"
+              :close "~n~n\end{theindex}~n"
+              :tree)
+
+(markup-letter-group-list :sep "~n~n  \indexspace~n~n")
+
+(markup-letter-group :open       "{\large"
+                     :open-head  "\textbf{"
+                     :close-head "}}~n\nopagebreak\vskip 2pt\nopagebreak~n"
+                     :upcase)
+
+;; The list of indexentries
+
+(markup-indexentry-list)
+
+(markup-indexentry :open "~n  \item "           :depth 0)
+(markup-indexentry :open "~n    \subitem "      :depth 1)
+(markup-indexentry :open "~n      \subsubitem " :depth 2)
+
+;; We do not use any explicit tags around keywords
+
+(markup-keyword-list)
+(markup-keyword)
+
+;; Location-references
+
+(markup-locclass-list :open "\enspace" :sep ", ")
+(markup-locref-list   :sep ", ")
+
+(markup-locref  :open "\textbf{" :close "}" :attr "textbf")
+
+;; Turn on tracing-mode...
+
+;;(markup-trace :on)

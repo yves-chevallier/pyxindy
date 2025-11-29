@@ -1,0 +1,162 @@
+Mon Feb  9 16:17:22 1998  Roger Kehr  <kehr@sponsor>
+
+	* Walter Obermiller <walter@sbart.stuttgart.netsurf.de> has
+    	  successfully ported xindy-2.0 to SunOS-4.1.1 on a Sparc-1.
+
+Tue Jan  6 17:35:53 1998  Roger Kehr  <kehr@spirit>
+
+	* Opened the module library on the web.
+
+	* Started work on making xindy learn Irish. The Irish rules cannot
+          be expressed in the current implementation. Padraig De Brun
+ 	  <pdebrun@celt.dias.ie> pointed me to that problem and helped to
+          find a solution.
+
+	* Announce of version 2.0 alpha release on the mailing list.
+
+Mon Oct 20 13:30:39 1997  Roger Kehr  <kehr@sponsor>
+
+	* Put a patch for 1.2.2 on the web. New version is 1.2.3.
+
+	* Implemented an extension to the sorting rule mechanism that now
+	  allows the definition of German and French sorting rules by
+	  using multiple sorting phases. The old scheme did not have a
+ 	  good support for complex sorting rules.
+
+Fri May  2 11:54:11 1997  Roger Kehr  <kehr@spelunke>
+
+	* Joerg Diederich <J_Diederich@herlab.ruhr.de> did finish the OS/2
+	  port. Release of OS/2 version.
+
+Thu Apr  3 15:46:24 1997  Roger Kehr  <kehr@spock>
+
+	* Rewrote the xindy shell-script wrapper. It is now written in
+	  perl, because perl is better supported on non-UNIX platforms
+	  such as OS/2.
+
+Fri Mar 28 14:05:05 1997  Roger Kehr  <kehr@spock>
+
+        * Released interim version 1.2.2
+
+	* Fixed several pieces of the code to make it more ANSI-compliant.
+	  Switched to Allegro CL as the development platform.
+	  xindy now runs on Allegro CL. Still missing is the support for
+	  sort- and merge-rules.
+
+Thu Mar 20 15:48:00 1997  Roger Kehr  <kehr@spock>
+
+	* Fixed OS/2-specific bug reported by Joerg Diederich
+	  <J_Diederich@herlab.ruhr.de>.
+
+	* Fixed bug in testsuite Makefile that was reported by
+	  Torsten Hilbrich <Torsten.Hilbrich@bln.de>
+
+Tue Mar 18 17:38:51 1997  Roger Kehr  <kehr@spock>
+
+        * Released interim version 1.2.1
+
+	* Fixed some of the bugs reported by Bernd Raichle
+	  <raichle@Informatik.Uni-Stuttgart.DE>.
+
+Thu Mar 13 16:59:42 1997  Roger Kehr  <kehr@spock>
+
+	* Fixed a bug in the range-building phase. Bug was reported by
+	  Andreas Schlechte <Andreas.Schlechte@tu-clausthal.de>.
+
+Mon Mar 10 16:53:56 1997  Roger Kehr  <kehr@spock>
+
+	* (merge-to :drop) did not drop the location references.
+	  Bug was reported by Andreas Schlechte
+	  <Andreas.Schlechte@tu-clausthal.de>.
+
+Wed Mar  5 16:53:22 1997  Roger Kehr  <kehr@spock>
+
+	* Version 1.2 released. Modified the installation procedure and
+	  fixed a bug with the searchpath. Bug was reported by
+	  Andreas Schlechte <Andreas.Schlechte@tu-clausthal.de>.
+
+Tue Mar  4 13:34:56 1997  Roger Kehr  <kehr@spock>
+
+	* Version 1.1 released.
+
+Mon Feb 24 15:53:26 1997  Roger Kehr  <kehr@spock>
+
+	* Made a new binary release for Sun Solaris. The new version now
+	  runs on Solaris 2.[4, 5, 5.1] for sun4m and sun4u (Ultra
+	  machines). Therefore we will support only one version for all
+	  Sun platforms. New new binary release has version 1.0c. The
+	  change is possible with a special patch for clisp making the
+	  format of the dump-files equal.
+	  Bug was reported by Peter Seitz <seitz@informatik.th-darmstadt.de>.
+
+Tue Feb 18 14:08:22 1997  Roger Kehr  <kehr@spock>
+
+	* Released version 1.0c. Fixed some minor bugs in the xindy
+	  startup file.
+
+Thu Feb 13 18:27:17 1997  Roger Kehr  <kehr@spock>
+
+	* Released version 1.0b. Included some missing files into the
+	  distribution that caused makeindex4 to break.
+	  Additionally included a simple test-suite for makeindex4.
+	  Bug was reported by Kyosti Huhtala <huhtala@jyu.fi>.
+
+Thu Feb  6 11:13:59 1997  Roger Kehr  <kehr@spock>
+
+        * Released version 1.0a. This is a snapshot of the upcoming
+          release 1.1.
+
+        * This release is not compatible to version 1.0. We have decided
+          to represent meta-characters inside of strings in the style
+          files to be prefixed with `~' instead of `\'.
+
+        * It contains many new features and bug-fixes.
+
+Fri Aug  2 19:57:58 1996  Roger Kehr  <kehr@spock>
+
+	* Revisited the manual and the tutorial. Now both are available as
+	  versions 1.0.
+
+	* Changed the installation scheme. The directory structure now
+	  allows better separation of the binary distribution and the base
+	  package.
+
+	* Set up the homepage. It is available now under
+
+	    http://www.iti.informatik.th-darmstadt.de/xindy/
+
+	* Fixed several small bugs.
+
+	* All packages now have the version number 1.0.
+
+
+Wed Jul 24 14:14:09 1996  Roger Kehr  <kehr@spock>
+
+	* First version of the tutorial finished.
+
+	* Found a bug in the binary version for Linux. This bug corrupted
+	  the handling of merge- and sort-rules. New package is available
+	  as version xindy-0.9.1-i386-linux-elf.tar.gz.
+
+	* Fixed another bug in the handling of hierarchical
+	  location-references. Appeared only in conjunction with
+	  hierarchical ranges.
+
+Mon Jul 22 13:46:40 1996  Roger Kehr  <kehr@spock>
+
+	* Implemented cross-reference checking. Added tests/xref-1
+	  for testing the new feature.
+
+	* Support for SGI-IRIX-5.3 available.
+
+Fri Jul 19          1996  Roger Kehr  <kehr@spock>
+
+	* Fixed a bug in tex2xindy. Now runs also with standard lex.
+
+Thu Jul 18          1996  Roger Kehr  <kehr@spock>
+
+	* Pre-release version 0.9 now available at
+
+	    ftp://ftp.th-darmstadt.de/pub/tex/src/xindy
+
+

@@ -1,0 +1,76 @@
+<HTML>
+<HEAD>
+<TITLE>XINDY: Practical Tips</TITLE>
+</HEAD>
+<BODY>
+<A HREF="xindy-by-topic-1.html"><IMG SRC="prev.gif" ALT="Previous"></A>
+<A HREF="xindy-by-topic-3.html"><IMG SRC="next.gif" ALT="Next"></A>
+<A HREF="xindy-by-topic.html#toc2"><IMG SRC="toc.gif" ALT="Contents"></A>
+<HR>
+<H2><A NAME="s2">2. Practical Tips</A></H2>
+
+<H2><A NAME="ss2.1">2.1 What LaTeX-package should I use in conjunction with xindy?</A></H2>
+
+
+<P>We strongly recommend using the LaTeX2e-package <CODE>index</CODE> written
+by David M. Jones, which is available at CTAN. It supports multiple
+indexes as well as several shortcuts to easily index terms in a
+document. Multiple indexes support the generation of several indexes
+for one document. For instance, one can make an author or command
+index in addition to a global index.</P>
+<P>Another option is to use the <CODE>xindy.sty</CODE> from Andreas Schlechte
+that comes with the <b>xindy</b> distribution. Take a look at the
+<CODE>contrib</CODE> directory that should contain a version.</P>
+
+
+<H2><A NAME="ss2.2">2.2 What editor should I use when writing xindy style files?</A></H2>
+
+
+<P>Use <CODE>Emacs</CODE> or <CODE>XEmacs</CODE>. Turn on the Lisp-mode with</P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+M-x lisp-mode
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+<P>and you can properly indent commands using <CODE>M-q</CODE>. To enter this
+mode automatically add the following lines to the end of the style
+file:</P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+^L
+;; Local Variables:
+;; mode: lisp
+;; End:
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+<P>The 
+<CODE>
+^L
+</CODE>
+ (Control-L) can be entered with <CODE>C-q C-l</CODE>.</P>
+
+
+
+<H2><A NAME="ss2.3">2.3 I have written a module for processing language <EM>foolandic</EM>. What must I do?</A></H2>
+
+
+<P>Great! Send it to us! It will become a part of the system in the next
+release.</P>
+
+
+
+
+
+
+
+
+<HR>
+<A HREF="xindy-by-topic-1.html"><IMG SRC="prev.gif" ALT="Previous"></A>
+<A HREF="xindy-by-topic-3.html"><IMG SRC="next.gif" ALT="Next"></A>
+<A HREF="xindy-by-topic.html#toc2"><IMG SRC="toc.gif" ALT="Contents"></A>
+</BODY>
+</HTML>

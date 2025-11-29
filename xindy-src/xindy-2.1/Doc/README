@@ -1,0 +1,16 @@
+$Id: README,v 1.1 1997/02/04 14:45:11 kehr Exp $
+------------------------------------------------------------
+
+This directory contains documentation to `xindy'.
+
+Note: The documents for GNU Info and the plain text file are a little
+      bit clumsy since they were generated from a SGML-document
+      automatically. The TeX and HTML versions look better.
+
+The subdirectory ./tutorial/ contains the examples that are used in
+the tutorial.
+
+=====================================================================
+Roger Kehr	           email: kehr@iti.informatik.th-darmstadt.de
+Computer Science Department
+Technical University of Darmstadt, Germany

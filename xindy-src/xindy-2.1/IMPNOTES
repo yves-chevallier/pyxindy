@@ -1,0 +1,43 @@
+$Id: IMPNOTES,v 1.2 1997/04/18 15:00:32 kehr Exp $
+------------------------------------------------------------
+
+xindy is largely written in Common Lisp. We have chosen Common Lisp
+for several reasons. Common Lisp is a very powerful rapid prototyping
+framework that allows for an efficient and maintainable
+implementation. We started using C++ and soon switched to Lisp gaining
+an productivity improvement by a significant factor. Since we make
+heavy use of the object-oriented features of CLOS, the Common Lisp
+Object System, and the dynamic nature of Lisp, thus other Lisp systems
+such as Emacs-Lisp will not work.
+
+We have chosen the Common Lisp implementation CLISP as the system of
+our choice, since CLISP runs on all commonly used platforms ranging
+from DOS/Windows (NT), OS/2 to many UNIX flavors. CLISP has a
+relatively small memory footprint (2-4 MB) and is reasonably fast
+compared to other Lisp systems.
+
+For efficiency reasons we have added the GNU Rx regular expression
+library and it has been extended with around 500 lines of C-code. The
+additional parts are only necessary if one uses the keyword-mapping
+features of xindy, which is one of the central parts of the system.
+But it should be usable without these features, too.
+
+It has also been tested on Allegro Common Lisp though it still lacks
+the keywork mapping support.
+
+Currently we offer several binary distributions to free the users from
+porting the Lisp system on their own. A full source version will be
+available soon.
+
+CLISP can be found at
+	ftp://ftp2.cons.org/pub/lisp/clisp/
+
+GNU Rx can be found at
+	ftp://prep.ai.mit.edu/pub/gnu/
+
+
+Enjoy, Roger.
+
+=====================================================================
+Roger Kehr	           email: kehr@iti.informatik.tu-darmstadt.de
+Computer Science Department	   Darmstadt University of Technology

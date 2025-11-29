@@ -1,0 +1,12 @@
+;; these indexentries test the sort-keys
+
+(indexentry :key ("arm")       :locref "1")
+(indexentry :key ("Arm")       :locref "2")
+(indexentry :key ("ARM")       :locref "3")
+(indexentry :key ("Armenhaus") :locref "4")
+(indexentry :key ("armselig")  :locref "5")
+
+(indexentry :key ("cote") :locref "11")
+(indexentry :key ("côte") :locref "12")
+(indexentry :key ("coté") :locref "13")
+(indexentry :key ("côté") :locref "14")

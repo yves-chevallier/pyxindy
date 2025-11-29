@@ -1,0 +1,54 @@
+# $Id: Makefile.in,v 1.2 1997/03/05 15:57:19 kehr Exp $$
+#----------------------------------------------------------------------
+#
+# This makefile can only be included into the platform-dependent makefiles.
+#
+#   clean      :  cleans unnecessary stuff
+#   tex2xindy  :  compiles the TeX-parser
+#   xindy      :  generates the wrapping-script
+#   makeindex4 :  generates the makeindex4-script
+#
+
+XINDY_IN      = $(SRCDIR)/xindy.in
+MAKEINDEX4_IN = $(SRCDIR)/makeindex4.in
+TEX2XINDYL    = $(SRCDIR)/tex2xindy.l
+
+
+# Target section
+
+all:: xindy makeindex4 tex2xindy finish
+
+# This section generates the xindy script
+
+xindy: $(XINDY_IN)
+	sed -e "s|@XINDY_LIBDIR@|$(LIBDIR)|g" \
+	    -e "s|@XINDY_MODULEDIR@|$(MODULEDIR)|g" \
+	    -e "s|@XINDY_PERL@|$(PERL)|g" \
+	    < $(XINDY_IN) > xindy
+	chmod a+x xindy
+
+makeindex4: $(MAKEINDEX4_IN)
+	sed -e "s|@XINDY_PERL@|$(PERL)|g" \
+	    < $(MAKEINDEX4_IN) > makeindex4
+	chmod a+x makeindex4
+
+# This section compiles the TeX-parser
+
+tex2xindy.c: $(TEX2XINDYL)
+	$(LEX) $(TEX2XINDYL) > tex2xindy.c
+
+tex2xindy: tex2xindy.c
+	$(CC) $(CFLAGS) tex2xindy.c -o tex2xindy $(LEXLIB)
+
+install-bin: tex2xindy xindy force
+	$(INSTALL) -d $(INSTBINDIR)
+	$(INSTALL) xindy $(INSTBINDIR)
+	$(INSTALL) tex2xindy $(INSTBINDIR)
+	$(INSTALL) makeindex4 $(INSTBINDIR)
+
+clean::
+	$(RM) xindy
+	$(RM) makeindex4
+	$(RM) tex2xindy tex2xindy.o tex2xindy.c
+
+# End of Makefile for src.
