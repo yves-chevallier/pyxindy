@@ -22,5 +22,13 @@ def test_renderer_shows_crossrefs():
     state = StyleInterpreter().load(DATA_DIR / "crossref.xdy")
     raw_entries = load_raw_index(DATA_DIR / "crossref.raw")
     index = build_index_entries(raw_entries, state)
-    output = render_index(index, MarkupConfig(crossref_prefix="see "))
+    output = render_index(
+        index,
+        MarkupConfig(
+            crossref_prefix="see ",
+            locref_prefix="[",
+            locref_separator="; ",
+            crossref_label_template="see ",
+        ),
+    )
     assert "see target" in output

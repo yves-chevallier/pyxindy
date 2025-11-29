@@ -12,9 +12,11 @@ class MarkupConfig:
     show_letter_headers: bool = True
     letter_header_template: str = "{label}"
     entry_indent: str = "  "
+    locref_prefix: str = ""
     locref_separator: str = ", "
     crossref_prefix: str = "see "
     crossref_separator: str = ", "
+    crossref_label_template: str | None = None
 
 
 def render_index(index: Index, config: MarkupConfig | None = None) -> str:
@@ -38,13 +40,17 @@ def _render_node(
     base = f"{indent}{node.term}"
     locref_part = ""
     if node.locrefs:
-        locref_part = " " + cfg.locref_separator.join(
+        locref_body = cfg.locref_separator.join(
             ref.locref_string for ref in node.locrefs
         )
+        locref_part = f" {cfg.locref_prefix}{locref_body}"
     lines.append(base + locref_part)
     for crossref in node.crossrefs:
         refs = cfg.crossref_separator.join(crossref.target)
-        lines.append(f"{indent}{cfg.crossref_prefix}{refs}")
+        label = cfg.crossref_prefix
+        if cfg.crossref_label_template:
+            label = cfg.crossref_label_template.format(target=refs)
+        lines.append(f"{indent}{label}{refs}")
     for child in node.children:
         _render_node(child, lines, cfg, depth + 1)
 
