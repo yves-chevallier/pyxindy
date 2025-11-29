@@ -31,6 +31,8 @@ def build_index_entries(
     locclass = _resolve_location_class(style_state, default_locclass)
     entries: list[IndexEntry] = []
     for raw in raw_entries:
+        attr_token = raw.attr
+        attr_token = _apply_merge_rules(attr_token, style_state)
         attr_name, catattr = _resolve_attribute(style_state, raw.attr)
         if catattr is None:
             raise IndexBuilderError("No category attribute available for entry")

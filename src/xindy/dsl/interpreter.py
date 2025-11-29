@@ -46,6 +46,7 @@ class StyleState:
     sort_rule_orientations: list[str] = field(
         default_factory=lambda: ["forward"] * 8
     )
+    merge_rules: list[tuple[str, str, bool]] = field(default_factory=list)
 
     def register_basetype(self, basetype: BaseType) -> None:
         self.basetypes[basetype.name] = basetype
@@ -126,6 +127,7 @@ class StyleInterpreter:
             "define-letter-groups": self._handle_define_letter_groups,
             "define-sort-rule-orientations": self._handle_define_sort_orientations,
             "sort-rule": self._handle_sort_rule,
+            "merge-to": self._handle_merge_to,
         }
         handler = dispatch.get(head.name)
         if handler:
@@ -225,6 +227,16 @@ class StyleInterpreter:
         if isinstance(value, str):
             return value.lower()
         raise StyleError("orientations must be string or symbol")
+
+    def _handle_merge_to(self, args: list[object]) -> None:
+        if len(args) < 2:
+            raise StyleError("merge-to requires from/to")
+        from_attr = self._stringify(args[0])
+        to_attr = self._stringify(args[1])
+        drop = False
+        if len(args) > 2 and isinstance(args[2], Keyword) and args[2].name == "drop":
+            drop = True
+        self.state.merge_rules.append((from_attr, to_attr, drop))
 
     # ------------------------------------------------------------------ parsing helpers
 
