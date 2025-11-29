@@ -31,9 +31,8 @@ def build_index_entries(
     locclass = _resolve_location_class(style_state, default_locclass)
     entries: list[IndexEntry] = []
     for raw in raw_entries:
-        attr_token = raw.attr
-        attr_token = _apply_merge_rules(attr_token, style_state)
-        attr_name, catattr = _resolve_attribute(style_state, raw.attr)
+        attr_token = _apply_merge_rules(raw.attr, style_state)
+        attr_name, catattr = _resolve_attribute(style_state, attr_token)
         if catattr is None:
             raise IndexBuilderError("No category attribute available for entry")
         locref = build_location_reference(locclass, raw.locref, catattr, attr_name)
@@ -88,6 +87,18 @@ def _default_attribute_name(state: StyleState) -> str | None:
     if state.attributes:
         return next(iter(state.attributes))
     return None
+
+
+def _apply_merge_rules(attr_name: str | None, style_state: StyleState) -> str | None:
+    if attr_name is None:
+        return None
+    current = attr_name
+    for source, target, drop in style_state.merge_rules:
+        if current == source:
+            current = target
+            if drop:
+                current = target
+    return current
 
 
 __all__ = ["IndexBuilderError", "build_index_entries"]

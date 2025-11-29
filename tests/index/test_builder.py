@@ -64,3 +64,12 @@ def test_sort_rules_affect_ordering():
     index = build_index_entries(raw_entries, state)
     first_node = index.groups[0].nodes[0]
     assert first_node.term == "äpple"
+
+
+def test_merge_to_rules_redirect_attributes():
+    state = StyleInterpreter().load(DATA_DIR / "merge.xdy")
+    raw_entries = load_raw_index(DATA_DIR / "merge.raw")
+    index = build_index_entries(raw_entries, state)
+    node = index.groups[0].nodes[0]
+    assert node.attribute == "def"
+    assert len(node.locrefs) == 3
