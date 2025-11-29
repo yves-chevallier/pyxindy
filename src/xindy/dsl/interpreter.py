@@ -47,6 +47,7 @@ class StyleState:
         default_factory=lambda: ["forward"] * 8
     )
     merge_rules: list[tuple[str, str, bool]] = field(default_factory=list)
+    markup_options: dict[str, object] = field(default_factory=dict)
 
     def register_basetype(self, basetype: BaseType) -> None:
         self.basetypes[basetype.name] = basetype
@@ -128,6 +129,12 @@ class StyleInterpreter:
             "define-sort-rule-orientations": self._handle_define_sort_orientations,
             "sort-rule": self._handle_sort_rule,
             "merge-to": self._handle_merge_to,
+            "markup-index": self._handle_markup_index,
+            "markup-letter-group-list": self._handle_markup_letter_group_list,
+            "markup-indexentry": self._handle_markup_indexentry,
+            "markup-indexentry-list": self._handle_markup_indexentry_list,
+            "markup-locref": self._handle_markup_locref,
+            "markup-crossref-list": self._handle_markup_crossref_list,
         }
         handler = dispatch.get(head.name)
         if handler:
@@ -237,6 +244,48 @@ class StyleInterpreter:
         if len(args) > 2 and isinstance(args[2], Keyword) and args[2].name == "drop":
             drop = True
         self.state.merge_rules.append((from_attr, to_attr, drop))
+
+    # ---------------------------- markup placeholders ----------------------------
+    def _handle_markup_index(self, args: list[object]) -> None:
+        self.state.markup_options["index"] = self._parse_markup_kwargs(args)
+
+    def _handle_markup_letter_group_list(self, args: list[object]) -> None:
+        self.state.markup_options["letter_group_list"] = self._parse_markup_kwargs(args)
+
+    def _handle_markup_indexentry(self, args: list[object]) -> None:
+        entries = self.state.markup_options.setdefault("indexentries", {})
+        kwargs = self._parse_markup_kwargs(args)
+        depth = kwargs.pop("depth", 0)
+        entries[depth] = kwargs
+
+    def _handle_markup_indexentry_list(self, args: list[object]) -> None:
+        self.state.markup_options["indexentry_list"] = self._parse_markup_kwargs(args)
+
+    def _handle_markup_locref(self, args: list[object]) -> None:
+        locrefs = self.state.markup_options.setdefault("locref", {})
+        kwargs = self._parse_markup_kwargs(args)
+        key = kwargs.get("attr") or "__default__"
+        locrefs[key] = kwargs
+
+    def _handle_markup_crossref_list(self, args: list[object]) -> None:
+        self.state.markup_options["crossref_list"] = self._parse_markup_kwargs(args)
+
+    def _parse_markup_kwargs(self, args: list[object]) -> dict[str, object]:
+        kwargs: dict[str, object] = {}
+        idx = 0
+        while idx < len(args):
+            token = args[idx]
+            if isinstance(token, Keyword):
+                key = token.name.replace("-", "_")
+                if idx + 1 < len(args) and not isinstance(args[idx + 1], Keyword):
+                    kwargs[key] = args[idx + 1]
+                    idx += 2
+                else:
+                    kwargs[key] = True
+                    idx += 1
+            else:
+                idx += 1
+        return kwargs
 
     # ------------------------------------------------------------------ parsing helpers
 
