@@ -15,7 +15,7 @@ def group_entries_by_letter(
     entries: Iterable[IndexEntry],
     style_state: StyleState,
 ) -> list[IndexLetterGroup]:
-    sorted_entries = sort_entries(entries)
+    sorted_entries = sort_entries(entries, style_state)
     groups = _resolve_letter_groups(style_state)
     buckets: Dict[str, list[IndexEntry]] = {label: [] for label in groups}
     extra_labels: list[str] = []

@@ -56,3 +56,11 @@ def test_duplicate_locrefs_are_merged():
     index = build_index_entries(raw_entries, state)
     apple_node = next(node for node in index.groups[0].nodes if node.term == "apple")
     assert len(apple_node.locrefs) == 2
+
+
+def test_sort_rules_affect_ordering():
+    state = StyleInterpreter().load(DATA_DIR / "sort-rule.xdy")
+    raw_entries = load_raw_index(DATA_DIR / "sort-rule.raw")
+    index = build_index_entries(raw_entries, state)
+    first_node = index.groups[0].nodes[0]
+    assert first_node.term == "äpple"

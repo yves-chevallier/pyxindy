@@ -42,6 +42,10 @@ class StyleState:
     search_paths: list[Path] = field(default_factory=list)
     loaded_files: set[Path] = field(default_factory=set)
     letter_groups: list[str] = field(default_factory=list)
+    sort_rules: list[tuple[str, str]] = field(default_factory=list)
+    sort_rule_orientations: list[str] = field(
+        default_factory=lambda: ["forward"] * 8
+    )
 
     def register_basetype(self, basetype: BaseType) -> None:
         self.basetypes[basetype.name] = basetype
@@ -120,6 +124,8 @@ class StyleInterpreter:
             "define-location-class": self._handle_define_location_class,
             "define-attributes": self._handle_define_attributes,
             "define-letter-groups": self._handle_define_letter_groups,
+            "define-sort-rule-orientations": self._handle_define_sort_orientations,
+            "sort-rule": self._handle_sort_rule,
         }
         handler = dispatch.get(head.name)
         if handler:
@@ -192,6 +198,33 @@ class StyleInterpreter:
             raise StyleError("define-letter-groups expects one list argument")
         letters = [self._stringify(item) for item in args[0]]
         self.state.letter_groups = letters
+
+    def _handle_define_sort_orientations(self, args: list[object]) -> None:
+        if not args:
+            raise StyleError("define-sort-rule-orientations expects arguments")
+        orientations = []
+        for arg in args:
+            if isinstance(arg, list):
+                orientations.extend(self._coerce_orientation(item) for item in arg)
+            else:
+                orientations.append(self._coerce_orientation(arg))
+        if not orientations:
+            orientations = ["forward"] * 8
+        self.state.sort_rule_orientations = orientations
+
+    def _handle_sort_rule(self, args: list[object]) -> None:
+        if len(args) < 2:
+            raise StyleError("sort-rule requires pattern and replacement")
+        pattern = self._stringify(args[0])
+        replacement = self._stringify(args[1])
+        self.state.sort_rules.append((pattern, replacement))
+
+    def _coerce_orientation(self, value: object) -> str:
+        if isinstance(value, Symbol):
+            return value.name.lower()
+        if isinstance(value, str):
+            return value.lower()
+        raise StyleError("orientations must be string or symbol")
 
     # ------------------------------------------------------------------ parsing helpers
 

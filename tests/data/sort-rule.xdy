@@ -1,0 +1,5 @@
+(define-location-class "page" ("arabic-numbers"))
+(define-attributes (("definition")))
+(define-letter-groups ("a" "b"))
+(define-sort-rule-orientations ("forward"))
+(sort-rule "ä" "a")
