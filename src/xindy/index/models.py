@@ -19,4 +19,21 @@ class IndexEntry:
         self.locrefs.append(locref)
 
 
-__all__ = ["IndexEntry"]
+@dataclass(slots=True)
+class IndexNode:
+    """Node in the hierarchical index tree."""
+
+    term: str
+    key: tuple[str, ...]
+    attribute: str | None = None
+    locrefs: list[LayeredLocationReference] = field(default_factory=list)
+    children: list["IndexNode"] = field(default_factory=list)
+
+    def add_child(self, node: "IndexNode") -> None:
+        self.children.append(node)
+
+    def extend_locrefs(self, refs: list[LayeredLocationReference]) -> None:
+        self.locrefs.extend(refs)
+
+
+__all__ = ["IndexEntry", "IndexNode"]

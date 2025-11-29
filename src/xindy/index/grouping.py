@@ -7,14 +7,15 @@ from typing import Iterable, Sequence
 
 from xindy.dsl.interpreter import StyleState
 
-from .models import IndexEntry
+from .hierarchy import build_hierarchy
+from .models import IndexEntry, IndexNode
 from .order import sort_entries
 
 
 @dataclass(slots=True)
 class LetterGroup:
     label: str
-    entries: list[IndexEntry] = field(default_factory=list)
+    nodes: list[IndexNode] = field(default_factory=list)
 
 
 def group_entries_by_letter(
@@ -23,13 +24,26 @@ def group_entries_by_letter(
 ) -> list[LetterGroup]:
     sorted_entries = sort_entries(entries)
     groups = _resolve_letter_groups(style_state)
-    buckets: dict[str, LetterGroup] = {label: LetterGroup(label) for label in groups}
-    fallback = buckets[groups[0]] if groups else LetterGroup("#")
+    buckets: dict[str, list[IndexEntry]] = {label: [] for label in groups}
+    extra_labels: list[str] = []
+    fallback_label = groups[0] if groups else "#"
     for entry in sorted_entries:
         label = _letter_label_for_entry(entry, groups)
-        target = buckets.get(label, fallback)
-        target.entries.append(entry)
-    return [group for group in buckets.values() if group.entries]
+        if label not in buckets:
+            buckets[label] = []
+            extra_labels.append(label)
+        buckets[label].append(entry)
+    result: list[LetterGroup] = []
+    ordered_labels = list(groups) + extra_labels
+    for label in ordered_labels:
+        entries = buckets.get(label, [])
+        nodes = build_hierarchy(entries)
+        if nodes:
+            result.append(LetterGroup(label=label, nodes=nodes))
+    if not result and sorted_entries:
+        nodes = build_hierarchy(sorted_entries)
+        result.append(LetterGroup(label=fallback_label, nodes=nodes))
+    return result
 
 
 def _resolve_letter_groups(state: StyleState) -> list[str]:

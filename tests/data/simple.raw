@@ -1,3 +1,4 @@
 (indexentry :key ("apple") :locref "1" :attr "definition")
 (indexentry :key ("banana") :locref "2" :attr "definition")
 (indexentry :key ("cherry") :locref "3" :attr "definition")
+(indexentry :key ("topic" "subtopic") :locref "4" :attr "definition")
