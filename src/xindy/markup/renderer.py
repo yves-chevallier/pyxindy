@@ -9,6 +9,14 @@ from xindy.index.models import Index, IndexNode
 
 
 @dataclass(slots=True)
+class LocrefFormat:
+    prefix: str = ""
+    open: str = ""
+    close: str = ""
+    separator: str = ", "
+
+
+@dataclass(slots=True)
 class MarkupConfig:
     show_letter_headers: bool = True
     letter_header_template: str = "{label}"
@@ -24,11 +32,10 @@ class MarkupConfig:
     entry_templates_by_depth: dict[int, str] = field(default_factory=dict)
     entry_open_templates: dict[int, str] = field(default_factory=dict)
     entry_close_templates: dict[int, str] = field(default_factory=dict)
+    entry_separator: str = ""
     verbose: bool = False
-    locref_prefix: str = ""
-    locref_open: str = ""
-    locref_close: str = ""
-    locref_separator: str = ", "
+    locref_formats: dict[str, LocrefFormat] = field(default_factory=dict)
+    default_locref_format: LocrefFormat = field(default_factory=LocrefFormat)
     range_separator: str = "-"
     crossref_prefix: str = "see "
     crossref_separator: str = ", "
@@ -53,8 +60,10 @@ def render_index(
         if cfg.show_letter_headers:
             header = cfg.letter_header_template.format(label=group.label.upper())
             lines.append(f"{cfg.letter_header_prefix}{header}{cfg.letter_header_suffix}")
-        for node in group.nodes:
+        for n_idx, node in enumerate(group.nodes):
             _render_node(node, lines, cfg, depth=0)
+            if cfg.entry_separator and n_idx != len(group.nodes) - 1:
+                lines.append(cfg.entry_separator)
         if cfg.letter_group_separator and idx != len(index.groups) - 1:
             lines.append(cfg.letter_group_separator)
         if cfg.letter_group_close:
@@ -71,6 +80,11 @@ def _render_node(
     depth: int,
 ) -> None:
     indent = cfg.entry_indent * depth
+    # choose locref format based on attribute (fallback to default)
+    locfmt = cfg.default_locref_format
+    if node.attribute and node.attribute in cfg.locref_formats:
+        locfmt = cfg.locref_formats[node.attribute]
+
     locref_chunks = []
     if node.locrefs:
         locref_chunks.extend(ref.locref_string for ref in node.locrefs)
@@ -81,10 +95,10 @@ def _render_node(
         )
     locref_part = ""
     if locref_chunks:
-        locref_body = cfg.locref_separator.join(locref_chunks)
+        locref_body = locfmt.separator.join(locref_chunks)
         locref_part = (
-            f" {cfg.locref_prefix}{cfg.locref_open}"
-            f"{locref_body}{cfg.locref_close}"
+            f" {locfmt.prefix}{locfmt.open}"
+            f"{locref_body}{locfmt.close}"
         )
 
     template = cfg.entry_templates_by_depth.get(depth, cfg.entry_template)
@@ -135,7 +149,7 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
 
     entry_list_opts = opts.get("indexentry_list", {})
     if "sep" in entry_list_opts:
-        cfg.letter_group_separator = entry_list_opts["sep"]
+        cfg.entry_separator = entry_list_opts["sep"]
 
     entries = opts.get("indexentries", {})
     for depth, entry_cfg in entries.items():
@@ -148,14 +162,14 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
 
     locref_opts = opts.get("locref", {})
     default_locref = locref_opts.get("__default__", {})
-    if "sep" in default_locref:
-        cfg.locref_separator = default_locref["sep"]
-    if "open" in default_locref:
-        cfg.locref_open = default_locref["open"]
-    if "close" in default_locref:
-        cfg.locref_close = default_locref["close"]
-    if "prefix" in default_locref:
-        cfg.locref_prefix = default_locref["prefix"]
+    cfg.default_locref_format = _update_locfmt(
+        cfg.default_locref_format,
+        default_locref,
+    )
+    for attr, raw_cfg in locref_opts.items():
+        if attr == "__default__":
+            continue
+        cfg.locref_formats[attr] = _update_locfmt(LocrefFormat(), raw_cfg)
 
     crossref_opts = opts.get("crossref_list", {})
     if "open" in crossref_opts:
@@ -164,6 +178,18 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
         cfg.crossref_separator = crossref_opts["sep"]
 
     return cfg
+
+
+def _update_locfmt(locfmt: LocrefFormat, data: dict[str, object]) -> LocrefFormat:
+    if "sep" in data:
+        locfmt.separator = data["sep"]
+    if "open" in data:
+        locfmt.open = data["open"]
+    if "close" in data:
+        locfmt.close = data["close"]
+    if "prefix" in data:
+        locfmt.prefix = data["prefix"]
+    return locfmt
 
 
 __all__ = ["MarkupConfig", "render_index"]

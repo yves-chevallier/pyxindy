@@ -16,8 +16,10 @@ def test_renderer_outputs_letter_groups_and_entries():
         index,
         MarkupConfig(
             range_separator="--",
-            locref_open="[",
-            locref_close="]",
+            default_locref_format=MarkupConfig().default_locref_format.__class__(
+                open="[",
+                close="]",
+            ),
             letter_group_separator="",
             index_open="<<INDEX>>",
             index_close="<<END>>",
@@ -43,8 +45,10 @@ def test_renderer_shows_crossrefs():
         index,
         MarkupConfig(
             crossref_prefix="see ",
-            locref_prefix="[",
-            locref_separator="; ",
+            default_locref_format=MarkupConfig().default_locref_format.__class__(
+                prefix="[",
+                separator="; ",
+            ),
             crossref_label_template="see ",
             letter_header_prefix="(",
             letter_header_suffix=")",
@@ -76,3 +80,13 @@ def test_renderer_verbose_mode():
     index = build_index_entries(raw_entries, state)
     output = render_index(index, MarkupConfig(verbose=True))
     assert "[d=0]" in output
+
+
+def test_locref_formats_are_attr_specific():
+    state = StyleInterpreter().load(DATA_DIR / "markup-locref.xdy")
+    raw_entries = load_raw_index(DATA_DIR / "markup-locref.raw")
+    index = build_index_entries(raw_entries, state)
+    output = render_index(index, style_state=state)
+    assert "<1|2" in output
+    assert "[3;4" in output
+    assert "||" in output

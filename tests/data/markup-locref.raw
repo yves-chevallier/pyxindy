@@ -1,0 +1,4 @@
+(indexentry :key ("alpha") :locref "1" :attr "def")
+(indexentry :key ("alpha") :locref "2" :attr "def")
+(indexentry :key ("beta")  :locref "3" :attr "imp")
+(indexentry :key ("beta")  :locref "4" :attr "imp")
