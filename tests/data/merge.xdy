@@ -1,3 +1,4 @@
 (define-location-class "page" ("arabic-numbers"))
 (define-attributes (("def" "highlight")))
 (merge-to "highlight" "def")
+(merge-to "obsolete" "def" :drop)

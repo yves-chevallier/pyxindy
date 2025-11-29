@@ -1,3 +1,4 @@
 (indexentry :key ("topic") :locref "1" :attr "def")
 (indexentry :key ("topic") :locref "2" :attr "highlight")
 (indexentry :key ("topic") :locref "3" :attr "highlight")
+(indexentry :key ("topic") :locref "99" :attr "obsolete")
