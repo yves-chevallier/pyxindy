@@ -27,6 +27,9 @@ class IndexNode:
     key: tuple[str, ...]
     attribute: str | None = None
     locrefs: list[LayeredLocationReference] = field(default_factory=list)
+    ranges: list[tuple[LayeredLocationReference, LayeredLocationReference]] = field(
+        default_factory=list
+    )
     children: list["IndexNode"] = field(default_factory=list)
 
     def add_child(self, node: "IndexNode") -> None:

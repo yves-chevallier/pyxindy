@@ -27,9 +27,12 @@ def test_group_entries_respects_defined_letter_groups_and_hierarchy():
     index = build_index_entries(raw_entries, state)
     groups = index.groups
     labels = [group.label for group in groups]
-    assert labels == ["a", "b", "c", "t"]
+    assert labels == ["a", "b", "c", "r", "t"]
     a_group_nodes = groups[0].nodes
     assert [node.term for node in a_group_nodes] == ["apple"]
+    range_node = groups[3].nodes[0]
+    assert len(range_node.ranges) == 1
+    assert [ref.locref_string for ref in range_node.ranges[0]] == ["10", "11"]
     topic_node = groups[-1].nodes[0]
     assert topic_node.term == "topic"
     assert topic_node.children[0].term == "subtopic"
