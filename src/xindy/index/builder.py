@@ -14,6 +14,7 @@ from xindy.locref import (
 from xindy.raw.reader import RawIndexEntry
 
 from .models import IndexEntry
+from .order import sort_entries
 
 
 class IndexBuilderError(RuntimeError):
@@ -38,10 +39,13 @@ def build_index_entries(
             raise IndexBuilderError(
                 f"Could not build location reference for {raw.locref!r}"
             )
-        entry = IndexEntry(key=raw.key, attribute=attr_name)
+        entry = IndexEntry(
+            key=raw.key,
+            attribute=attr_name,
+        )
         entry.add_location_reference(locref)
         entries.append(entry)
-    return entries
+    return sort_entries(entries)
 
 
 def _resolve_location_class(

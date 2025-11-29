@@ -39,3 +39,11 @@ def test_unknown_location_class_raises():
     state, raw_entries = _load_state_and_entries()
     with pytest.raises(IndexBuilderError):
         build_index_entries([raw_entries[0]], state, default_locclass="missing")
+
+
+def test_entries_are_sorted_by_key():
+    state, raw_entries = _load_state_and_entries()
+    unsorted = list(reversed(raw_entries[:5]))
+    entries = build_index_entries(unsorted, state)
+    keys = [entry.key for entry in entries]
+    assert keys == sorted(keys)
