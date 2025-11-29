@@ -8,6 +8,7 @@ from xindy.raw.reader import load_raw_index
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TESTS_DIR = REPO_ROOT / "xindy-src" / "xindy-2.1" / "tests"
+DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 
 
 def _load_state_and_entries():
@@ -47,3 +48,11 @@ def test_entries_are_sorted_by_key():
     index = build_index_entries(unsorted, state)
     keys = [node.key for node in index.groups[0].nodes]
     assert keys == sorted(keys)
+
+
+def test_duplicate_locrefs_are_merged():
+    state = StyleInterpreter().load(DATA_DIR / "simple.xdy")
+    raw_entries = load_raw_index(DATA_DIR / "simple.raw")
+    index = build_index_entries(raw_entries, state)
+    apple_node = next(node for node in index.groups[0].nodes if node.term == "apple")
+    assert len(apple_node.locrefs) == 2

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Iterable
 
 from xindy.locref import LayeredLocationReference
 
@@ -37,6 +38,21 @@ class IndexNode:
 
     def extend_locrefs(self, refs: list[LayeredLocationReference]) -> None:
         self.locrefs.extend(refs)
+
+    def add_locrefs(self, refs: Iterable[LayeredLocationReference]) -> bool:
+        added = False
+        existing = {
+            (ref.locref_string, ref.attribute)
+            for ref in self.locrefs
+        }
+        for ref in refs:
+            signature = (ref.locref_string, ref.attribute)
+            if signature in existing:
+                continue
+            self.locrefs.append(ref)
+            existing.add(signature)
+            added = True
+        return added
 
 
 @dataclass(slots=True)

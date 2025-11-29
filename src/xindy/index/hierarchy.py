@@ -24,8 +24,9 @@ def build_hierarchy(entries: Iterable[IndexEntry]) -> list[IndexNode]:
         if node:
             if entry.attribute and node.attribute is None:
                 node.attribute = entry.attribute
-            node.extend_locrefs(entry.locrefs)
-            _detect_numeric_ranges(node)
+            changed = node.add_locrefs(entry.locrefs)
+            if changed:
+                _detect_numeric_ranges(node)
     return roots
 
 

@@ -27,7 +27,7 @@ def test_group_entries_respects_defined_letter_groups_and_hierarchy():
     groups = index.groups
     labels = [group.label for group in groups]
     assert labels == ["a", "b", "c", "r", "t"]
-    assert groups[0].entry_count == 1
+    assert groups[0].entry_count == 2
     a_group_nodes = groups[0].nodes
     assert [node.term for node in a_group_nodes] == ["apple"]
     range_node = groups[3].nodes[0]
