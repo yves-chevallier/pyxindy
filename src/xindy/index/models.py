@@ -15,9 +15,16 @@ class IndexEntry:
     key: tuple[str, ...]
     attribute: str | None
     locrefs: list[LayeredLocationReference] = field(default_factory=list)
+    xref_target: tuple[str, ...] | None = None
 
     def add_location_reference(self, locref: LayeredLocationReference) -> None:
         self.locrefs.append(locref)
+
+
+@dataclass(slots=True)
+class IndexCrossReference:
+    target: tuple[str, ...]
+    attribute: str | None
 
 
 @dataclass(slots=True)
@@ -32,6 +39,7 @@ class IndexNode:
         default_factory=list
     )
     children: list["IndexNode"] = field(default_factory=list)
+    crossrefs: list[IndexCrossReference] = field(default_factory=list)
 
     def add_child(self, node: "IndexNode") -> None:
         self.children.append(node)
@@ -54,6 +62,9 @@ class IndexNode:
             added = True
         return added
 
+    def add_crossref(self, target: tuple[str, ...], attribute: str | None) -> None:
+        self.crossrefs.append(IndexCrossReference(target=target, attribute=attribute))
+
 
 @dataclass(slots=True)
 class IndexLetterGroup:
@@ -66,6 +77,13 @@ class IndexLetterGroup:
 class Index:
     groups: list[IndexLetterGroup]
     total_entries: int
+    progress_markers: list[int]
 
 
-__all__ = ["Index", "IndexEntry", "IndexLetterGroup", "IndexNode"]
+__all__ = [
+    "Index",
+    "IndexCrossReference",
+    "IndexEntry",
+    "IndexLetterGroup",
+    "IndexNode",
+]

@@ -1,0 +1,2 @@
+(define-location-class "page" ("arabic-numbers"))
+(define-attributes (("verified" "unverified")))

@@ -48,6 +48,7 @@ def test_entries_are_sorted_by_key():
     index = build_index_entries(unsorted, state)
     keys = [node.key for node in index.groups[0].nodes]
     assert keys == sorted(keys)
+    assert index.progress_markers[-1] >= len(unsorted)
 
 
 def test_duplicate_locrefs_are_merged():
@@ -73,3 +74,16 @@ def test_merge_to_rules_redirect_attributes():
     node = index.groups[0].nodes[0]
     assert node.attribute == "def"
     assert len(node.locrefs) == 3
+
+
+def test_crossref_entries_are_collected():
+    state = StyleInterpreter().load(DATA_DIR / "crossref.xdy")
+    raw_entries = load_raw_index(DATA_DIR / "crossref.raw")
+    index = build_index_entries(raw_entries, state)
+    crossref_node = next(
+        node for node in index.groups[0].nodes if node.term == "see-target"
+    )
+    assert not crossref_node.locrefs
+    assert len(crossref_node.crossrefs) == 1
+    assert crossref_node.crossrefs[0].target == ("target",)
+    assert crossref_node.crossrefs[0].attribute == "verified"

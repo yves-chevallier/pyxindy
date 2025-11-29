@@ -19,7 +19,7 @@ class RawIndexEntry:
     """Representation of one ``(indexentry ...)`` S-expression."""
 
     key: tuple[str, ...]
-    locref: str
+    locref: str | None
     attr: str | None = None
     extras: Mapping[str, object] = field(default_factory=dict)
 
@@ -56,7 +56,7 @@ def _entry_from_form(form: object) -> RawIndexEntry:
         properties[key.name] = rest[i + 1]
 
     key = _coerce_key(properties.get("key"))
-    locref = _coerce_locref(properties.get("locref"))
+    locref = _coerce_optional_string(properties.get("locref"))
     attr = _coerce_optional_string(properties.get("attr"))
     extras = {
         name: value
@@ -75,12 +75,6 @@ def _coerce_key(value: object) -> tuple[str, ...]:
             raise RawIndexSyntaxError(":key entries must be strings")
         coerced.append(part)
     return tuple(coerced)
-
-
-def _coerce_locref(value: object) -> str:
-    if not isinstance(value, str):
-        raise RawIndexSyntaxError(":locref must be a string")
-    return value
 
 
 def _coerce_optional_string(value: object) -> str | None:

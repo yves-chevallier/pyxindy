@@ -37,19 +37,28 @@ def build_index_entries(
         attr_name, catattr = _resolve_attribute(style_state, attr_token)
         if catattr is None:
             raise IndexBuilderError("No category attribute available for entry")
-        locref = build_location_reference(locclass, raw.locref, catattr, attr_name)
-        if not locref:
-            raise IndexBuilderError(
-                f"Could not build location reference for {raw.locref!r}"
-            )
+        xref_target = _parse_xref_target(raw.extras.get("xref"))
+        locrefs = []
+        if xref_target is None:
+            if raw.locref is None:
+                raise IndexBuilderError("Missing :locref for non-crossref entry")
+            locref = build_location_reference(locclass, raw.locref, catattr, attr_name)
+            if not locref:
+                raise IndexBuilderError(
+                    f"Could not build location reference for {raw.locref!r}"
+                )
+            locrefs.append(locref)
         entry = IndexEntry(
             key=raw.key,
             attribute=attr_name,
+            xref_target=xref_target,
         )
-        entry.add_location_reference(locref)
+        for locref in locrefs:
+            entry.add_location_reference(locref)
         entries.append(entry)
     grouped = group_entries_by_letter(entries, style_state)
-    return Index(groups=grouped, total_entries=len(entries))
+    progress = _compute_progress_markers(len(entries))
+    return Index(groups=grouped, total_entries=len(entries), progress_markers=progress)
 
 
 def _resolve_location_class(
@@ -104,6 +113,27 @@ def _apply_merge_rules(
                 return None, True
             current = target
     return current, False
+
+
+def _parse_xref_target(value: object | None) -> tuple[str, ...] | None:
+    if value is None:
+        return None
+    if isinstance(value, list):
+        if not value:
+            return None
+        return tuple(str(item) for item in value)
+    if isinstance(value, str):
+        return (value,)
+    raise IndexBuilderError("Unsupported xref format")
+
+
+def _compute_progress_markers(total_entries: int) -> list[int]:
+    if total_entries == 0:
+        return []
+    markers = []
+    for percent in range(10, 110, 10):
+        markers.append(max(1, int(total_entries * (percent / 100))))
+    return markers
 
 
 __all__ = ["IndexBuilderError", "build_index_entries"]

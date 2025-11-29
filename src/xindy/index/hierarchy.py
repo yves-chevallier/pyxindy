@@ -24,6 +24,9 @@ def build_hierarchy(entries: Iterable[IndexEntry]) -> list[IndexNode]:
         if node:
             if entry.attribute and node.attribute is None:
                 node.attribute = entry.attribute
+            if entry.xref_target:
+                node.add_crossref(entry.xref_target, entry.attribute)
+                continue
             changed = node.add_locrefs(entry.locrefs)
             if changed:
                 _detect_numeric_ranges(node)

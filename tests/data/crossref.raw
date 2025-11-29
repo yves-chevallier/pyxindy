@@ -1,0 +1,3 @@
+(indexentry :key ("target") :locref "1" :attr "verified")
+(indexentry :key ("see-target") :xref ("target") :attr "verified")
+(indexentry :key ("see-missing") :xref ("missing") :attr "unverified")
