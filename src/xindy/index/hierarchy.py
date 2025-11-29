@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Iterable
 
+from xindy.locref import LayeredLocationReference
+
 from .models import IndexEntry, IndexNode
 
 

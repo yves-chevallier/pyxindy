@@ -2,7 +2,6 @@ from pathlib import Path
 
 from xindy.dsl.interpreter import StyleInterpreter
 from xindy.index.builder import build_index_entries
-from xindy.index.grouping import group_entries_by_letter
 from xindy.raw.reader import load_raw_index
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
