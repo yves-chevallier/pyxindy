@@ -32,7 +32,10 @@ def parse_raw_index(text: str) -> list[RawIndexEntry]:
 
 def load_raw_index(path: str | PathLike[str]) -> list[RawIndexEntry]:
     """Read ``path`` and parse every index entry."""
-    content = Path(path).read_text(encoding="utf-8")
+    try:
+        content = Path(path).read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        content = Path(path).read_text(encoding="latin-1")
     return parse_raw_index(content)
 
 

@@ -41,6 +41,7 @@ class StyleState:
     attribute_groups: list[list[str]] = field(default_factory=list)
     search_paths: list[Path] = field(default_factory=list)
     loaded_files: set[Path] = field(default_factory=set)
+    letter_groups: list[str] = field(default_factory=list)
 
     def register_basetype(self, basetype: BaseType) -> None:
         self.basetypes[basetype.name] = basetype
@@ -98,7 +99,10 @@ class StyleInterpreter:
         self.state.loaded_files.add(path)
         self._file_stack.append(path)
         try:
-            content = path.read_text(encoding="utf-8")
+            try:
+                content = path.read_text(encoding="utf-8")
+            except UnicodeDecodeError:
+                content = path.read_text(encoding="latin-1")
             for form in parse_many(content):
                 self._eval_form(form)
         finally:
@@ -115,6 +119,7 @@ class StyleInterpreter:
             "require": self._handle_require,
             "define-location-class": self._handle_define_location_class,
             "define-attributes": self._handle_define_attributes,
+            "define-letter-groups": self._handle_define_letter_groups,
         }
         handler = dispatch.get(head.name)
         if handler:
@@ -181,6 +186,12 @@ class StyleInterpreter:
                         attr_name
                     )
         self.state.attribute_groups.extend(attr_groups)
+
+    def _handle_define_letter_groups(self, args: list[object]) -> None:
+        if len(args) != 1 or not isinstance(args[0], list):
+            raise StyleError("define-letter-groups expects one list argument")
+        letters = [self._stringify(item) for item in args[0]]
+        self.state.letter_groups = letters
 
     # ------------------------------------------------------------------ parsing helpers
 

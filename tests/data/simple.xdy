@@ -1,0 +1,3 @@
+(define-location-class "page-numbers" ("arabic-numbers"))
+(define-attributes (("definition")))
+(define-letter-groups ("a" "b" "c"))
