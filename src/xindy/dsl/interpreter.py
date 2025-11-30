@@ -24,7 +24,7 @@ from xindy.locref import (
     prefix_match_for_roman_numbers,
 )
 
-from .sexpr import Keyword, Symbol, parse_many
+from .sexpr import Keyword, Symbol, SExprSyntaxError, parse_many
 
 
 class StyleError(RuntimeError):
@@ -44,6 +44,7 @@ class StyleState:
     search_paths: list[Path] = field(default_factory=list)
     loaded_files: set[Path] = field(default_factory=set)
     letter_groups: list[str] = field(default_factory=list)
+    location_class_order: list[str] = field(default_factory=list)
     sort_rules: list[tuple[str, str, bool, int]] = field(default_factory=list)
     sort_rule_orientations: list[str] = field(
         default_factory=lambda: ["forward"] * 8
@@ -177,6 +178,7 @@ class StyleInterpreter:
             "define-attributes": self._handle_define_attributes,
             "define-letter-groups": self._handle_define_letter_groups,
             "define-letter-group": self._handle_define_letter_group,
+            "define-location-class-order": self._handle_define_location_class_order,
             "define-sort-rule-orientations": self._handle_define_sort_orientations,
             "sort-rule": self._handle_sort_rule,
             "define-rule-set": self._handle_define_rule_set,
@@ -189,11 +191,15 @@ class StyleInterpreter:
             "markup-letter-group": self._handle_markup_letter_group,
             "markup-indexentry": self._handle_markup_indexentry,
             "markup-indexentry-list": self._handle_markup_indexentry_list,
+            "markup-keyword-list": self._handle_markup_keyword_list,
+            "markup-keyword": self._handle_markup_keyword_list,
             "markup-locref": self._handle_markup_locref,
             "markup-locref-list": self._handle_markup_locref_list,
             "markup-locref-layer": self._handle_markup_locref_layer,
             "markup-locclass-list": self._handle_markup_locclass_list,
             "markup-crossref-list": self._handle_markup_crossref_list,
+            "markup-crossref-layer-list": self._handle_markup_crossref_layer_list,
+            "markup-crossref-layer": self._handle_markup_crossref_layer,
             "markup-range": self._handle_markup_range,
             "markup-attribute-group-list": self._handle_markup_attribute_group_list,
             "progn": self._handle_progn,
@@ -204,6 +210,8 @@ class StyleInterpreter:
         handler = dispatch.get(head.name)
         if handler:
             handler(form[1:])
+        else:
+            raise StyleError(f"Unknown form '{head.name}'")
 
     def _handle_searchpath(self, args: list[object]) -> None:
         if len(args) != 1 or not isinstance(args[0], list):
@@ -326,6 +334,11 @@ class StyleInterpreter:
         if not orientations:
             orientations = ["forward"] * 8
         self.state.sort_rule_orientations = orientations
+
+    def _handle_define_location_class_order(self, args: list[object]) -> None:
+        if not args or not isinstance(args[0], list):
+            raise StyleError("define-location-class-order expects a list of names")
+        self.state.location_class_order = [self._stringify(item) for item in args[0]]
 
     def _handle_sort_rule(self, args: list[object]) -> None:
         if len(args) < 2:
@@ -501,6 +514,10 @@ class StyleInterpreter:
     def _handle_markup_indexentry_list(self, args: list[object]) -> None:
         self.state.markup_options["indexentry_list"] = self._parse_markup_kwargs(args)
 
+    def _handle_markup_keyword_list(self, args: list[object]) -> None:
+        # Placeholder: keyword markup is ignored in text backend but we store options.
+        self.state.markup_options["keyword_list"] = self._parse_markup_kwargs(args)
+
     def _handle_markup_locref(self, args: list[object]) -> None:
         locrefs = self.state.markup_options.setdefault("locref", {})
         kwargs = self._parse_markup_kwargs(args)
@@ -541,6 +558,13 @@ class StyleInterpreter:
 
     def _handle_markup_crossref_list(self, args: list[object]) -> None:
         self.state.markup_options["crossref_list"] = self._parse_markup_kwargs(args)
+
+    def _handle_markup_crossref_layer_list(self, args: list[object]) -> None:
+        self.state.markup_options["crossref_layer_list"] = self._parse_markup_kwargs(args)
+
+    def _handle_markup_crossref_layer(self, args: list[object]) -> None:
+        kwargs = self._parse_markup_kwargs(args)
+        self.state.markup_options["crossref_layer"] = kwargs
 
     def _handle_markup_range(self, args: list[object]) -> None:
         kwargs = self._parse_markup_kwargs(args)

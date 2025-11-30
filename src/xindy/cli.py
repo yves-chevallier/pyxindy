@@ -10,6 +10,7 @@ from typing import Sequence
 
 from . import __version__
 from .dsl.interpreter import StyleError, StyleInterpreter
+from .dsl.sexpr import SExprSyntaxError
 from .index import build_index_entries
 from .markup import render_index
 from .raw.reader import load_raw_index
@@ -104,7 +105,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         raw_entries = load_raw_index(raw_path)
         index = build_index_entries(raw_entries, state)
         output = render_index(index, style_state=state)
-    except (FileNotFoundError, StyleError) as exc:
+    except (FileNotFoundError, StyleError, SExprSyntaxError) as exc:
         print(f"xindy error: {exc}", file=sys.stderr)
         _log(f"error: {exc}")
         return 1

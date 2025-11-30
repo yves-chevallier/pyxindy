@@ -17,11 +17,11 @@
 
 ## Couverture de tests (pytest)
 
-- [x] 80 tests actuels passent (`uv run pytest`) : dsl, index, markup, raw, CLI, tex2xindy, snapshots `ex1/ex2/deep/simple/attr2/attr3/ranges1/french/deutsch/infII/wegweiser/mappings/modules_tex/makeidx_module` + pipeline `.idx` end-to-end.
+- [x] 83 tests actuels passent (`uv run pytest`) : dsl, index, markup, raw, CLI, tex2xindy, snapshots `ex1/ex2/deep/simple/attr2/attr3/ranges1/french/deutsch/infII/wegweiser/mappings/modules_tex/makeidx_module/xref-1` + pipeline `.idx` end-to-end + erreurs CLI.
 - [x] Tests langues/modules supplémentaires (autres mappings/langues) à ajouter. (`mappings` ajouté, `infII`/`wegweiser` réalignés, modules tex/latin chargés automatiquement)
 
 ## Points restants pour 100% de migration
 
 - [x] Étendre encore le loader de modules/langues et ajouter des snapshots pour d’autres styles des dossiers `modules/` (règles, ordres de tri, alphabets).
 - [x] Documentation finale (README, usage CLI, exemples) et packaging.
-- [ ] Vérifier les scripts d’erreur (err1/err2/xref-1) et scénarios makefile historiques.
+- [x] Vérifier les scripts d’erreur (err1/err2/xref-1) et scénarios makefile historiques.

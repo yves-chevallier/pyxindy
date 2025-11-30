@@ -64,8 +64,9 @@ class MarkupConfig:
     crossref_prefix: str = "see "
     crossref_suffix: str = ""
     crossref_separator: str = ", "
+    crossref_layer_separator: str = ", "
     crossref_label_template: str | None = None
-    crossref_unverified_suffix: str = " (?)"
+    crossref_unverified_suffix: str = ""
     enable_crossrefs: bool = True
     max_depth: int | None = None
     backend: str = "text"  # "text" or "tex"
@@ -138,7 +139,7 @@ def _render_node(
     crossref_parts: list[str] = []
     if cfg.enable_crossrefs:
         for crossref in node.crossrefs:
-            refs = cfg.crossref_separator.join(crossref.target)
+            refs = cfg.crossref_layer_separator.join(crossref.target)
             if cfg.crossref_label_template:
                 template = cfg.crossref_label_template
                 if "{target}" in template:
@@ -153,13 +154,15 @@ def _render_node(
             crossref_parts.append(f"{body}{suffix}")
     template = cfg.entry_templates_by_depth.get(depth, cfg.entry_template)
     line = template.format(
-        indent=indent,
+        indent="" if cfg.entry_open_templates.get(depth) else indent,
         term=node.term,
         locrefs=locref_part,
         depth=depth,
     )
     if crossref_parts:
         sep = cfg.crossref_separator or " "
+        if not locref_part and sep.lstrip().startswith(";"):
+            sep = " "
         tail = (sep if sep.endswith(" ") else sep).join(crossref_parts)
         line = f"{line}{sep}{tail}"
     open_template = cfg.entry_open_templates.get(depth)
@@ -897,6 +900,9 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
         cfg.crossref_suffix = crossref_opts["close"]
     if "open" in crossref_opts or "close" in crossref_opts:
         cfg.crossref_label_template = None
+    layer_opts = opts.get("crossref_layer_list", {})
+    if "sep" in layer_opts:
+        cfg.crossref_layer_separator = layer_opts["sep"]
 
     range_opts = opts.get("range", {})
     if "sep" in range_opts:
