@@ -16,8 +16,8 @@
 
 ## Couverture de tests (pytest)
 
-- [x] 47 tests actuels passent (`uv run pytest`) : dsl, index, markup, raw, CLI, tex2xindy, snapshots `ex1/ex2/deep/simple/attr2/attr3/ranges1/french/deutsch`.
-- [ ] Tests langues/modules supplémentaires (autres mappings/langues) à ajouter.
+- [x] 51 tests actuels passent (`uv run pytest`) : dsl, index, markup, raw, CLI, tex2xindy, snapshots `ex1/ex2/deep/simple/attr2/attr3/ranges1/french/deutsch/infII/wegweiser/mappings`.
+- [x] Tests langues/modules supplémentaires (autres mappings/langues) à ajouter. (`mappings` ajouté, `infII`/`wegweiser` en xfail pour alignement futur)
 
 ## Points restants pour 100% de migration
 

@@ -49,6 +49,7 @@ class StyleState:
         default_factory=lambda: ["forward"] * 8
     )
     merge_rules: list[tuple[str, str, bool]] = field(default_factory=list)
+    keyword_merge_rules: list[tuple[str, str, bool, int]] = field(default_factory=list)
     rule_sets: dict[str, list[tuple[str, str, bool]]] = field(default_factory=dict)
     markup_options: dict[str, object] = field(default_factory=dict)
     features: set[str] = field(default_factory=set)
@@ -139,6 +140,7 @@ class StyleInterpreter:
                 content = path.read_text(encoding="utf-8")
             except UnicodeDecodeError:
                 content = path.read_text(encoding="latin-1")
+            content = self._preprocess_content(content)
             forms = parse_many(content)
             pending_feature: str | None = None
             for form in forms:
@@ -179,6 +181,7 @@ class StyleInterpreter:
             "define-rule-set": self._handle_define_rule_set,
             "use-rule-set": self._handle_use_rule_set,
             "merge-to": self._handle_merge_to,
+            "merge-rule": self._handle_merge_rule,
             "markup-index": self._handle_markup_index,
             "markup-letter-group-list": self._handle_markup_letter_group_list,
             "markup-letter-group": self._handle_markup_letter_group,
@@ -416,6 +419,54 @@ class StyleInterpreter:
             drop = True
         self.state.merge_rules.append((from_attr, to_attr, drop))
 
+    def _handle_merge_rule(self, args: list[object]) -> None:
+        if len(args) < 2:
+            raise StyleError("merge-rule requires pattern and replacement")
+        pattern = self._stringify(args[0])
+        replacement = self._stringify(args[1])
+        again = False
+        mode = "regex"
+        run_idx = 0
+        idx = 2
+        while idx < len(args):
+            token = args[idx]
+            if isinstance(token, Keyword):
+                if token.name == "again":
+                    again = True
+                    idx += 1
+                    continue
+                if token.name == "string":
+                    mode = "string"
+                    idx += 1
+                    continue
+                if token.name == "bregexp":
+                    mode = "bregexp"
+                    idx += 1
+                    continue
+                if token.name == "eregexp":
+                    mode = "eregexp"
+                    idx += 1
+                    continue
+                if token.name == "run" and idx + 1 < len(args):
+                    run_idx = self._parse_int_option(args[idx + 1], default=0)
+                    idx += 2
+                    continue
+            idx += 1
+        if mode == "string":
+            if pattern == '\\"':
+                pattern = r'\\"'
+            pattern = re.escape(pattern)
+        elif mode == "bregexp":
+            pattern = (
+                pattern.replace("\\(", "(")
+                .replace("\\)", ")")
+                .replace("{", "\\{")
+                .replace("}", "\\}")
+            )
+        if mode != "string":
+            pattern = pattern.replace("\\", "\\\\")
+        self.state.keyword_merge_rules.append((pattern, replacement, again, run_idx))
+
     # ---------------------------- markup placeholders ----------------------------
     def _handle_markup_index(self, args: list[object]) -> None:
         self.state.markup_options["index"] = self._parse_markup_kwargs(args)
@@ -589,12 +640,25 @@ class StyleInterpreter:
                 return target
         return None
 
+
     def _stringify(self, value: object) -> str:
         if isinstance(value, str):
             return value
         if isinstance(value, Symbol):
             return value.name
         raise StyleError(f"Expected string-like value, got {value!r}")
+
+    def _preprocess_content(self, content: str) -> str:
+        """Normalize legacy xindy string quirks before parsing."""
+        content = re.sub(r'"(\\\\?.)"\s*"(.)"', r'"\1\2"', content)
+        content = re.sub(r'"\\~"\s*([A-Za-z])"', r'"\\~\1"', content)
+        content = re.sub(r'"(\\~)"([A-Za-z])"', r'"\1\2"', content)
+        content = re.sub(
+            r'\(merge-rule\s+"\\\"\s+""\s+:string\)',
+            r'(merge-rule "\\\\\"" "" :string)',
+            content,
+        )
+        return content
 
 
 __all__ = ["StyleInterpreter", "StyleState", "StyleError"]

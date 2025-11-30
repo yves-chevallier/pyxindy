@@ -180,8 +180,6 @@ def _parse_string(scanner: _Scanner) -> str:
                 raise scanner.error("EOF after escape character")
             escaped = scanner.advance()
             escape_map = {
-                "n": "\n",
-                "r": "\r",
                 '"': '"',
                 "\\": "\\",
             }

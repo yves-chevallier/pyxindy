@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+import re
 from typing import Dict, Iterable, Sequence
 
 from xindy.dsl.interpreter import StyleState
 
 from .hierarchy import build_hierarchy
 from .models import IndexEntry, IndexLetterGroup
-from .order import sort_entries
+from .order import apply_sort_rules, sort_entries
 
 
 def group_entries_by_letter(
@@ -21,7 +22,7 @@ def group_entries_by_letter(
     extra_labels: list[str] = []
     fallback_label = groups[0] if groups else "#"
     for entry in sorted_entries:
-        label = _letter_label_for_entry(entry, groups)
+        label = _letter_label_for_entry(entry, groups, style_state)
         if label not in buckets:
             buckets[label] = []
             extra_labels.append(label)
@@ -71,12 +72,27 @@ def _resolve_letter_groups(state: StyleState) -> list[str]:
     return []
 
 
-def _letter_label_for_entry(entry: IndexEntry, groups: Sequence[str]) -> str:
-    text = entry.key[0].lower()
+def _letter_label_for_entry(
+    entry: IndexEntry,
+    groups: Sequence[str],
+    style_state: StyleState,
+) -> str:
+    text = ""
+    if getattr(entry, "canonical_key", None):
+        text = entry.canonical_key[0] if entry.canonical_key else ""
+    elif entry.key:
+        text = entry.key[0]
+    if style_state and text:
+        runs = apply_sort_rules(text, style_state)
+        if runs:
+            text = runs[0]
+    normalized = re.sub(r"^[^0-9a-zA-Z]+", "", text.lower())
+    if not normalized:
+        normalized = text.lower()
     # prefer longest matching group prefix
     sorted_groups = sorted(groups, key=lambda g: (-len(g), groups.index(g)))
     for label in sorted_groups:
-        if text.startswith(label.lower()):
+        if normalized.startswith(label.lower()):
             return label
     return groups[0] if groups else "#"
 

@@ -11,6 +11,7 @@ from xindy.locref import (
     build_location_reference,
     make_category_attribute,
 )
+from xindy.index.order import apply_merge_rules, apply_sort_rules
 from xindy.raw.reader import RawIndexEntry
 
 from .grouping import group_entries_by_letter
@@ -30,17 +31,24 @@ def build_index_entries(
     """Convert raw entries into structured :class:`IndexEntry` objects."""
     locclasses = _resolve_location_classes(style_state, default_locclass)
     entries: list[IndexEntry] = []
-    for raw in raw_entries:
+    first_display_for_canon: dict[tuple[str, ...], tuple[str, ...]] = {}
+    for idx, raw in enumerate(raw_entries):
         target_attrs = _expand_attributes(raw.attr, style_state)
         if not target_attrs:
             raise IndexBuilderError("No target attributes resolved for entry")
+        canonical_key = tuple(apply_merge_rules(part, style_state) for part in raw.key)
+        if canonical_key not in first_display_for_canon:
+            first_display_for_canon[canonical_key] = raw.display_key or raw.key
         xref_target = _parse_xref_target(raw.extras.get("xref"))
         if xref_target is None and raw.locref is None:
             raise IndexBuilderError("Missing :locref for non-crossref entry")
         entry = IndexEntry(
             key=raw.key,
+            display_key=first_display_for_canon[canonical_key],
+            canonical_key=canonical_key,
             attribute=target_attrs[0][0],
             xref_target=xref_target,
+            position=idx,
         )
         if xref_target is None:
             base_locref = None

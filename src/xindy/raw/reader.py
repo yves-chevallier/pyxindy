@@ -19,7 +19,8 @@ class RawIndexEntry:
     """Representation of one ``(indexentry ...)`` S-expression."""
 
     key: tuple[str, ...]
-    locref: str | None
+    locref: str | None = None
+    display_key: tuple[str, ...] | None = None
     attr: str | None = None
     extras: Mapping[str, object] = field(default_factory=dict)
 
@@ -61,9 +62,10 @@ def _entry_from_form(form: object) -> RawIndexEntry:
         properties[key.name] = value
 
     key_prop = properties.get("key")
+    display_key: tuple[str, ...] | None = None
     if key_prop is None and "tkey" in properties:
         key_prop = properties.get("tkey")
-    key = _coerce_key(key_prop)
+    key, display_key = _coerce_key(key_prop)
     locref = _coerce_optional_string(properties.get("locref"))
     attr = _coerce_optional_string(properties.get("attr"))
     extras = {
@@ -71,23 +73,35 @@ def _entry_from_form(form: object) -> RawIndexEntry:
         for name, value in properties.items()
         if name not in {"key", "tkey", "locref", "attr"}
     }
-    return RawIndexEntry(key=key, locref=locref, attr=attr, extras=extras)
+    return RawIndexEntry(
+        key=key,
+        display_key=display_key,
+        locref=locref,
+        attr=attr,
+        extras=extras,
+    )
 
 
-def _coerce_key(value: object) -> tuple[str, ...]:
+def _coerce_key(value: object) -> tuple[tuple[str, ...], tuple[str, ...] | None]:
     if not isinstance(value, list) or not value:
         raise RawIndexSyntaxError(":key must be a non-empty list")
     coerced: list[str] = []
+    display_parts: list[str] = []
     for part in value:
         if isinstance(part, list):
             if not part or not isinstance(part[0], str):
                 raise RawIndexSyntaxError(":tkey entries must be string lists")
             coerced.append(part[0])
+            display_parts.append(part[1] if len(part) > 1 and isinstance(part[1], str) else part[0])
         else:
             if not isinstance(part, str):
                 raise RawIndexSyntaxError(":key entries must be strings")
             coerced.append(part)
-    return tuple(coerced)
+            display_parts.append(part)
+    display_key = tuple(display_parts) if any(
+        (isinstance(part, list) and len(part) > 1) for part in value
+    ) else None
+    return tuple(coerced), display_key
 
 
 def _coerce_optional_string(value: object) -> str | None:

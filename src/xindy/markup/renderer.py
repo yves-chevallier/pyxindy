@@ -62,6 +62,7 @@ class MarkupConfig:
     default_locref_format: LocrefFormat = field(default_factory=LocrefFormat)
     range_separator: str = "-"
     crossref_prefix: str = "see "
+    crossref_suffix: str = ""
     crossref_separator: str = ", "
     crossref_label_template: str | None = None
     crossref_unverified_suffix: str = " (?)"
@@ -81,8 +82,9 @@ def render_index(
     lines: list[str] = []
     if cfg.index_open:
         open_str = cfg.index_open
-        lines.extend(open_str.splitlines())
-        if open_str.endswith("\n"):
+        open_lines = open_str.splitlines()
+        lines.extend(open_lines)
+        if open_str.endswith("\n") and (not open_lines or open_lines[-1] != ""):
             lines.append("")
     for idx, group in enumerate(index.groups):
         label_text = (
@@ -130,19 +132,25 @@ def _render_node(
     style_state: StyleState | None,
 ) -> None:
     indent = cfg.entry_indent * depth
-    # choose locref format based on attribute (fallback to default)
     locfmt = cfg.default_locref_format
-    if node.attribute and node.attribute in cfg.locref_formats:
-        override = cfg.locref_formats[node.attribute]
-        locfmt = LocrefFormat(
-            prefix=override.prefix or locfmt.prefix,
-            open=override.open or locfmt.open,
-            close=override.close or locfmt.close,
-            separator=override.separator or locfmt.separator,
-        )
 
     locref_part = _render_locref_part(node, cfg, locfmt, depth, style_state)
-
+    crossref_parts: list[str] = []
+    if cfg.enable_crossrefs:
+        for crossref in node.crossrefs:
+            refs = cfg.crossref_separator.join(crossref.target)
+            if cfg.crossref_label_template:
+                template = cfg.crossref_label_template
+                if "{target}" in template:
+                    body = template.replace("{target}", refs)
+                else:
+                    body = f"{template}{refs}"
+            else:
+                body = f"{cfg.crossref_prefix}{refs}{cfg.crossref_suffix}"
+            suffix = ""
+            if crossref.attribute and crossref.attribute.lower() == "unverified":
+                suffix = cfg.crossref_unverified_suffix
+            crossref_parts.append(f"{body}{suffix}")
     template = cfg.entry_templates_by_depth.get(depth, cfg.entry_template)
     line = template.format(
         indent=indent,
@@ -150,6 +158,10 @@ def _render_node(
         locrefs=locref_part,
         depth=depth,
     )
+    if crossref_parts:
+        sep = cfg.crossref_separator or " "
+        tail = (sep if sep.endswith(" ") else sep).join(crossref_parts)
+        line = f"{line}{sep}{tail}"
     open_template = cfg.entry_open_templates.get(depth)
     close_template = cfg.entry_close_templates.get(depth)
     if open_template:
@@ -165,16 +177,6 @@ def _render_node(
     if cfg.verbose:
         line = f"[d={depth}] {line}"
     lines.append(line)
-    if cfg.enable_crossrefs:
-        for crossref in node.crossrefs:
-            refs = cfg.crossref_separator.join(crossref.target)
-            label = cfg.crossref_prefix
-            if cfg.crossref_label_template:
-                label = cfg.crossref_label_template.format(target=refs)
-            suffix = ""
-            if crossref.attribute and crossref.attribute.lower() == "unverified":
-                suffix = cfg.crossref_unverified_suffix
-            lines.append(f"{indent}{label}{refs}{suffix}")
     next_depth = depth + 1
     if cfg.max_depth is not None and next_depth > cfg.max_depth:
         return
@@ -248,7 +250,6 @@ def _render_locref_part(
 
     if not parts:
         return ""
-
     # order attributes if possible
     def sort_key(item: tuple[str | None, LocrefFormat, list[object], list[tuple[object, object]], object]) -> tuple[float, int]:
         attr, _, refs, class_ranges, _ = item
@@ -396,17 +397,22 @@ def _render_locref_part(
                 range_items = [it for it in attr_items if it[0][2] == 1]
                 attr_items = ref_items + range_items
             if per_item_format:
-                if fmt_base.prefix:
-                    key, text = attr_items[0]
-                    attr_items[0] = (key, fmt_base.prefix + text)
+                # prefix applied after global sort
+                pass
             else:
                 open_token = fmt_base.open or ""
                 close_token = fmt_base.close or ""
-                prefix = fmt_base.prefix or ""
-                key_first, text_first = attr_items[0]
-                attr_items[0] = (key_first, prefix + open_token + text_first)
-                key_last, text_last = attr_items[-1]
-                attr_items[-1] = (key_last, text_last + close_token)
+                if cfg.backend == "tex":
+                    if open_token or close_token:
+                        attr_items = [
+                            (key, f"{open_token}{text}{close_token}") for key, text in attr_items
+                        ]
+                else:
+                    if open_token or close_token:
+                        key_first, text_first = attr_items[0]
+                        attr_items[0] = (key_first, f"{open_token}{text_first}")
+                        key_last, text_last = attr_items[-1]
+                        attr_items[-1] = (key_last, f"{text_last}{close_token}")
             items.extend(attr_items)
         if not items:
             continue
@@ -418,9 +424,12 @@ def _render_locref_part(
         all_items.extend(text for _, text in items)
     if not all_items:
         return ""
+    prefix_token = locfmt.prefix or cfg.default_locref_format.prefix
+    if prefix_token and not all_items[0].startswith(prefix_token):
+        all_items[0] = prefix_token + all_items[0]
     spacer = ""
     if cfg.backend == "text" and not cfg.attr_group_open:
-        spacer = " "
+        spacer = "" if all_items and all_items[0].startswith(" ") else " "
     sep = cfg.attr_group_sep or global_separator or locfmt.separator
     body = sep.join(all_items)
     if cfg.attr_group_open:
@@ -780,12 +789,20 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
     )
     if letter_group_opts:
         cfg.show_letter_headers = True
+        group_open = _normalize_markup_string(
+            letter_group_opts.get("open", "")
+        )
         cfg.letter_header_prefix = _normalize_markup_string(
             letter_group_opts.get("open_head", cfg.letter_header_prefix)
         )
         cfg.letter_header_suffix = _normalize_markup_string(
             letter_group_opts.get("close_head", cfg.letter_header_suffix)
         )
+        if group_open:
+            cfg.letter_header_prefix = group_open + cfg.letter_header_prefix
+        group_close = _normalize_markup_string(letter_group_opts.get("close", ""))
+        if group_close:
+            cfg.letter_header_suffix = cfg.letter_header_suffix + group_close
         if letter_group_opts.get("capitalize"):
             cfg.letter_header_capitalize = True
     elif lg_opts:
@@ -802,7 +819,9 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
 
     entry_list_opts = opts.get("indexentry_list", {})
     if "sep" in entry_list_opts:
-        cfg.entry_separator = entry_list_opts["sep"]
+        cfg.entry_separator = _normalize_markup_string(entry_list_opts["sep"])
+        if cfg.entry_separator == "\n":
+            cfg.entry_separator = ""
     if "open" in entry_list_opts:
         cfg.entry_list_open_templates[0] = _normalize_markup_string(
             entry_list_opts["open"]
@@ -874,6 +893,10 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
         cfg.crossref_prefix = crossref_opts["open"]
     if "sep" in crossref_opts:
         cfg.crossref_separator = crossref_opts["sep"]
+    if "close" in crossref_opts:
+        cfg.crossref_suffix = crossref_opts["close"]
+    if "open" in crossref_opts or "close" in crossref_opts:
+        cfg.crossref_label_template = None
 
     range_opts = opts.get("range", {})
     if "sep" in range_opts:

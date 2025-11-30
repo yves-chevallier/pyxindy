@@ -13,7 +13,10 @@ class IndexEntry:
     """Represents a single index entry after applying style semantics."""
 
     key: tuple[str, ...]
+    display_key: tuple[str, ...]
+    canonical_key: tuple[str, ...]
     attribute: str | None
+    position: int = 0
     locrefs: list[LayeredLocationReference] = field(default_factory=list)
     xref_target: tuple[str, ...] | None = None
 

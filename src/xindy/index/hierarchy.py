@@ -22,10 +22,12 @@ def build_hierarchy(
             continue
         current_level = roots
         prefix: list[str] = []
+        canon_prefix: list[str] = []
         node: IndexNode | None = None
-        for token in entry.key:
+        for token, canon_token in zip(entry.display_key, entry.canonical_key):
             prefix.append(token)
-            node = _find_or_create_node(current_level, token, tuple(prefix))
+            canon_prefix.append(canon_token)
+            node = _find_or_create_node(current_level, token, tuple(canon_prefix))
             current_level = node.children
         if node:
             if entry.attribute and node.attribute is None:
@@ -46,7 +48,7 @@ def _find_or_create_node(
     key: tuple[str, ...],
 ) -> IndexNode:
     for node in nodes:
-        if node.term == term:
+        if node.key == key:
             return node
     new_node = IndexNode(term=term, key=key)
     nodes.append(new_node)
