@@ -21,3 +21,8 @@ def test_infII_snapshot():
     output = render_index(index, style_state=state)
     expected = (TESTS_DIR / "infII.cmp").read_text(encoding="latin-1")
     assert output.strip() == expected.strip()
+
+    # End-to-end from .idx without touching the bundled .raw
+    index_from_idx = build_index_entries(from_idx, state)
+    output_from_idx = render_index(index_from_idx, style_state=state)
+    assert output_from_idx.strip() == expected.strip()

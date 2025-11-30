@@ -12,16 +12,16 @@
 - [x] tex2xindy minimal (`tex/tex2xindy.py`) : conversion `.idx → .raw`, CLI avec encodage/logs, tests `infII`.
 - [x] Snapshots attr2/attr3/ranges1 : fusion d’attributs/ranges par attribut corrigée (tests réactivés).
 - [x] Modules/langues avancés : charge les modules (rule-sets, use-rule-set, inherit-from) et snapshots de langues `french`/`deutsch` + modules `tex/makeidx`, `tex/isolatin1s` vérifiés.
-- [x] Outils TeX complets (options makeindex4) et gestion d’attributs complexes/manquants (wrapper makeindex4, compression d’espaces, ignore blanks `-l`, log/output, attr auto).
+- [x] Outils TeX complets (options makeindex4) et gestion d’attributs complexes/manquants (wrapper makeindex4, compression d’espaces, ignore blanks `-l`, log/output, attr auto, crossrefs/case-insensitive encap).
+- [x] `tex2xindy` robuste : parsing TeX (macros, escapes, niveaux `@`/`!`, crossrefs `see{}`), génération `:tkey` et pipeline `.idx → .raw → xindy`.
 
 ## Couverture de tests (pytest)
 
-- [x] 78 tests actuels passent (`uv run pytest`) : dsl, index, markup, raw, CLI, tex2xindy, snapshots `ex1/ex2/deep/simple/attr2/attr3/ranges1/french/deutsch/infII/wegweiser/mappings/modules_tex/makeidx_module`.
+- [x] 80 tests actuels passent (`uv run pytest`) : dsl, index, markup, raw, CLI, tex2xindy, snapshots `ex1/ex2/deep/simple/attr2/attr3/ranges1/french/deutsch/infII/wegweiser/mappings/modules_tex/makeidx_module` + pipeline `.idx` end-to-end.
 - [x] Tests langues/modules supplémentaires (autres mappings/langues) à ajouter. (`mappings` ajouté, `infII`/`wegweiser` réalignés, modules tex/latin chargés automatiquement)
 
 ## Points restants pour 100% de migration
 
 - [x] Étendre encore le loader de modules/langues et ajouter des snapshots pour d’autres styles des dossiers `modules/` (règles, ordres de tri, alphabets).
-- [ ] Compléter tex2xindy : options makeindex4, parsing TeX plus robuste (macros, escapes), pipeline CLI bout-en-bout.
 - [ ] Documentation finale (README, usage CLI, exemples) et packaging.
 - [ ] Vérifier les scripts d’erreur (err1/err2/xref-1) et scénarios makefile historiques.
