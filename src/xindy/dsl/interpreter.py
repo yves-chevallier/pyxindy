@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import re
 from pathlib import Path
 from typing import Sequence
 
@@ -43,11 +44,12 @@ class StyleState:
     search_paths: list[Path] = field(default_factory=list)
     loaded_files: set[Path] = field(default_factory=set)
     letter_groups: list[str] = field(default_factory=list)
-    sort_rules: list[tuple[str, str, bool]] = field(default_factory=list)
+    sort_rules: list[tuple[str, str, bool, int]] = field(default_factory=list)
     sort_rule_orientations: list[str] = field(
         default_factory=lambda: ["forward"] * 8
     )
     merge_rules: list[tuple[str, str, bool]] = field(default_factory=list)
+    rule_sets: dict[str, list[tuple[str, str, bool]]] = field(default_factory=dict)
     markup_options: dict[str, object] = field(default_factory=dict)
     features: set[str] = field(default_factory=set)
 
@@ -174,6 +176,8 @@ class StyleInterpreter:
             "define-letter-group": self._handle_define_letter_group,
             "define-sort-rule-orientations": self._handle_define_sort_orientations,
             "sort-rule": self._handle_sort_rule,
+            "define-rule-set": self._handle_define_rule_set,
+            "use-rule-set": self._handle_use_rule_set,
             "merge-to": self._handle_merge_to,
             "markup-index": self._handle_markup_index,
             "markup-letter-group-list": self._handle_markup_letter_group_list,
@@ -324,12 +328,24 @@ class StyleInterpreter:
         replacement = self._stringify(args[1])
         again = False
         use_basic_regex = False
-        for token in args[2:]:
+        run_idx = 0
+        idx = 2
+        while idx < len(args):
+            token = args[idx]
             if isinstance(token, Keyword):
                 if token.name == "again":
                     again = True
+                    idx += 1
+                    continue
                 if token.name == "bregexp":
                     use_basic_regex = True
+                    idx += 1
+                    continue
+                if token.name == "run" and idx + 1 < len(args):
+                    run_idx = self._parse_int_option(args[idx + 1], default=0)
+                    idx += 2
+                    continue
+            idx += 1
         if use_basic_regex:
             pattern = (
                 pattern.replace("\\(", "(")
@@ -337,7 +353,51 @@ class StyleInterpreter:
                 .replace("{", "\\{")
                 .replace("}", "\\}")
             )
-        self.state.sort_rules.append((pattern, replacement, again))
+        self.state.sort_rules.append((pattern, replacement, again, run_idx))
+
+    def _handle_define_rule_set(self, args: list[object]) -> None:
+        if not args:
+            raise StyleError("define-rule-set requires a name")
+        name = self._stringify(args[0])
+        kwargs = self._parse_keyword_args(args[1:])
+        rules_data = kwargs.get("rules")
+        if not isinstance(rules_data, list):
+            raise StyleError("define-rule-set expects a :rules list")
+        parsed_rules: list[tuple[str, str, bool]] = []
+        inherit = kwargs.get("inherit-from") or kwargs.get("inherit_from")
+        if inherit:
+            if not isinstance(inherit, list):
+                inherit = [inherit]
+            for parent in inherit:
+                parent_name = self._stringify(parent)
+                parsed_rules.extend(self.state.rule_sets.get(parent_name, []))
+        for entry in rules_data:
+            if not isinstance(entry, list) or len(entry) < 2:
+                continue
+            pat_raw = entry[0]
+            repl_raw = entry[1]
+            again = any(isinstance(tok, Keyword) and tok.name == "again" for tok in entry[2:])
+            is_string = any(isinstance(tok, Keyword) and tok.name == "string" for tok in entry[2:])
+            pattern = self._stringify(pat_raw)
+            replacement = self._stringify(repl_raw)
+            if is_string:
+                pattern = re.escape(pattern)
+            parsed_rules.append((pattern, replacement, again))
+        self.state.rule_sets[name] = parsed_rules
+
+    def _handle_use_rule_set(self, args: list[object]) -> None:
+        kwargs = self._parse_keyword_args(args)
+        rule_names = kwargs.get("rule-set") or kwargs.get("rule_set")
+        if not rule_names:
+            raise StyleError("use-rule-set expects :rule-set")
+        if not isinstance(rule_names, list):
+            rule_names = [rule_names]
+        run_idx = self._parse_int_option(kwargs.get("run"), default=0)
+        for rule_name in rule_names:
+            rule_key = self._stringify(rule_name)
+            rules = self.state.rule_sets.get(rule_key, [])
+            for pattern, replacement, again in rules:
+                self.state.sort_rules.append((pattern, replacement, again, run_idx))
 
     def _coerce_orientation(self, value: object) -> str:
         if isinstance(value, Symbol):
