@@ -1,8 +1,4 @@
-# xindy: Command List
-
----
-
-## 3. Command List
+# Command List
 
 Here is the complete list of xindy's commands that may be used in
 the index style. The symbol `name` always refers to a string. We
@@ -14,22 +10,20 @@ syntax and ``{ `' and ``}`' denote the grouping of elements. A
 vertical bar indicates alternatives. However, the enclosing round
 braces _are_ part of the syntax and must be supplied.
 
-## 3.1 Processing Commands
+## Processing Commands
 
 Here follows the list of processing commands.
 
 ### define-alphabet
 
-```
+```text
 (define-alphabet name string-list)
 ```
-
----
 
 Defines `name` to be the alphabet consisting of all elements of the
 `string-list`. Examples:
 
-```
+```text
   (define-alphabet "example-alphabet" ("An" "Example" "Alphabet"))
 ```
 
@@ -38,18 +32,16 @@ successor relationship holds: `succ("An")="Example"` and
 `succ("Example")="Alphabet"`. The built-in alphabet `digits` is
 defined as follows:
 
-```
+```text
   (define-alphabet "digits"
                    ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9"))
 ```
 
 ### define-attributes
 
-```
+```text
 (define-attributes attribute-list)
 ```
-
----
 
 Defines all attributes the raw index may contain. Parameter
 `attribute-list` is a list of list of strings. The nesting level
@@ -77,11 +69,9 @@ attribute `usage`. In the attribute group `("definition"
 
 ### define-crossref-class
 
-```
+```text
 (define-crossref-class name [:unverified])
 ```
-
----
 
 Defines `name` to be a class of cross references. We distinguish
 two types of cross reference classes. _Verified_ cross reference
@@ -94,26 +84,24 @@ behaviour.
 
 ### define-letter-group
 
-```
+```text
 (define-letter-group name [:before lgname] [:after lgname]
                           [:prefixes list-of-prefixes])
 
 (define-letter-groups list-of-letter-groups)
 ```
 
----
-
 This command defines a letter group with name `name`, which must be
 a string value, grouping all index entries that have a _sort key_
 beginning with the prefix `name`. The command
 
-```
+```text
   (define-letter-group "a")
 ```
 
 is equivalent to the command
 
-```
+```text
   (define-letter-group "a" :prefixes ("a"))
 ```
 
@@ -125,21 +113,21 @@ currently defined prefixes.
 
 Example:
 
-```
+```text
   (define-letter-group "a")
 ```
 
 defines a letter group containing all index entries beginning with the
 string `"a"`.
 
-```
+```text
   (define-letter-group "c" :after "a")
 ```
 
 defines a letter group containing all index entries beginning with the
 string `"c"`. The letter group appears behind the letter group "a"
 
-```
+```text
   (define-letter-group "b" :after "a" :before "c")
 ```
 
@@ -161,13 +149,13 @@ simply an abbreviation for a sequence of
 `define-letter-group` definitions where the elements are ordered in
 the ordering given by the list. Example:
 
-```
+```text
   (define-letter-groups ("a" "b" "c")
 ```
 
 equals the definitions
 
-```
+```text
   (define-letter-group "a")
   (define-letter-group "b" :after "a")
   (define-letter-group "c" :after "b")
@@ -178,14 +166,12 @@ See also commands `markup-letter-group-list` and
 
 ### define-location-class
 
-```
+```text
 (define-location-class name layer-list
                        [:min-range-length num]
                        [:hierdepth depth]
                        [:var])
 ```
-
----
 
 Defines `name` to be a location class consisting of the given list
 of layers. A list of layers consists of names of basetypes and/or
@@ -204,7 +190,7 @@ argument `depth` must be an integer number indicating the number of
 layers the hierarchy does contain. See command
 `markup-locref-list` for more information. Examples:
 
-```
+```text
   (define-location-class "page-numbers" ("arabic-numbers")
                          :minimum-range-length 3)
 ```
@@ -216,7 +202,7 @@ a range because the range length is only 2. But the references 6, 7,
 8, and 9 are enough to form a range. Some example instances of this
 class are `0`, `1`, ... `2313`, etc.
 
-```
+```text
   (define-location-class "sections" :var
      ("arabic-numbers" :sep "."
       "arabic-numbers" :sep "."
@@ -230,17 +216,15 @@ number instead of arabic one).
 
 ### define-location-class-order
 
-```
+```text
 (define-location-class-order list)
 ```
-
----
 
 Defines the order in which the location classes are written to the
 output file. The parameter `list` is a list of names of
 location classes. Examples:
 
-```
+```text
   (define-location-class-order
       ("page-numbers" "sections" "xrefs"))
 ```
@@ -255,13 +239,11 @@ used location classes when using this command.
 
 ### define-rule-set
 
-```
+```text
 (define-rule-set name
         [ :inherit-from ("rule-set" "rule-set-2") ]
         :rules (<rule>...) )
 ```
-
----
 
 A complete specification of a multi-phase sorting process for a
 language requires that some rules have to appear in several subsequent
@@ -274,7 +256,7 @@ They do not add new functionality that is not already present with
 
 A rule can be of the form:
 
-```
+```text
   <rule> ::= ("pattern" "replacement"
               [:string|:bregexp|:egegexp] [:again])
 ```
@@ -284,7 +266,7 @@ The following incomplete example defines a new rule set of name
 `latin-tolower`, overriding or adding the sort rules in the list of
 `:rules`.
 
-```
+```text
    (define-rule-set "isolatin1-tolower"
 
      :inherit-from ("latin-tolower")
@@ -307,7 +289,7 @@ further descriptions on the sorting model refer to the command
 
 ### define-sort-rule-orientations
 
-```
+```text
 (define-sort-rule-orientations (orientations...))
 ```
 
@@ -324,12 +306,10 @@ For further descriptions on the sorting model refer to the command
 
 ### merge-rule
 
-```
+```text
 (merge-rule pattern replacement [:again]
                                 [:bregexp | :eregexp | :string])
 ```
-
----
 
 Defines a keyword mapping rule that can be used to generate the
 _merge key_ from the _main key_ of an index entry. This mapping
@@ -358,14 +338,14 @@ a string possibly containing the special characters `&`
 
 (substituting for the _n_-th submatch. Examples:
 
-```
+```text
   (merge-rule "A" "a")
 ```
 
 replaces each occurrence of the uppercase letter ``A`' with its
 lowercase counterpart.
 
-```
+```text
   (merge-rule "\~"([AEOUaeou])" "\1")
 ```
 
@@ -411,13 +391,13 @@ Due to efficiency, rules that just exchange characters or substitute
 constant character sequences are not treated as regular expressions.
 Therefore, instead of using the rule
 
-```
+```text
   (merge-rule "[A-Z]" "&ampx")
 ```
 
 it is more efficient (though less comfortable) to use
 
-```
+```text
   (merge-rule "A" "Ax")
   (merge-rule "B" "Bx")
   ...
@@ -440,7 +420,7 @@ merge rule the rule is marked as _mutable_, which means that after
 using this rule the transformation process shall restart at the same
 place. E.g. the rule
 
-```
+```text
   (merge-rule "\$(.*)\$" "\1" :again)
 ```
 
@@ -452,11 +432,9 @@ See also command `sort-rule`.
 
 ### merge-to
 
-```
+```text
 (merge-to attr-from attr-to [:drop])
 ```
-
----
 
 A _merge rule_ says that the attribute `attr-from` can be used
 to build ranges in `attr-to`. Both attributes must name valid
@@ -468,11 +446,9 @@ about processing phases.
 
 ### require
 
-```
+```text
 (require filename)
 ```
-
----
 
 This command allows to load more index style modules. The module is
 searched in the directories defined in the search path. The file is
@@ -481,7 +457,7 @@ read in and processing of the current file continues. The argument
 index style into several modules that can be included into the topmost
 index style file. Example:
 
-```
+```text
   (require "french/alphabet.xdy")
   (require "french/sort-rules.xdy")
   (require "tex/locations.xdy")
@@ -495,11 +471,9 @@ command `searchpath`.
 
 ### searchpath
 
-```
+```text
 (searchpath {path-string | path-list})
 ```
-
----
 
 This command adds the given paths to the list of paths, xindy
 searches for index style files. The argument `path-string` must be
@@ -507,7 +481,7 @@ a colon-separated string of directory names. If this path ends with a
 colon the default search path is added to the end of the path list.
 Example:
 
-> ```
+> ```text
 >
 >   (searchpath ".:/usr/local/lib/xindy:/usr/local/lib/xindy/english:")
 >
@@ -517,7 +491,7 @@ Example:
 > ends with a colon, the built-in search path is added at the end.
 > Specifying
 
-> ```
+> ```text
 >
 >   (searchpath ("."
 >                "/usr/local/lib/xindy"
@@ -538,11 +512,9 @@ Example:
 
 ### sort-rule
 
-```
+```text
 (sort-rule pattern replacement [:run level] [:again])
 ```
-
----
 
 Defines a keyword mapping rule that can be used to generate the
 _sort key_ of an index entry from the _merge key_. This key is
@@ -560,12 +532,10 @@ rules.
 
 ### use-rule-set
 
-```
+```text
 (use-rule-set [:run phase]
               [:rule-set ( <rule-set>... ))
 ```
-
----
 
 This command instantiates the gives rule sets to be in effect at
 sorting phase `phase`. The order of the rule sets given with
@@ -577,7 +547,7 @@ The following example declares that in phase 0 the rule sets
 `din5007` and `isolatin1-tolower` should be active, whereas in
 phase 2 the other rule sets have to be applied.
 
-```
+```text
   (use-rule-set :run 0
                 :rule-set ("din5007" "isolatin1-tolower"))
 
@@ -621,12 +591,10 @@ some of the commands grouped together.
 
 ### markup-attribute-group-list
 
-```
+```text
 (markup-attribute-group-list [:open string] [:close string]
                              [:sep string])
 ```
-
----
 
 Location class groups consist of lists of attribute groups. The markup
 of this list can be defined with the command
@@ -634,12 +602,10 @@ of this list can be defined with the command
 
 ### markup-attribute-group
 
-```
+```text
 (markup-attribute-group      [:open string] [:close string]
                              [:group group-num])
 ```
-
----
 
 To allow different markup for different attribute groups the command
 `markup-attribute-group` can be specialized on the group number with
@@ -647,7 +613,7 @@ the keyword argument `:group` which must be an integer number. Given
 the groups `("definition" "theorem")` and `("default")` with group
 numbers 0 and 1, then
 
-```
+```text
   (markup-attribute-group :open "<group0>" :close "</group0>"
                           :group 0)
 
@@ -659,13 +625,11 @@ can assign different markup for both groups in a SGML-based language.
 
 ### markup-crossref-list
 
-```
+```text
 (markup-crossref-list       [:open string] [:close string]
                             [:sep string]
                             [:class crossref-class])
 ```
-
----
 
 A crossref class group contains cross references of the same class.
 The separator between the classes is defined with the
@@ -675,13 +639,11 @@ specializes on the `:class` argument.
 
 ### markup-crossref-layer-list
 
-```
+```text
 (markup-crossref-layer-list [:open string] [:close string]
                             [:sep string]
                             [:class crossref-class])
 ```
-
----
 
 Each cross reference is determined by a list of layers indicating
 the target of the cross reference. To define suitable markup for
@@ -689,12 +651,10 @@ such a list the command `markup-crossref-layer-list` can be used.
 
 ### markup-crossref-layer
 
-```
+```text
 (markup-crossref-layer      [:open string] [:close string]
                             [:class crossref-class])
 ```
-
----
 
 Each layer of a cross reference can be assigned two tags that
 specialize on the class of the reference, like all other commands.
@@ -702,7 +662,7 @@ specialize on the class of the reference, like all other commands.
 A suitable markup for a cross reference class `see` within LaTeX2e
 could look like that:
 
-```
+```text
   (markup-crossref-list :class "see" :open "\emph{see} "
                                      :sep  "; ")
   (markup-crossref-layer-list :class "see" :sep ",")
@@ -716,17 +676,15 @@ An example output could look like
 
 ### markup-index
 
-```
+```text
 (markup-index [:open string] [:close string]
               [ :flat | :tree | :hierdepth depth ])
 ```
 
----
-
 Defines the markup tags that enclose the whole index via the
 `:open` and `:close` parameters. Examples:
 
-```
+```text
   (markup-index :open  "Here comes the index~n"
                 :close "That's all folks!~n")
 ```
@@ -744,7 +702,7 @@ is an abbrevation of `:hierdepth 0` and `:tree` is an
 abbrevation of `:hierdepth max-depth`, with `max-depth` being
 the maximum number of layers a keyword has. An example: the keywords
 
-```
+```text
   ("tree" "binary" "AVL")
   ("tree" "binary" "natural")
 ```
@@ -753,14 +711,14 @@ can be transformed in the following ways:
 
 A flat index (`:flat` or `:hierdepth 0`)
 
-```
+```text
   tree binary AVL
   tree binary natural
 ```
 
 with `:hierdepth 1`
 
-```
+```text
   tree
      binary  AVL
      binary  natural
@@ -768,7 +726,7 @@ with `:hierdepth 1`
 
 and a tree (`:tree` or `:hierdepth` > 1)
 
-```
+```text
   tree
      binary
         AVL
@@ -779,7 +737,7 @@ Most often one will create tree-like indexes or ones that are flat.
 
 ### markup-indexentry-list
 
-```
+```text
 (markup-indexentry-list [:open string] [:close string]
                         [:sep string]  [:depth integer])
 
@@ -787,14 +745,12 @@ Most often one will create tree-like indexes or ones that are flat.
                         [:depth integer])
 ```
 
----
-
 Letter groups consists of a list of index entries. The command
 `markup-indexentry-list` defines the markup of these lists. The
 markup can be specialized on the depth if the index is hierarchically
 organized. The command
 
-```
+```text
   (markup-indexentry-list :open  "\begin{IdxentList}"
                           :close "\end{IdxentList}"
                           :sep   "~n")
@@ -803,7 +759,7 @@ organized. The command
 defines that the index entries of all layers are wrapped into the
 given markup tags. If additionally
 
-```
+```text
   (markup-indexentry-list :open  "\begin{IdxentListII}"
                           :close "\end{IdxentListII}"
                           :sep   "~n"
@@ -824,7 +780,7 @@ markup for different layers. If depth is ommited the default markup
 for all possible depths is defined. The top-most index entries have
 depth 0.
 
-```
+```text
   (markup-indexentry :open  "\begin{Indexentry}"
                      :close "\end{Indexentry}")
 ```
@@ -832,7 +788,7 @@ depth 0.
 defines that the index entries of all layers are wrapped into the
 given markup tags. If additionally
 
-```
+```text
   (markup-indexentry :open  "\begin{IndexentryII}"
                      :close "\end{IndexentryII}"
                      :depth 2)
@@ -844,15 +800,13 @@ according to the first specification, and the index entries with depth
 
 ### markup-keyword-list
 
-```
+```text
 (markup-keyword-list [:open string] [:close string]
                      [:sep string] [:depth integer])
 
 (markup-keyword      [:open string] [:close string]
                      [:depth integer])
 ```
-
----
 
 The print key of an index entry consists of a list of strings. The
 markup of this list can be defined with the command
@@ -869,7 +823,7 @@ specialize this markup for some depth.
 
 ### markup-letter-group-list
 
-```
+```text
 (markup-letter-group-list [:open string] [:close string]
                           [:sep string])
 
@@ -878,8 +832,6 @@ specialize this markup for some depth.
                       [:upcase | :downcase | :capitalize])
 ```
 
----
-
 The first command defines the markup of the letter group with name
 `group-name`. Since the markup of letter groups often contains the
 name of the letter group as a part of it, the other keyword arguments
@@ -887,7 +839,7 @@ allow an additional markup for this group name. If one of the
 parameters `:open-head` and `:close-head` is specified
 additional markup is added as can be described as follows:
 
-```
+```text
   <OPEN>
      IF (:open-head OR :close-head)
        <OPEN-HEAD>
@@ -912,26 +864,22 @@ letter groups.
 
 ### markup-locclass-list
 
-```
+```text
 (markup-locclass-list [:open string] [:close string]
                       [:sep string])
 ```
-
----
 
 Each index entry contains a list of location class groups. This markup
 command can be used to define the markup of this list.
 
 ### markup-locref
 
-```
+```text
 (markup-locref [:open string] [:close string]
                [:class locref-class]
                [:attr  attribute]
                [:depth integer])
 ```
-
----
 
 The markup tags of a location reference can be specialized on the
 three arguments `:class`, `:attr` and additionally, if
@@ -944,19 +892,17 @@ this case would not specialize on the depth or any particular class. A
 valid definition, suitable for a usage within HTML, could look like
 this.
 
-```
+```text
   (markup-locref :open "<B>" :close "</B>" :attr "definition")
   (markup-locref :open "<I>" :close "</I>" :attr "default")
 ```
 
 ### markup-locref-class
 
-```
+```text
 (markup-locref-class [:open string] [:close string]
                      [:class locref-class])
 ```
-
----
 
 All location references of a particular location reference class can
 be wrapped into the tags defined by this command. It specializes on
@@ -964,13 +910,11 @@ the keyword argument `:class`.
 
 ### markup-locref-layer
 
-```
+```text
 (markup-locref-layer      [:open string] [:close string]
                           [:depth integer] [:layer integer]
                           [:class locref-class])
 ```
-
----
 
 The command allows tagging elements of a layer list differently. The
 first element of this list can be specialized with `:layer 0`, the
@@ -978,14 +922,12 @@ next element with `:layer 1`, etc.
 
 ### markup-locref-layer-list
 
-```
+```text
 (markup-locref-layer-list [:open string] [:close string]
                           [:sep string]
                           [:depth integer]
                           [:class locref-class])
 ```
-
----
 
 A location reference contains a list of location reference layers. The
 list command can markup this list. It specializes on the class of the
@@ -993,12 +935,10 @@ location references and the depth (if sub-references are used).
 
 ### markup-locref-list
 
-```
+```text
 (markup-locref-list [:open string] [:close string] [:sep string]
                     [:depth integer] [:class locref-class])
 ```
-
----
 
 An attribute group contains a list of location references and/or
 ranges. Additionally a layered location reference itself may contain
@@ -1010,7 +950,7 @@ location references with sub-references.
 
 Given is a list of location references that have the class description
 
-```
+```text
   (define-location-class "Appendix"
                          ("ALPHA" :sep "-" "arabic-numbers")
                          :hierdepth 2)
@@ -1020,7 +960,7 @@ This location class has instances like `A-1`, `B-5`, etc. The
 keyword argument `:hierdepth 2` informs xindy to markup these
 location references in a hierarchical form. With the commands
 
-```
+```text
   (markup-locref-list            :sep "; "
                        :depth 0  :class "Appendix")
   (markup-locref-list  :open " " :sep ","
@@ -1031,13 +971,13 @@ location references in a hierarchical form. With the commands
 
 we obtain a markup sequence for some example data that could look like
 
-```
+```text
   {\bf A} 1,2,5; {\bf B} 5,6,9; {\bf D} 1,5,8; ...
 ```
 
 ### markup-range
 
-```
+```text
 (markup-range [:open string] [:close string] [:sep string]
               [:class locref-class]
               [:length num] [:ignore-end])
@@ -1062,7 +1002,7 @@ with the switch `:ignore-end`.
 
 The markup tags for a range _(X,Y)_ can be described as follows:
 
-```
+```text
   <OPEN>
     Markup of location reference X
   <SEP>
@@ -1076,13 +1016,13 @@ The following tags can be used to define a range of page numbers
 (given in a location class `page-numbers`) without considering the
 open and close parameters:
 
-```
+```text
   (markup-range :sep "-" :class "page-numbers")
 ```
 
 Location ranges then appear separated by a hyphen in a form like this:
 
-```
+```text
    ..., 5-8, 19-23, ...
 ```
 
@@ -1103,7 +1043,7 @@ the commands that must be used to define this tag. The defaults for
 the keyword argument `:open` is `` <`' and for `:close` is
  ``>`'. The beginning of an example output could look like:
 
-```
+```text
   <INDEX:OPEN>
     <LETTER-GROUP-LIST:OPEN>
       <LETTER-GROUP:OPEN ["a"]>
@@ -1118,7 +1058,7 @@ We use a simple indentation scheme to make the structure of the tags
 visible. The symbolic tag `<LETTER-GROUP:OPEN ["a"]>` for example
 indicates that the tag that can be specified with the command
 
-```
+```text
   (markup-letter-group :open "XXX" :group "a" ... )
 ```
 
@@ -1137,13 +1077,13 @@ as a comment. For TeX this could be
 
 or a definition in the TeX document like
 
-```
+```text
   \def\ignore#1{}
 ```
 
 combined with the command
 
-```
+```text
   (markup-trace :open "\ignore{" :close "}")
 ```
 
@@ -1167,7 +1107,7 @@ follows:
 
 ### indexentry
 
-```
+```text
 (indexentry { :key string-list [:print string-list]
             | :tkey list-of-layers }
             [:attr string]
@@ -1180,7 +1120,7 @@ follows:
 The pseudo variable _string_ is a sequence of characters
 surrounded by double quotes, e.g.
 
-```
+```text
   "Hi, it's me"  "one"  "a string with two \"double quotes\""
 ```
 
@@ -1190,7 +1130,7 @@ backslash as shown in the third example. A _string list_ is simply
 a list of strings separated by whitespaces and surrounded by round
 braces. An example of a string list is
 
-```
+```text
   ("This" "is" "a" "list" "of" "strings")
 ```
 
@@ -1216,13 +1156,13 @@ or two strings. The first string will be interpreted as the main key,
 whereas the second one will become the print key. If the print key is
 ommited, the main key is taken instead. So the definition
 
-```
+```text
   :tkey (("This") ("is") ("a") ("bang" "BANG !!!"))
 ```
 
 is equivalent to
 
-```
+```text
   :key   ("This" "is" "a" "bang")
   :print ("This" "is" "a" "BANG !!!")
 ```
@@ -1258,14 +1198,14 @@ the indexentry is declared to have the attribute `default`.
 
 Some examples:
 
-```
+```text
   (indexentry :key ("airplane") :locref "25" :attr "default")
 ```
 
 defines an index entry with the key `airplane' indexed on page '25'.
 This index entry has the attribute `default`.
 
-```
+```text
   (indexentry :key ("house") :xref ("building") :attr "see")
 ```
 
@@ -1273,11 +1213,9 @@ defines a cross reference with the key 'house' pointing to the term
 'building'. This cross reference belongs to the cross reference class
 `see`.
 
-```
+```text
   (indexentry :key ("house") :xref ("building") :open-range)
 ```
 
 is an invalid specification, since `:open-range` mustn't be used
 together with cross references.
-
----
