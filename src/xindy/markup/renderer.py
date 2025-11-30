@@ -45,6 +45,7 @@ class MarkupConfig:
     crossref_unverified_suffix: str = " (?)"
     enable_crossrefs: bool = True
     max_depth: int | None = None
+    backend: str = "text"  # "text" or "tex"
 
 
 def render_index(
@@ -69,7 +70,10 @@ def render_index(
             lines.append(cfg.letter_group_close.format(label=group.label.upper()))
     if cfg.index_close:
         lines.append(cfg.index_close)
-    return "\n".join(lines).rstrip() + ("\n" if lines else "")
+    output = "\n".join(lines).rstrip()
+    if cfg.backend == "tex":
+        output = _wrap_tex(output)
+    return output + ("\n" if output else "")
 
 
 def _render_node(
@@ -159,6 +163,8 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
     index_opts = opts.get("index", {})
     cfg.index_open = _normalize_markup_string(index_opts.get("open", cfg.index_open))
     cfg.index_close = _normalize_markup_string(index_opts.get("close", cfg.index_close))
+    if "\\begin{theindex}" in cfg.index_open:
+        cfg.backend = "tex"
 
     lg_opts = opts.get("letter_group_list", {})
     cfg.letter_group_separator = lg_opts.get("sep", cfg.letter_group_separator)
@@ -192,6 +198,8 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
             )
         if "template" in entry_cfg:
             cfg.entry_templates_by_depth[depth] = entry_cfg["template"]
+        elif cfg.backend == "tex" and "open" in entry_cfg:
+            cfg.entry_templates_by_depth[depth] = "{indent}{locrefs}"
 
     locref_opts = opts.get("locref", {})
     default_locref = locref_opts.get("__default__", {})
@@ -209,7 +217,9 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
         cfg.default_locref_format.separator = locref_list["sep"]
     locclass_list = opts.get("locclass_list", {})
     if locclass_list.get("open"):
-        cfg.default_locref_format.prefix = _normalize_markup_string(locclass_list["open"])
+        cfg.default_locref_format.prefix = _normalize_markup_string(
+            locclass_list["open"]
+        )
 
     crossref_opts = opts.get("crossref_list", {})
     if "open" in crossref_opts:
@@ -242,6 +252,10 @@ def _normalize_markup_string(value: object | None) -> str:
     if isinstance(value, str):
         return value.replace("~n", "\n")
     return str(value)
+
+
+def _wrap_tex(body: str) -> str:
+    return "\\begin{theindex}\n\n" + body + "\n\n\\end{theindex}"
 
 
 __all__ = ["MarkupConfig", "render_index"]
