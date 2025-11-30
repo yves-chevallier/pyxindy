@@ -8,6 +8,8 @@ dependencies = []
 
 [project.scripts]
 xindy = "xindy.cli:main"
+tex2xindy = "xindy.tex.tex2xindy:main"
+makeindex4 = "xindy.tex.makeindex4:main"
 
 [project.optional-dependencies]
 dev = [

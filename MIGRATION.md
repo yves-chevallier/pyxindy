@@ -12,7 +12,7 @@
 - [x] tex2xindy minimal (`tex/tex2xindy.py`) : conversion `.idx → .raw`, CLI avec encodage/logs, tests `infII`.
 - [x] Snapshots attr2/attr3/ranges1 : fusion d’attributs/ranges par attribut corrigée (tests réactivés).
 - [x] Modules/langues avancés : charge les modules (rule-sets, use-rule-set, inherit-from) et snapshots de langues `french`/`deutsch` vérifiés.
-- [x] Outils TeX complets (options makeindex4) et gestion d’attributs complexes/manquants (wrapper makeindex4, compression d’espaces, log/output, attr auto).
+- [x] Outils TeX complets (options makeindex4) et gestion d’attributs complexes/manquants (wrapper makeindex4, compression d’espaces, ignore blanks `-l`, log/output, attr auto).
 
 ## Couverture de tests (pytest)
 
