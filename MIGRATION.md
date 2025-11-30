@@ -23,5 +23,5 @@
 ## Points restants pour 100% de migration
 
 - [x] Étendre encore le loader de modules/langues et ajouter des snapshots pour d’autres styles des dossiers `modules/` (règles, ordres de tri, alphabets).
-- [ ] Documentation finale (README, usage CLI, exemples) et packaging.
+- [x] Documentation finale (README, usage CLI, exemples) et packaging.
 - [ ] Vérifier les scripts d’erreur (err1/err2/xref-1) et scénarios makefile historiques.
