@@ -157,13 +157,20 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
     opts = style_state.markup_options
 
     index_opts = opts.get("index", {})
-    cfg.index_open = index_opts.get("open", cfg.index_open)
-    cfg.index_close = index_opts.get("close", cfg.index_close)
+    cfg.index_open = _normalize_markup_string(index_opts.get("open", cfg.index_open))
+    cfg.index_close = _normalize_markup_string(index_opts.get("close", cfg.index_close))
 
     lg_opts = opts.get("letter_group_list", {})
     cfg.letter_group_separator = lg_opts.get("sep", cfg.letter_group_separator)
-    cfg.letter_group_open = lg_opts.get("open", cfg.letter_group_open)
-    cfg.letter_group_close = lg_opts.get("close", cfg.letter_group_close)
+    cfg.letter_group_open = _normalize_markup_string(
+        lg_opts.get("open", cfg.letter_group_open)
+    )
+    cfg.letter_group_close = _normalize_markup_string(
+        lg_opts.get("close", cfg.letter_group_close)
+    )
+    if lg_opts:
+        # if no explicit header, do not emit headers
+        cfg.show_letter_headers = False
 
     entry_list_opts = opts.get("indexentry_list", {})
     if "sep" in entry_list_opts:
@@ -176,9 +183,13 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
     entries = opts.get("indexentries", {})
     for depth, entry_cfg in entries.items():
         if "open" in entry_cfg:
-            cfg.entry_open_templates[depth] = entry_cfg["open"]
+            cfg.entry_open_templates[depth] = _normalize_markup_string(
+                entry_cfg["open"]
+            )
         if "close" in entry_cfg:
-            cfg.entry_close_templates[depth] = entry_cfg["close"]
+            cfg.entry_close_templates[depth] = _normalize_markup_string(
+                entry_cfg["close"]
+            )
         if "template" in entry_cfg:
             cfg.entry_templates_by_depth[depth] = entry_cfg["template"]
 
@@ -193,11 +204,22 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
             continue
         cfg.locref_formats[attr] = _update_locfmt(LocrefFormat(), raw_cfg)
 
+    locref_list = opts.get("locref_list", {})
+    if locref_list.get("sep"):
+        cfg.default_locref_format.separator = locref_list["sep"]
+    locclass_list = opts.get("locclass_list", {})
+    if locclass_list.get("open"):
+        cfg.default_locref_format.prefix = _normalize_markup_string(locclass_list["open"])
+
     crossref_opts = opts.get("crossref_list", {})
     if "open" in crossref_opts:
         cfg.crossref_prefix = crossref_opts["open"]
     if "sep" in crossref_opts:
         cfg.crossref_separator = crossref_opts["sep"]
+
+    range_opts = opts.get("range", {})
+    if "sep" in range_opts:
+        cfg.range_separator = range_opts["sep"]
 
     return cfg
 
@@ -212,6 +234,14 @@ def _update_locfmt(locfmt: LocrefFormat, data: dict[str, object]) -> LocrefForma
     if "prefix" in data:
         locfmt.prefix = data["prefix"]
     return locfmt
+
+
+def _normalize_markup_string(value: object | None) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        return value.replace("~n", "\n")
+    return str(value)
 
 
 __all__ = ["MarkupConfig", "render_index"]

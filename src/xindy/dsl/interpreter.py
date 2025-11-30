@@ -142,7 +142,10 @@ class StyleInterpreter:
             "markup-indexentry": self._handle_markup_indexentry,
             "markup-indexentry-list": self._handle_markup_indexentry_list,
             "markup-locref": self._handle_markup_locref,
+            "markup-locref-list": self._handle_markup_locref_list,
+            "markup-locclass-list": self._handle_markup_locclass_list,
             "markup-crossref-list": self._handle_markup_crossref_list,
+            "markup-range": self._handle_markup_range,
         }
         if head.name == "mapc":
             self._handle_mapc(form[1:])
@@ -278,8 +281,21 @@ class StyleInterpreter:
         key = kwargs.get("attr") or "__default__"
         locrefs[key] = kwargs
 
+    def _handle_markup_locref_list(self, args: list[object]) -> None:
+        kwargs = self._parse_markup_kwargs(args)
+        locref_list = self.state.markup_options.setdefault("locref_list", {})
+        locref_list["sep"] = kwargs.get("sep")
+
+    def _handle_markup_locclass_list(self, args: list[object]) -> None:
+        kwargs = self._parse_markup_kwargs(args)
+        self.state.markup_options["locclass_list"] = kwargs
+
     def _handle_markup_crossref_list(self, args: list[object]) -> None:
         self.state.markup_options["crossref_list"] = self._parse_markup_kwargs(args)
+
+    def _handle_markup_range(self, args: list[object]) -> None:
+        kwargs = self._parse_markup_kwargs(args)
+        self.state.markup_options["range"] = kwargs
 
     def _parse_markup_kwargs(self, args: list[object]) -> dict[str, object]:
         kwargs: dict[str, object] = {}
