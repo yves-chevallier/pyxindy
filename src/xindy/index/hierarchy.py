@@ -47,17 +47,23 @@ def _find_or_create_node(
 
 
 def _detect_numeric_ranges(node: IndexNode) -> None:
-    if len(node.locrefs) < 2:
+    if len(node.locrefs) < 3:
         return
     node.ranges.clear()
     join_length = getattr(node.locrefs[0].locclass, "join_length", 2)
 
-    def to_int(ref: LayeredLocationReference) -> int | None:
+    def to_ordnum(ref: LayeredLocationReference) -> int | None:
+        if ref.ordnums:
+            try:
+                return int(ref.ordnums[0])
+            except (TypeError, ValueError):
+                pass
         try:
             return int(ref.locref_string)
         except ValueError:
             return None
-    numeric = [(ref, to_int(ref)) for ref in node.locrefs]
+
+    numeric = [(ref, to_ordnum(ref)) for ref in node.locrefs]
     numeric = [(ref, value) for ref, value in numeric if value is not None]
     if len(numeric) < 2:
         return

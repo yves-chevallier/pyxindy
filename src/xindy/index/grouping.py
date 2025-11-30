@@ -62,9 +62,11 @@ def _resolve_letter_groups(state: StyleState) -> list[str]:
 
 
 def _letter_label_for_entry(entry: IndexEntry, groups: Sequence[str]) -> str:
-    first_char = entry.key[0][0].lower()
-    for label in groups:
-        if label.startswith(first_char):
+    text = entry.key[0].lower()
+    # prefer longest matching group prefix
+    sorted_groups = sorted(groups, key=lambda g: (-len(g), groups.index(g)))
+    for label in sorted_groups:
+        if text.startswith(label.lower()):
             return label
     return groups[0] if groups else "#"
 

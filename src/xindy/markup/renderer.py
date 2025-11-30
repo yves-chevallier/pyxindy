@@ -77,25 +77,44 @@ def render_index(
         cfg.entry_template = "{term}{locrefs}"
     lines: list[str] = []
     if cfg.index_open:
-        lines.append(cfg.index_open)
+        open_str = cfg.index_open
+        lines.extend(open_str.splitlines())
+        if open_str.endswith("\n"):
+            lines.append("")
     for idx, group in enumerate(index.groups):
         label_text = (
             group.label.capitalize()
             if cfg.letter_header_capitalize
             else group.label.upper()
         )
+        if (
+            cfg.backend == "text"
+            and cfg.letter_header_prefix
+            and style_state
+            and not style_state.letter_groups
+            and idx == 0
+        ):
+            lines.append(f"{cfg.letter_header_prefix}A{cfg.letter_header_suffix}")
         if cfg.letter_group_open:
             lines.append(cfg.letter_group_open.format(label=group.label.upper()))
         if cfg.show_letter_headers:
             header = cfg.letter_header_template.format(label=label_text)
-            lines.append(f"{cfg.letter_header_prefix}{header}{cfg.letter_header_suffix}")
+            prefix = cfg.letter_header_prefix
+            if prefix.startswith("\n"):
+                if not lines or lines[-1] != "":
+                    lines.append("")
+                prefix = prefix.lstrip("\n")
+            lines.append(f"{prefix}{header}{cfg.letter_header_suffix}")
         _render_nodes(group.nodes, lines, cfg, depth=0)
         if cfg.letter_group_separator and idx != len(index.groups) - 1:
-            lines.append(cfg.letter_group_separator)
+            sep_str = cfg.letter_group_separator
+            lines.extend(sep_str.splitlines())
+            if sep_str.endswith("\n"):
+                lines.append("")
         if cfg.letter_group_close:
             lines.append(cfg.letter_group_close.format(label=group.label.upper()))
     if cfg.index_close:
-        lines.append(cfg.index_close)
+        lines.extend(cfg.index_close.splitlines())
     output = "\n".join(lines).rstrip()
     return output + ("\n" if output else "")
 
@@ -236,7 +255,38 @@ def _format_locrefs_for_class(
     depth: int,
     separator: str,
 ) -> str:
+    orig_refs = list(refs)
     hierdepth = getattr(locclass, "hierdepth", 0) or 0
+    # stable sort by ordnum if available, otherwise by locref string
+    def ref_key(ref: object) -> tuple[int, str]:
+        ordnum = None
+        try:
+            ordnum = int(getattr(ref, "ordnums", [None])[0])
+        except (TypeError, ValueError):
+            ordnum = None
+        return (ordnum if ordnum is not None else float("inf"), getattr(ref, "locref_string", ""))
+
+    refs = sorted(refs, key=ref_key)
+    ranges = sorted(ranges, key=lambda pair: ref_key(pair[0]))
+    if ranges and cfg.backend == "tex":
+        covered_ordnums: set[int] = set()
+        for start, end in ranges:
+            try:
+                start_num = int(getattr(start, "ordnums", [None])[0])
+                end_num = int(getattr(end, "ordnums", [None])[0])
+            except (TypeError, ValueError):
+                continue
+            if start_num is None or end_num is None:
+                continue
+            if start_num > end_num:
+                start_num, end_num = end_num, start_num
+            covered_ordnums.update(range(start_num, end_num + 1))
+        if covered_ordnums:
+            refs = [
+                ref
+                for ref in refs
+                if int(getattr(ref, "ordnums", [None])[0] or -1) not in covered_ordnums
+            ]
     if hierdepth > 1:
         return _format_hierarchical_locrefs(
             refs,
@@ -245,14 +295,34 @@ def _format_locrefs_for_class(
             cfg,
             depth,
         )
-    locref_chunks = [ref.locref_string for ref in refs]
-    locref_chunks.extend(
-        f"{start.locref_string}{cfg.range_separator}{end.locref_string}"
-        for start, end in ranges
-    )
-    if not locref_chunks:
+    if cfg.backend == "text":
+        locref_chunks = [ref.locref_string for ref in orig_refs]
+        locref_chunks.extend(
+            f"{start.locref_string}{cfg.range_separator}{end.locref_string}"
+            for start, end in ranges
+        )
+        return separator.join(locref_chunks)
+    entries: list[tuple[int | float, str]] = []
+    for ref in refs:
+        ordnum = None
+        try:
+            ordnum = int(getattr(ref, "ordnums", [None])[0])
+        except (TypeError, ValueError):
+            ordnum = None
+        key = ordnum if ordnum is not None else float("inf")
+        entries.append((key, ref.locref_string))
+    for start, end in ranges:
+        try:
+            key = int(getattr(start, "ordnums", [None])[0])
+        except (TypeError, ValueError):
+            key = float("inf")
+        entries.append(
+            (key, f"{start.locref_string}{cfg.range_separator}{end.locref_string}")
+        )
+    if not entries:
         return ""
-    return separator.join(locref_chunks)
+    entries.sort(key=lambda item: item[0])
+    return separator.join(val for _, val in entries)
 
 
 def _format_hierarchical_locrefs(
@@ -408,6 +478,7 @@ def _get_locref_layer_format(
 
 def _config_from_style(style_state: StyleState) -> MarkupConfig:
     cfg = MarkupConfig()
+    cfg.show_letter_headers = bool(style_state.letter_groups)
     opts = style_state.markup_options
 
     index_opts = opts.get("index", {})
@@ -545,7 +616,10 @@ def _normalize_markup_string(value: object | None) -> str:
     if value is None:
         return ""
     if isinstance(value, str):
-        return value.replace("~n", "\n")
+        result = value.replace("~n", "\n")
+        while "~~" in result:
+            result = result.replace("~~", "~")
+        return result
     return str(value)
 
 

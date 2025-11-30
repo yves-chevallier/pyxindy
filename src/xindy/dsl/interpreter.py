@@ -163,6 +163,7 @@ class StyleInterpreter:
             "define-location-class": self._handle_define_location_class,
             "define-attributes": self._handle_define_attributes,
             "define-letter-groups": self._handle_define_letter_groups,
+            "define-letter-group": self._handle_define_letter_group,
             "define-sort-rule-orientations": self._handle_define_sort_orientations,
             "sort-rule": self._handle_sort_rule,
             "merge-to": self._handle_merge_to,
@@ -217,7 +218,12 @@ class StyleInterpreter:
 
         kwargs = self._parse_keyword_args(args[2:])
         hierdepth = self._parse_int_option(kwargs.get("hierdepth"), default=0)
-        default_join = 3 if hierdepth else 2
+        contains_roman = any(
+            isinstance(tok, (str, Symbol)) and "roman" in self._stringify(tok)
+            for tok in layer_tokens
+            if not isinstance(tok, Keyword)
+        )
+        default_join = 3 if hierdepth or contains_roman else 2
         join_length = self._parse_int_option(
             kwargs.get("min-range-length"),
             default=default_join,
@@ -257,6 +263,37 @@ class StyleInterpreter:
             raise StyleError("define-letter-groups expects one list argument")
         letters = [self._stringify(item) for item in args[0]]
         self.state.letter_groups = letters
+
+    def _handle_define_letter_group(self, args: list[object]) -> None:
+        if not args:
+            raise StyleError("define-letter-group expects a name")
+        name = self._stringify(args[0])
+        kwargs = self._parse_keyword_args(args[1:])
+        after = kwargs.get("after")
+        before = kwargs.get("before")
+        groups = list(self.state.letter_groups)
+        if not groups:
+            # seed with default alphabet if none provided yet
+            if self.state.basetypes:
+                first = next(iter(self.state.basetypes.values()))
+                groups = list(first.base_alphabet)
+        if after:
+            marker = self._stringify(after)
+            if marker in groups:
+                idx = groups.index(marker) + 1
+                groups.insert(idx, name)
+                self.state.letter_groups = groups
+                return
+        if before:
+            marker = self._stringify(before)
+            if marker in groups:
+                idx = groups.index(marker)
+                groups.insert(idx, name)
+                self.state.letter_groups = groups
+                return
+        if name not in groups:
+            groups.append(name)
+        self.state.letter_groups = groups
 
     def _handle_define_sort_orientations(self, args: list[object]) -> None:
         if not args:
