@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 import re
-from typing import Iterable
 
 from xindy.dsl.interpreter import StyleState
 
@@ -31,7 +31,9 @@ def apply_merge_rules(text: str, style_state: StyleState) -> str:
                     result = updated
             except re.error:
                 continue
-    prefer_umlaut_prefix = any("wegweiser" in str(path) for path in getattr(style_state, "loaded_files", []))
+    prefer_umlaut_prefix = any(
+        "wegweiser" in str(path) for path in getattr(style_state, "loaded_files", [])
+    )
     if prefer_umlaut_prefix:
         umlaut_map = {
             '\\"a': "_a",

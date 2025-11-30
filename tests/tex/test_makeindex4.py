@@ -1,14 +1,10 @@
-from pathlib import Path
-
 from xindy.tex import makeindex4_main
 
 
 def test_makeindex4_cli_produces_index(tmp_path):
     idx = tmp_path / "sample.idx"
     idx.write_text(
-        "\\indexentry{alpha}{1}\n"
-        "\\indexentry{alpha }{2}\n"
-        "\\indexentry{beta|imp}{3}\n",
+        "\\indexentry{alpha}{1}\n\\indexentry{alpha }{2}\n\\indexentry{beta|imp}{3}\n",
         encoding="latin-1",
     )
     ind_path = tmp_path / "sample.ind"

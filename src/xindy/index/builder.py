@@ -2,17 +2,17 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 import logging
-from typing import Iterable
 
 from xindy.dsl.interpreter import StyleState
+from xindy.index.order import apply_merge_rules
 from xindy.locref import (
     CategoryAttribute,
     LayeredLocationClass,
     build_location_reference,
     make_category_attribute,
 )
-from xindy.index.order import apply_merge_rules, apply_sort_rules
 from xindy.raw.reader import RawIndexEntry
 
 from .grouping import group_entries_by_letter
@@ -84,9 +84,7 @@ def build_index_entries(
                 break
             locref = None
             for loccls in locclasses:
-                locref = build_location_reference(
-                    loccls, raw.locref, catattr, resolved_attr
-                )
+                locref = build_location_reference(loccls, raw.locref, catattr, resolved_attr)
                 if locref:
                     break
             if not locref:

@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from os import PathLike
 from pathlib import Path
-from typing import Mapping
 
 from xindy.dsl.sexpr import Keyword, Symbol, loads
 
@@ -98,9 +98,11 @@ def _coerce_key(value: object) -> tuple[tuple[str, ...], tuple[str, ...] | None]
                 raise RawIndexSyntaxError(":key entries must be strings")
             coerced.append(part)
             display_parts.append(part)
-    display_key = tuple(display_parts) if any(
-        (isinstance(part, list) and len(part) > 1) for part in value
-    ) else None
+    display_key = (
+        tuple(display_parts)
+        if any((isinstance(part, list) and len(part) > 1) for part in value)
+        else None
+    )
     return tuple(coerced), display_key
 
 

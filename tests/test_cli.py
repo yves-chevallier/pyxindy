@@ -4,6 +4,7 @@ import pytest
 
 from xindy import __version__, cli
 
+
 DATA_DIR = Path(__file__).resolve().parent / "data"
 
 

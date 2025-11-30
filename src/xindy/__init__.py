@@ -2,6 +2,7 @@
 
 from importlib import metadata
 
+
 try:
     __version__ = metadata.version("xindy")
 except metadata.PackageNotFoundError:  # pragma: no cover - during local dev

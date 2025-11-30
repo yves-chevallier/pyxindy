@@ -4,10 +4,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from io import TextIOBase
-from typing import List, Union
+from typing import Union
+
 
 SExprAtom = Union["Symbol", "Keyword", str, int, float]
-SExpr = Union[SExprAtom, List["SExpr"]]
+SExpr = SExprAtom | list["SExpr"]
 
 
 class SExprSyntaxError(ValueError):
@@ -102,7 +103,7 @@ class _Scanner:
                 depth -= 1
 
 
-def parse_many(source: str | bytes | TextIOBase) -> List[SExpr]:
+def parse_many(source: str | bytes | TextIOBase) -> list[SExpr]:
     """Parse every S-expression present in ``source``."""
     if isinstance(source, TextIOBase):
         text = source.read()
@@ -111,7 +112,7 @@ def parse_many(source: str | bytes | TextIOBase) -> List[SExpr]:
     else:
         text = str(source)
     scanner = _Scanner(text)
-    expressions: List[SExpr] = []
+    expressions: list[SExpr] = []
     while True:
         scanner.skip_separators()
         if scanner.eof():
@@ -120,7 +121,7 @@ def parse_many(source: str | bytes | TextIOBase) -> List[SExpr]:
     return expressions
 
 
-def loads(text: str) -> List[SExpr]:
+def loads(text: str) -> list[SExpr]:
     """Convenience alias mirroring :func:`json.loads`."""
     return parse_many(text)
 
@@ -152,8 +153,8 @@ def _parse_expression(scanner: _Scanner) -> SExpr:
     return _parse_atom(scanner)
 
 
-def _parse_list(scanner: _Scanner) -> List[SExpr]:
-    elements: List[SExpr] = []
+def _parse_list(scanner: _Scanner) -> list[SExpr]:
+    elements: list[SExpr] = []
     scanner.advance()  # consume "("
     while True:
         scanner.skip_separators()

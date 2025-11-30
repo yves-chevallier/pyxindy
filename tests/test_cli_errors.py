@@ -2,6 +2,7 @@ from pathlib import Path
 
 from xindy import cli
 
+
 TESTS_DIR = Path(__file__).resolve().parents[1] / "xindy-src" / "xindy-2.1" / "tests"
 
 

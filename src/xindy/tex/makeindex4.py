@@ -3,18 +3,17 @@
 from __future__ import annotations
 
 import argparse
-import sys
-import tempfile
+from collections.abc import Iterable, Sequence
 from pathlib import Path
 import sys
-from typing import Iterable, Sequence
+import tempfile
 
 from xindy.dsl.interpreter import StyleInterpreter
 from xindy.index import build_index_entries
 from xindy.markup import render_index
 from xindy.raw.reader import RawIndexEntry
 
-from .tex2xindy import convert_idx_to_raw_entries, write_raw
+from .tex2xindy import convert_idx_to_raw_entries, parse_idx, write_raw
 
 
 def _compress_key_parts(entry: RawIndexEntry) -> RawIndexEntry:
@@ -39,15 +38,13 @@ def _build_temp_style(
         "(define-attributes ((" + " ".join(f'"{a}"' for a in attr_list) + ' "default")))',
     ]
     if ignore_blanks:
-        lines.append('(define-sort-rule-orientations (forward))')
+        lines.append("(define-sort-rule-orientations (forward))")
         lines.append('(sort-rule " " "" :run 0)')
     for attr in attr_list:
         lines.append(f'(markup-locref :attr "{attr}" :open "\\\\{attr}{{" :close "}}")')
     for cref in crossref_list or ["see"]:
         lines.append(f'(define-crossref-class "{cref}")')
-        lines.append(
-            f'(markup-crossref-list :open "\\\\{cref}{{" :close "}}{{}}" :class "{cref}")'
-        )
+        lines.append(f'(markup-crossref-list :open "\\\\{cref}{{" :close "}}{{}}" :class "{cref}")')
     order = [
         '"roman-page-numbers"',
         '"arabic-page-numbers"',
@@ -81,20 +78,30 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("idx", help="Input .idx file")
     parser.add_argument("-o", "--output", help="Output .ind file (default: basename.idx -> .ind)")
     parser.add_argument("-t", "--log", help="Log file (default: basename.ilg)")
-    parser.add_argument("-c", action="store_true", help="Compress whitespace in keys (makeindex -c)")
+    parser.add_argument(
+        "-c", action="store_true", help="Compress whitespace in keys (makeindex -c)"
+    )
     parser.add_argument("-l", action="store_true", help="Ignore blanks in sorting (makeindex -l)")
     parser.add_argument("--input-encoding", default="latin-1", help="Encoding of .idx input")
     parser.add_argument("--output-encoding", default="utf-8", help="Encoding of .ind output")
-    parser.add_argument("-g", action="store_true", help="(makeindex -g) not supported, emits warning")
-    parser.add_argument("-q", action="store_true", help="(makeindex -q) not supported, emits warning")
-    parser.add_argument("-r", action="store_true", help="(makeindex -r) not supported, emits warning")
+    parser.add_argument(
+        "-g", action="store_true", help="(makeindex -g) not supported, emits warning"
+    )
+    parser.add_argument(
+        "-q", action="store_true", help="(makeindex -q) not supported, emits warning"
+    )
+    parser.add_argument(
+        "-r", action="store_true", help="(makeindex -r) not supported, emits warning"
+    )
     parser.add_argument("-p", help="(makeindex -p) not supported, emits warning")
     parser.add_argument("-s", help="(makeindex -s) not supported, emits warning")
     args = parser.parse_args(argv)
 
     idx_path = Path(args.idx) if args.idx != "-" else None
     base = idx_path.with_suffix("") if idx_path else Path("stdin")
-    out_path = Path(args.output) if args.output else (base.with_suffix(".ind") if idx_path else Path("-"))
+    out_path = (
+        Path(args.output) if args.output else (base.with_suffix(".ind") if idx_path else Path("-"))
+    )
     log_path = Path(args.log) if args.log else (base.with_suffix(".ilg") if idx_path else Path("-"))
 
     if idx_path is None:
@@ -130,9 +137,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             sys.stderr.write(log_content)
         else:
             log_path.write_text(log_content, encoding="utf-8")
-    for flag, name in [(args.g, "-g"), (args.q, "-q"), (args.r, "-r"), (bool(args.p), "-p"), (bool(args.s), "-s")]:
+    for flag, name in [
+        (args.g, "-g"),
+        (args.q, "-q"),
+        (args.r, "-r"),
+        (bool(args.p), "-p"),
+        (bool(args.s), "-s"),
+    ]:
         if flag:
-            print(f"Warning: makeindex option {name} not supported by Python wrapper", file=sys.stderr)
+            print(
+                f"Warning: makeindex option {name} not supported by Python wrapper", file=sys.stderr
+            )
     return 0
 
 

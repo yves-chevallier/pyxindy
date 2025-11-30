@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import re
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from typing import Callable, Sequence
+import re
 
 
 @dataclass(slots=True)

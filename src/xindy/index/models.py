@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Iterable
 
 from xindy.locref import LayeredLocationReference
 
@@ -43,11 +43,11 @@ class IndexNode:
     ranges: list[tuple[LayeredLocationReference, LayeredLocationReference]] = field(
         default_factory=list
     )
-    children: list["IndexNode"] = field(default_factory=list)
+    children: list[IndexNode] = field(default_factory=list)
     crossrefs: list[IndexCrossReference] = field(default_factory=list)
     dropped_ordnums: dict[str | None, set[str]] = field(default_factory=dict)
 
-    def add_child(self, node: "IndexNode") -> None:
+    def add_child(self, node: IndexNode) -> None:
         self.children.append(node)
 
     def extend_locrefs(self, refs: list[LayeredLocationReference]) -> None:
@@ -55,7 +55,9 @@ class IndexNode:
 
     def add_locrefs(self, refs: Iterable[LayeredLocationReference]) -> bool:
         added = False
-        existing = {(ref.locref_string, ref.attribute, getattr(ref, "state", None)) for ref in self.locrefs}
+        existing = {
+            (ref.locref_string, ref.attribute, getattr(ref, "state", None)) for ref in self.locrefs
+        }
         for ref in refs:
             signature = (ref.locref_string, ref.attribute, getattr(ref, "state", None))
             if signature in existing:

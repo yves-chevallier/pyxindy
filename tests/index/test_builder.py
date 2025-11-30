@@ -6,6 +6,7 @@ from xindy.dsl.interpreter import StyleInterpreter
 from xindy.index import IndexBuilderError, build_index_entries
 from xindy.raw.reader import load_raw_index
 
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TESTS_DIR = REPO_ROOT / "xindy-src" / "xindy-2.1" / "tests"
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
@@ -80,9 +81,7 @@ def test_crossref_entries_are_collected():
     state = StyleInterpreter().load(DATA_DIR / "crossref.xdy")
     raw_entries = load_raw_index(DATA_DIR / "crossref.raw")
     index = build_index_entries(raw_entries, state)
-    crossref_node = next(
-        node for node in index.groups[0].nodes if node.term == "see-target"
-    )
+    crossref_node = next(node for node in index.groups[0].nodes if node.term == "see-target")
     assert not crossref_node.locrefs
     assert len(crossref_node.crossrefs) == 1
     assert crossref_node.crossrefs[0].target == ("target",)

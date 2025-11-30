@@ -3,6 +3,7 @@ from pathlib import Path
 from xindy.raw.reader import load_raw_index
 from xindy.tex import tex2xindy
 
+
 TESTS_DIR = Path(__file__).resolve().parents[2] / "xindy-src" / "xindy-2.1" / "tests"
 
 

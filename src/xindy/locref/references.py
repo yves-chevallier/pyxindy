@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Sequence
 
 from .classes import LayeredLocationClass, LocationMatchError, perform_match
 
@@ -33,10 +33,10 @@ class LayeredLocationReference(LocationReference):
     catattr: CategoryAttribute
     state: str = "normal"
     rangeattr: str | None = None
-    origin: "LayeredLocationReference | None" = None
+    origin: LayeredLocationReference | None = None
     virtual: bool = False
     merge_drop: bool = False
-    subrefs: list["LayeredLocationReference"] = field(default_factory=list)
+    subrefs: list[LayeredLocationReference] = field(default_factory=list)
 
     def __hash__(self) -> int:
         return id(self)
@@ -94,7 +94,7 @@ def locref_class_eq(locref_a: LocationReference, locref_b: LocationReference) ->
 def locref_ordnum_lt(list_a: Sequence[int], list_b: Sequence[int]) -> bool:
     if list_a == list_b:
         return False
-    for a, b in zip(list_a, list_b):
+    for a, b in zip(list_a, list_b, strict=False):
         if a == b:
             continue
         return a < b

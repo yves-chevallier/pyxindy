@@ -5,6 +5,7 @@ from xindy.index import build_index_entries
 from xindy.markup import render_index
 from xindy.raw.reader import load_raw_index
 
+
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 SNAPSHOT = DATA_DIR / "simple.ind"
 

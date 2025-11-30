@@ -2,6 +2,7 @@ from pathlib import Path
 
 from xindy.dsl.interpreter import StyleInterpreter
 
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 TESTS_DIR = REPO_ROOT / "xindy-src" / "xindy-2.1" / "tests"
 

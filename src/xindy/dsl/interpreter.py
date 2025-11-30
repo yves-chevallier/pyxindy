@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-import re
 from pathlib import Path
-from typing import Sequence
+import re
 
 from xindy.locref import (
     Alphabet,
@@ -24,7 +24,7 @@ from xindy.locref import (
     prefix_match_for_roman_numbers,
 )
 
-from .sexpr import Keyword, Symbol, SExprSyntaxError, parse_many
+from .sexpr import Keyword, Symbol, parse_many
 
 
 class StyleError(RuntimeError):
@@ -46,9 +46,7 @@ class StyleState:
     letter_groups: list[str] = field(default_factory=list)
     location_class_order: list[str] = field(default_factory=list)
     sort_rules: list[tuple[str, str, bool, int]] = field(default_factory=list)
-    sort_rule_orientations: list[str] = field(
-        default_factory=lambda: ["forward"] * 8
-    )
+    sort_rule_orientations: list[str] = field(default_factory=lambda: ["forward"] * 8)
     merge_rules: list[tuple[str, str, bool]] = field(default_factory=list)
     keyword_merge_rules: list[tuple[str, str, bool, int]] = field(default_factory=list)
     rule_sets: dict[str, list[tuple[str, str, bool]]] = field(default_factory=dict)
@@ -69,10 +67,7 @@ class StyleInterpreter:
         if not self.state.basetypes:
             self._register_default_basetypes()
         modules_dir = (
-            Path(__file__)
-            .resolve()
-            .parents[3]
-            .joinpath("xindy-src", "xindy-2.1", "modules")
+            Path(__file__).resolve().parents[3].joinpath("xindy-src", "xindy-2.1", "modules")
         )
         if modules_dir.exists():
             self.state.search_paths.append(modules_dir)
@@ -85,9 +80,7 @@ class StyleInterpreter:
     ) -> StyleState:
         """Interpret ``path`` and return the populated :class:`StyleState`."""
         if extra_search_paths:
-            self.state.search_paths.extend(
-                Path(p).resolve() for p in extra_search_paths
-            )
+            self.state.search_paths.extend(Path(p).resolve() for p in extra_search_paths)
         self._eval_file(Path(path))
         return self.state
 
@@ -111,18 +104,14 @@ class StyleInterpreter:
             Enumeration(
                 name="roman-numbers-uppercase",
                 base_alphabet=tuple("IVXLCDM"),
-                match_func=lambda text: prefix_match_for_roman_numbers(
-                    text, lowercase=False
-                ),
+                match_func=lambda text: prefix_match_for_roman_numbers(text, lowercase=False),
             )
         )
         self.state.register_basetype(
             Enumeration(
                 name="roman-numbers-lowercase",
                 base_alphabet=tuple("ivxlcdm"),
-                match_func=lambda text: prefix_match_for_roman_numbers(
-                    text, lowercase=True
-                ),
+                match_func=lambda text: prefix_match_for_roman_numbers(text, lowercase=True),
             )
         )
 
@@ -286,9 +275,7 @@ class StyleInterpreter:
             attr_groups.append(converted)
             for attr_name in converted:
                 if attr_name not in self.state.attributes:
-                    self.state.attributes[attr_name] = make_category_attribute(
-                        attr_name
-                    )
+                    self.state.attributes[attr_name] = make_category_attribute(attr_name)
         self.state.attribute_groups.extend(attr_groups)
         self._initialize_category_attributes()
 
@@ -306,11 +293,10 @@ class StyleInterpreter:
         after = kwargs.get("after")
         before = kwargs.get("before")
         groups = list(self.state.letter_groups)
-        if not groups:
+        if not groups and self.state.basetypes:
             # seed with default alphabet if none provided yet
-            if self.state.basetypes:
-                first = next(iter(self.state.basetypes.values()))
-                groups = list(first.base_alphabet)
+            first = next(iter(self.state.basetypes.values()))
+            groups = list(first.base_alphabet)
         if after:
             marker = self._stringify(after)
             if marker in groups:
@@ -520,9 +506,7 @@ class StyleInterpreter:
         if not args:
             raise StyleError("define-crossref-class expects a name")
         name = self._stringify(args[0])
-        unverified = any(
-            isinstance(arg, Keyword) and arg.name == "unverified" for arg in args[1:]
-        )
+        unverified = any(isinstance(arg, Keyword) and arg.name == "unverified" for arg in args[1:])
         self.state.crossref_classes[name] = unverified
 
     # ---------------------------- markup placeholders ----------------------------
@@ -539,8 +523,8 @@ class StyleInterpreter:
             try:
                 depth_val = int(hierdepth)
                 self.state.markup_options["max_depth"] = depth_val
-            except (TypeError, ValueError):
-                raise StyleError("hierdepth must be numeric")
+            except (TypeError, ValueError) as exc:
+                raise StyleError("hierdepth must be numeric") from exc
         self.state.markup_options["index"] = kwargs
 
     def _handle_markup_letter_group_list(self, args: list[object]) -> None:
@@ -573,9 +557,7 @@ class StyleInterpreter:
 
     def _handle_markup_locref_list(self, args: list[object]) -> None:
         kwargs = self._parse_markup_kwargs(args)
-        class_name = (
-            self._stringify(kwargs["class"]) if "class" in kwargs else "__default__"
-        )
+        class_name = self._stringify(kwargs["class"]) if "class" in kwargs else "__default__"
         depth = self._parse_int_option(kwargs.get("depth"), default=0)
         lists = self.state.markup_options.setdefault("locref_lists", {})
         by_depth = lists.setdefault(class_name, {})
@@ -587,9 +569,7 @@ class StyleInterpreter:
 
     def _handle_markup_locref_layer(self, args: list[object]) -> None:
         kwargs = self._parse_markup_kwargs(args)
-        class_name = (
-            self._stringify(kwargs["class"]) if "class" in kwargs else "__default__"
-        )
+        class_name = self._stringify(kwargs["class"]) if "class" in kwargs else "__default__"
         depth = self._parse_int_option(kwargs.get("depth"), default=0)
         layer_idx = self._parse_int_option(kwargs.get("layer"), default=0)
         layers = self.state.markup_options.setdefault("locref_layers", {})
@@ -742,7 +722,6 @@ class StyleInterpreter:
                 return target
         return None
 
-
     def _stringify(self, value: object) -> str:
         if isinstance(value, str):
             return value
@@ -800,9 +779,13 @@ class StyleInterpreter:
         def find_radix(expr: object) -> int | None:
             if isinstance(expr, list):
                 for idx, item in enumerate(expr):
-                    if isinstance(item, Symbol) and item.name == "prefix-match-for-radix-numbers":
-                        if idx + 2 < len(expr) and isinstance(expr[idx + 2], (int, float)):
-                            return int(expr[idx + 2])
+                    if (
+                        isinstance(item, Symbol)
+                        and item.name == "prefix-match-for-radix-numbers"
+                        and idx + 2 < len(expr)
+                        and isinstance(expr[idx + 2], (int, float))
+                    ):
+                        return int(expr[idx + 2])
                     rad = find_radix(item)
                     if rad is not None:
                         return rad
@@ -814,9 +797,7 @@ class StyleInterpreter:
 
         lower = "lower" in name or "lowercase" in name
         if "roman-numbers" in name or "roman" in name:
-            return lambda text, low=lower: prefix_match_for_roman_numbers(
-                text, lowercase=low
-            )
+            return lambda text, low=lower: prefix_match_for_roman_numbers(text, lowercase=low)
 
         if "arabic" in name:
             return lambda text: prefix_match_for_radix_numbers(text, 10)
@@ -850,4 +831,4 @@ class StyleInterpreter:
                 catattr.last_in_group = last_name
 
 
-__all__ = ["StyleInterpreter", "StyleState", "StyleError"]
+__all__ = ["StyleError", "StyleInterpreter", "StyleState"]

@@ -4,6 +4,7 @@ import pytest
 
 from xindy.raw.reader import RawIndexSyntaxError, load_raw_index, parse_raw_index
 
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = REPO_ROOT / "xindy-src" / "xindy-2.1" / "tests"
 

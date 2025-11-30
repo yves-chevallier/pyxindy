@@ -37,6 +37,7 @@ from .references import (
     make_category_attribute,
 )
 
+
 __all__ = [
     "Alphabet",
     "BaseType",
@@ -47,11 +48,11 @@ __all__ = [
     "LayerElement",
     "LayeredLocationClass",
     "LayeredLocationReference",
+    "LocClassLayer",
+    "LocClassSeparator",
     "LocationClass",
     "LocationMatchError",
     "LocationReference",
-    "LocClassLayer",
-    "LocClassSeparator",
     "MatchResult",
     "StandardLocationClass",
     "VarLocationClass",

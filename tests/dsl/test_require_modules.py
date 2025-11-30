@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from xindy.dsl.interpreter import StyleInterpreter
 
 

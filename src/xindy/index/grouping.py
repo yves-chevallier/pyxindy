@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Sequence
 import re
-from typing import Dict, Iterable, Sequence
 
 from xindy.dsl.interpreter import StyleState
 
@@ -18,7 +18,7 @@ def group_entries_by_letter(
 ) -> list[IndexLetterGroup]:
     sorted_entries = sort_entries(entries, style_state)
     groups = _resolve_letter_groups(style_state)
-    buckets: Dict[str, list[IndexEntry]] = {label: [] for label in groups}
+    buckets: dict[str, list[IndexEntry]] = {label: [] for label in groups}
     extra_labels: list[str] = []
     fallback_label = groups[0] if groups else "#"
     for entry in sorted_entries:

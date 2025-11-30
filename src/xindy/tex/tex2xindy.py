@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-import re
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 import sys
-from typing import Iterable, Sequence
 
 from xindy.raw.reader import RawIndexEntry
 
@@ -326,9 +325,7 @@ def _split_command(attr: str) -> tuple[str, str | None]:
     """Split ``cmd{arg}`` into (cmd, arg) handling escaped braces."""
     name: list[str] = []
     idx = 0
-    while idx < len(attr) and (
-        attr[idx].isalpha() or (attr[idx] in {"\\", ":"} and idx == 0)
-    ):
+    while idx < len(attr) and (attr[idx].isalpha() or (attr[idx] in {"\\", ":"} and idx == 0)):
         name.append(attr[idx])
         idx += 1
     remaining = attr[idx:].lstrip()
@@ -364,7 +361,7 @@ def _normalize_token(text: str) -> str:
 def _serialize_key(entry: RawIndexEntry) -> str:
     if entry.display_key and entry.display_key != entry.key:
         parts = []
-        for sort, disp in zip(entry.key, entry.display_key):
+        for sort, disp in zip(entry.key, entry.display_key, strict=False):
             parts.append(f'("{_escape(sort)}" "{_escape(disp)}")')
         return f":tkey ({' '.join(parts)})"
     return ':key ("' + '" "'.join(_escape(s) for s in entry.key) + '")'

@@ -23,9 +23,52 @@ addopts = "-ra"
 testpaths = ["tests"]
 
 [tool.ruff]
-line-length = 88
+line-length = 100
 target-version = "py313"
 src = ["src"]
+extend-exclude = [
+  ".venv",
+  "venv",
+  "build",
+  "dist",
+  "site",
+  "docs/_build",
+  "**/migrations",
+  "xindy-src",
+]
+fix = true
+unsafe-fixes = false
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+docstring-code-format = true
+docstring-code-line-length = 100
 
 [tool.ruff.lint]
-select = ["E", "F", "I"]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+force-sort-within-sections = true
+known-first-party = ["xindy"]
+section-order = ["future","standard-library","third-party","first-party","local-folder"]
+lines-after-imports = 2
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-annotations]
+mypy-init-return = true
+suppress-dummy-args = true
+suppress-none-returning = true
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.per-file-ignores]
+"src/xindy/cli.py" = ["B008"]
+"**/__init__.py" = ["F401", "F403"]
+"tests/**" = ["D", "T20", "S101", "ANN", "ARG002", "SLF001", "PT018", "ARG001", "TRY003"]

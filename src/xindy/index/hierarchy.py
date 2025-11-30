@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Iterable, Sequence
+from collections.abc import Iterable, Sequence
 
 from xindy.locref import LayeredLocationReference
 
@@ -24,7 +24,7 @@ def build_hierarchy(
         prefix: list[str] = []
         canon_prefix: list[str] = []
         node: IndexNode | None = None
-        for token, canon_token in zip(entry.display_key, entry.canonical_key):
+        for token, canon_token in zip(entry.display_key, entry.canonical_key, strict=False):
             prefix.append(token)
             canon_prefix.append(canon_token)
             node = _find_or_create_node(current_level, token, tuple(canon_prefix))
@@ -39,7 +39,7 @@ def build_hierarchy(
                     getattr(entry, "xref_verified", True),
                 )
                 continue
-            changed = node.add_locrefs(entry.locrefs)
+            node.add_locrefs(entry.locrefs)
             # defer range detection to final sweep
     for node in roots:
         _finalize_ranges(node, range_allowed, allow_all_ranges, suppress_covered_ranges)
@@ -86,7 +86,10 @@ def _detect_numeric_ranges(
         local_ranges: list[tuple[LayeredLocationReference, LayeredLocationReference]] = []
         refs_sorted = sorted(
             refs,
-            key=lambda r: (_to_ordnum(r) if _to_ordnum(r) is not None else float("inf"), r.locref_string),
+            key=lambda r: (
+                _to_ordnum(r) if _to_ordnum(r) is not None else float("inf"),
+                r.locref_string,
+            ),
         )
         stack: list[LayeredLocationReference] = []
         covered: set[int] = set()
@@ -140,21 +143,19 @@ def _detect_numeric_ranges(
         if numeric and (allow_all or attr in allowed_range_attrs):
             numeric.sort(key=lambda item: item[1])
             start_ref, start_val = numeric[0]
-            prev_ref, prev_val = start_ref, start_val
-            run_refs: list[tuple[LayeredLocationReference, int | None]] = [
-                (start_ref, start_val)
-            ]
+            prev_val = start_val
+            run_refs: list[tuple[LayeredLocationReference, int | None]] = [(start_ref, start_val)]
             for ref, value in numeric[1:]:
                 if value == prev_val:
                     run_refs.append((ref, value))
                     continue
                 if value == prev_val + 1:
                     run_refs.append((ref, value))
-                    prev_ref, prev_val = ref, value
+                    prev_val = value
                     continue
                 _emit_range_if_needed(run_refs, join_length, local_ranges, suppress_covered)
                 run_refs = [(ref, value)]
-                prev_ref, prev_val = ref, value
+                prev_val = value
             _emit_range_if_needed(run_refs, join_length, local_ranges, suppress_covered)
 
         merged = _merge_overlapping_ranges(local_ranges)
@@ -252,7 +253,9 @@ def _apply_merge_filters(
                 sources_to_drop.add(origin)
                 ord_origin = _to_ordnum(origin)
                 if ord_origin is not None:
-                    dropped_claims.setdefault(getattr(origin, "attribute", None), set()).add(str(ord_origin))
+                    dropped_claims.setdefault(getattr(origin, "attribute", None), set()).add(
+                        str(ord_origin)
+                    )
 
     filtered_locrefs: list[LayeredLocationReference] = []
     for ref in node.locrefs:

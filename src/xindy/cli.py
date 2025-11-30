@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import argparse
-import subprocess
+from collections.abc import Sequence
 import os
 from pathlib import Path
+import subprocess
 import sys
-from typing import Sequence
 
 from . import __version__
 from .dsl.interpreter import StyleError, StyleInterpreter
@@ -113,16 +113,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         if not raw_path.exists():
             parser.error(f"raw file not found: {raw_path}")
 
-    style_path = Path(args.style).resolve() if args.style else (raw_path.with_suffix(".xdy") if raw_path else None)
+    style_path = (
+        Path(args.style).resolve()
+        if args.style
+        else (raw_path.with_suffix(".xdy") if raw_path else None)
+    )
     if style_path is None or not style_path.exists():
         parser.error(f"style file not found: {style_path}")
 
     search_paths: list[Path] = []
     env_search = os.environ.get("XINDY_SEARCHPATH")
     if env_search:
-        search_paths.extend(
-            Path(p).resolve() for p in env_search.split(os.pathsep) if p.strip()
-        )
+        search_paths.extend(Path(p).resolve() for p in env_search.split(os.pathsep) if p.strip())
     search_paths.extend(Path(p).resolve() for p in args.searchpath)
     # ensure style directory is always searched for relative requires
     search_paths.append(style_path.parent)
@@ -143,7 +145,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.markup_trace:
             state.markup_options.setdefault("trace", {})["enabled"] = True
         if args.interactive:
-            print("warning: interactive mode (-i) not supported in Python port; ignoring", file=sys.stderr)
+            print(
+                "warning: interactive mode (-i) not supported in Python port; ignoring",
+                file=sys.stderr,
+            )
         if args.try_run:
             print("note: try-run (-n) has no effect in Python port", file=sys.stderr)
         if args.loglevel is not None:
@@ -154,14 +159,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             filtered = subprocess.run(
                 args.filter_cmd,
                 input=raw_text.encode(args.codepage),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                capture_output=True,
                 shell=True,
             )
             if filtered.returncode != 0:
                 raise RuntimeError(
                     f"filter command failed ({filtered.returncode}): {filtered.stderr.decode(errors='ignore')}"
-                )
+                ) from None
             raw_entries = parse_raw_index(filtered.stdout.decode(args.codepage))
         elif raw_path is None:
             raw_text = sys.stdin.buffer.read().decode(args.codepage)
