@@ -53,6 +53,7 @@ class StyleState:
     rule_sets: dict[str, list[tuple[str, str, bool]]] = field(default_factory=dict)
     markup_options: dict[str, object] = field(default_factory=dict)
     features: set[str] = field(default_factory=set)
+    crossref_classes: dict[str, bool] = field(default_factory=dict)
 
     def register_basetype(self, basetype: BaseType) -> None:
         self.basetypes[basetype.name] = basetype
@@ -182,6 +183,7 @@ class StyleInterpreter:
             "use-rule-set": self._handle_use_rule_set,
             "merge-to": self._handle_merge_to,
             "merge-rule": self._handle_merge_rule,
+            "define-crossref-class": self._handle_define_crossref_class,
             "markup-index": self._handle_markup_index,
             "markup-letter-group-list": self._handle_markup_letter_group_list,
             "markup-letter-group": self._handle_markup_letter_group,
@@ -263,9 +265,10 @@ class StyleInterpreter:
             raise StyleError("define-attributes requires one list argument")
         attr_groups: list[list[str]] = []
         for group in args[0]:
-            if not isinstance(group, list):
-                raise StyleError("attribute groups must be lists")
-            converted = [self._stringify(item) for item in group]
+            if isinstance(group, list):
+                converted = [self._stringify(item) for item in group]
+            else:
+                converted = [self._stringify(group)]
             attr_groups.append(converted)
             for attr_name in converted:
                 if attr_name not in self.state.attributes:
@@ -420,14 +423,17 @@ class StyleInterpreter:
         self.state.merge_rules.append((from_attr, to_attr, drop))
 
     def _handle_merge_rule(self, args: list[object]) -> None:
-        if len(args) < 2:
+        if not args:
             raise StyleError("merge-rule requires pattern and replacement")
         pattern = self._stringify(args[0])
-        replacement = self._stringify(args[1])
+        replacement = ""
+        idx = 1
+        if idx < len(args) and not isinstance(args[idx], Keyword):
+            replacement = self._stringify(args[idx])
+            idx += 1
         again = False
         mode = "regex"
         run_idx = 0
-        idx = 2
         while idx < len(args):
             token = args[idx]
             if isinstance(token, Keyword):
@@ -466,6 +472,15 @@ class StyleInterpreter:
         if mode != "string":
             pattern = pattern.replace("\\", "\\\\")
         self.state.keyword_merge_rules.append((pattern, replacement, again, run_idx))
+
+    def _handle_define_crossref_class(self, args: list[object]) -> None:
+        if not args:
+            raise StyleError("define-crossref-class expects a name")
+        name = self._stringify(args[0])
+        unverified = any(
+            isinstance(arg, Keyword) and arg.name == "unverified" for arg in args[1:]
+        )
+        self.state.crossref_classes[name] = unverified
 
     # ---------------------------- markup placeholders ----------------------------
     def _handle_markup_index(self, args: list[object]) -> None:
@@ -650,14 +665,23 @@ class StyleInterpreter:
 
     def _preprocess_content(self, content: str) -> str:
         """Normalize legacy xindy string quirks before parsing."""
-        content = re.sub(r'"(\\\\?.)"\s*"(.)"', r'"\1\2"', content)
-        content = re.sub(r'"\\~"\s*([A-Za-z])"', r'"\\~\1"', content)
+        content = re.sub(r'"(\\\\?.)""(.)"', r'"\1\2"', content)
+        content = re.sub(r'"\\~"([A-Za-z])"', r'"\\~\1"', content)
         content = re.sub(r'"(\\~)"([A-Za-z])"', r'"\1\2"', content)
         content = re.sub(
             r'\(merge-rule\s+"\\\"\s+""\s+:string\)',
             r'(merge-rule "\\\\\"" "" :string)',
             content,
         )
+        content = re.sub(r'"(\\~)"\{\}"', r'"\1{}"', content)
+        content = re.sub(r'"(\\~)"\\([A-Za-z])"', r'"\1\\\2"', content)
+        # Concatenate adjacent string literals which xindy modules use heavily.
+        string_pair = re.compile(r'"((?:\\.|[^"\\])*)""((?:\\.|[^"\\])*)"')
+        while True:
+            updated = string_pair.sub(lambda m: f'"{m.group(1)}{m.group(2)}"', content)
+            if updated == content:
+                break
+            content = updated
         return content
 
 

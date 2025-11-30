@@ -70,14 +70,17 @@ def apply_merge_rules(text: str, style_state: StyleState) -> str:
 def _apply_run(text: str, rules: list[tuple[str, str, bool]]) -> str:
     result = text
     for pattern, replacement, repeat in rules:
-        if not repeat:
-            result = re.sub(pattern, replacement, result)
+        try:
+            if not repeat:
+                result = re.sub(pattern, replacement, result)
+                continue
+            while True:
+                updated = re.sub(pattern, replacement, result)
+                if updated == result:
+                    break
+                result = updated
+        except re.error:
             continue
-        while True:
-            updated = re.sub(pattern, replacement, result)
-            if updated == result:
-                break
-            result = updated
     return result
 
 

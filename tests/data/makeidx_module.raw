@@ -1,0 +1,3 @@
+(indexentry :key ("Alpha") :locref "1")
+(indexentry :key ("Alpha" "Gamma") :locref "2")
+(indexentry :key ("beta") :locref "3")

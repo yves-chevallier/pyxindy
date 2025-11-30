@@ -1,0 +1,7 @@
+(require "lang/latin/letgroup.xdy")
+(require "lang/latin/caseisrt.xdy")
+(require "ord/letorder.xdy")
+(require "tex/isolatin1s.xdy")
+
+(define-location-class "page-numbers" ("arabic-numbers"))
+(define-attributes (("default")))
