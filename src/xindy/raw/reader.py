@@ -45,15 +45,20 @@ def _entry_from_form(form: object) -> RawIndexEntry:
     head, *rest = form
     if not isinstance(head, Symbol) or head.name != "indexentry":
         raise RawIndexSyntaxError("Unsupported form; only indexentry is allowed")
-    if len(rest) % 2 != 0:
-        raise RawIndexSyntaxError("indexentry property list must have even length")
 
     properties: dict[str, object] = {}
-    for i in range(0, len(rest), 2):
-        key = rest[i]
+    idx = 0
+    while idx < len(rest):
+        key = rest[idx]
         if not isinstance(key, Keyword):
             raise RawIndexSyntaxError("indexentry properties must start with keywords")
-        properties[key.name] = rest[i + 1]
+        value: object = True
+        if idx + 1 < len(rest) and not isinstance(rest[idx + 1], Keyword):
+            value = rest[idx + 1]
+            idx += 2
+        else:
+            idx += 1
+        properties[key.name] = value
 
     key_prop = properties.get("key")
     if key_prop is None and "tkey" in properties:

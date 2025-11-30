@@ -31,41 +31,46 @@ def build_index_entries(
     locclasses = _resolve_location_classes(style_state, default_locclass)
     entries: list[IndexEntry] = []
     for raw in raw_entries:
-        attr_token, dropped = _apply_merge_rules(raw.attr, style_state)
-        if dropped:
-            continue
-        attr_name, catattr = _resolve_attribute(style_state, attr_token)
-        if catattr is None:
-            raise IndexBuilderError("No category attribute available for entry")
+        target_attrs = _expand_attributes(raw.attr, style_state)
+        if not target_attrs:
+            raise IndexBuilderError("No target attributes resolved for entry")
         xref_target = _parse_xref_target(raw.extras.get("xref"))
-        locrefs = []
+        if xref_target is None and raw.locref is None:
+            raise IndexBuilderError("Missing :locref for non-crossref entry")
+        entry = IndexEntry(
+            key=raw.key,
+            attribute=target_attrs[0][0],
+            xref_target=xref_target,
+        )
         if xref_target is None:
-            if raw.locref is None:
-                raise IndexBuilderError("Missing :locref for non-crossref entry")
-            locref = None
-            for loccls in locclasses:
-                locref = build_location_reference(
-                    loccls, raw.locref, catattr, attr_name
-                )
-                if locref:
-                    break
-            if locref:
+            base_locref = None
+            for target_attr, is_merge, drop in target_attrs:
+                resolved_attr, catattr = _resolve_attribute(style_state, target_attr)
+                if catattr is None:
+                    raise IndexBuilderError("No category attribute available for entry")
+                locref = None
+                for loccls in locclasses:
+                    locref = build_location_reference(
+                        loccls, raw.locref, catattr, resolved_attr
+                    )
+                    if locref:
+                        break
+                if not locref:
+                    raise IndexBuilderError(
+                        f"Could not build location reference for {raw.locref!r}"
+                    )
                 if "open-range" in raw.extras:
                     locref.state = "open-range"
                 if "close-range" in raw.extras:
                     locref.state = "close-range"
-                locrefs.append(locref)
-            else:
-                raise IndexBuilderError(
-                    f"Could not build location reference for {raw.locref!r}"
-                )
-        entry = IndexEntry(
-            key=raw.key,
-            attribute=attr_name,
-            xref_target=xref_target,
-        )
-        for locref in locrefs:
-            entry.add_location_reference(locref)
+                locref.attribute = resolved_attr
+                if base_locref is None:
+                    base_locref = locref
+                if is_merge:
+                    locref.virtual = True
+                    locref.merge_drop = drop
+                    locref.origin = base_locref
+                entry.add_location_reference(locref)
         entries.append(entry)
     grouped = group_entries_by_letter(entries, style_state)
     progress = _compute_progress_markers(len(entries))
@@ -120,19 +125,32 @@ def _default_attribute_name(state: StyleState) -> str | None:
     return None
 
 
-def _apply_merge_rules(
+def _expand_attributes(
     attr_name: str | None,
     style_state: StyleState,
-) -> tuple[str | None, bool]:
-    if attr_name is None:
-        return None, False
-    current = attr_name
+) -> list[tuple[str, bool, bool]]:
+    """Return attributes to emit for a raw entry after merge-to rules.
+
+    Each tuple is (attribute name, is_merged, drop_source_if_merged).
+    """
+    targets: list[tuple[str, bool, bool]] = []
+    known_attrs = set(style_state.attributes)
+    default_attr = _default_attribute_name(style_state)
+    base_attr = attr_name or default_attr
+    if base_attr is None:
+        base_attr = "default"
+    include_base = True
+    if base_attr not in known_attrs:
+        for source, _, drop in style_state.merge_rules:
+            if base_attr == source and drop:
+                include_base = False
+                break
+    if include_base:
+        targets.append((base_attr, False, False))
     for source, target, drop in style_state.merge_rules:
-        if current == source:
-            if drop:
-                return None, True
-            current = target
-    return current, False
+        if base_attr == source:
+            targets.append((target, True, drop))
+    return targets
 
 
 def _parse_xref_target(value: object | None) -> tuple[str, ...] | None:

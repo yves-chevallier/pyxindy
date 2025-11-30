@@ -232,57 +232,197 @@ def _render_locref_part(
         elif style_state.attributes:
             attr_order = list(style_state.attributes.keys())
 
-    parts: list[str] = []
+    parts: list[tuple[str | None, LocrefFormat, list[object], list[tuple[object, object]], object]] = []
     for (class_name, attr), refs in locrefs_by_key.items():
         class_ranges = ranges_by_key.get((class_name, attr), [])
         locclass = locclass_map.get(class_name)
         override_fmt = cfg.locref_formats.get(attr) if attr else None
         fmt_base = _merge_locfmt(locfmt, override_fmt)
-        content = _format_locrefs_for_class(
-            refs,
-            class_ranges,
-            locclass,
-            cfg,
-            depth,
-            fmt_base.separator,
-        )
-        if content:
-            parts.append((attr, fmt_base, f"{fmt_base.prefix}{fmt_base.open}{content}{fmt_base.close}"))
+        parts.append((attr, fmt_base, refs, class_ranges, locclass))
     if not parts and node.ranges:
         for (class_name, attr), class_ranges in ranges_by_key.items():
             locclass = locclass_map.get(class_name)
             override_fmt = cfg.locref_formats.get(attr) if attr else None
             fmt_base = _merge_locfmt(locfmt, override_fmt)
-            content = _format_locrefs_for_class(
-                [],
-                class_ranges,
-                locclass,
-                cfg,
-                depth,
-                fmt_base.separator,
-            )
-            if content:
-                parts.append((attr, fmt_base, f"{fmt_base.prefix}{fmt_base.open}{content}{fmt_base.close}"))
+            parts.append((attr, fmt_base, [], class_ranges, locclass))
 
     if not parts:
         return ""
 
     # order attributes if possible
-    def sort_key(item: tuple[str | None, LocrefFormat, str]) -> int:
-        attr, _, _ = item
+    def sort_key(item: tuple[str | None, LocrefFormat, list[object], list[tuple[object, object]], object]) -> tuple[float, int]:
+        attr, _, refs, class_ranges, _ = item
+        ordnums: list[float] = []
+        for ref in refs:
+            try:
+                ordnums.append(float(ref.ordnums[0]))
+            except Exception:
+                continue
+        for start, end in class_ranges:
+            try:
+                ordnums.append(float(start.ordnums[0]))
+            except Exception:
+                continue
+        min_ord = min(ordnums) if ordnums else float("inf")
         if attr is None:
-            return len(attr_order) + 1
-        if attr in attr_order:
-            return attr_order.index(attr)
-        return len(attr_order)
+            attr_index = len(attr_order) + 1
+        elif attr in attr_order:
+            attr_index = attr_order.index(attr)
+        else:
+            attr_index = len(attr_order)
+        return (min_ord, attr_index)
 
     parts.sort(key=sort_key)
-    rendered_attrs = [chunk for _, _, chunk in parts]
-    sep = cfg.attr_group_sep or locfmt.separator
+    # map attributes to groups
+    attr_group_map: dict[str | None, int] = {}
+    if style_state:
+        for idx, group in enumerate(style_state.attribute_groups):
+            for attr in group:
+                attr_group_map[attr] = idx
+
+    suppress_covered = bool(style_state and style_state.markup_options)
+    per_item_format = bool(style_state and "range" in style_state.markup_options)
+    dropped_claims = getattr(node, "dropped_ordnums", {}) or {}
+    priority = list(attr_order)
+    for attr, *_ in parts:
+        if attr not in priority:
+            priority.append(attr)
+    allowed_by_attr: dict[str | None, tuple[list[object], list[tuple[object, object]], set[int]]] = {}
+    claimed_by_group: dict[int, set[str]] = {}
+    for attr in priority:
+        segment = next((p for p in parts if p[0] == attr), None)
+        group_id = attr_group_map.get(attr, -1)
+        claimed = claimed_by_group.setdefault(group_id, set())
+        extra_claims = dropped_claims.get(attr)
+        if extra_claims:
+            claimed.update(extra_claims)
+        if not segment:
+            claimed_by_group[group_id] = claimed
+            continue
+        _, _, refs, class_ranges, _ = segment
+        filtered_refs = [r for r in refs if r.locref_string not in claimed]
+        unique_refs: list[object] = []
+        seen_strings: set[str] = set()
+        for r in filtered_refs:
+            if r.locref_string in seen_strings:
+                continue
+            seen_strings.add(r.locref_string)
+            unique_refs.append(r)
+        filtered_refs = unique_refs
+        filtered_ranges = []
+        covered: set[int] = set()
+        for start, end in class_ranges:
+            if start.locref_string in claimed or end.locref_string in claimed:
+                continue
+            filtered_ranges.append((start, end))
+            # claim all ordnums in range
+            try:
+                s_ord = int(getattr(start, "ordnums", [None])[0])
+                e_ord = int(getattr(end, "ordnums", [None])[0])
+                if s_ord > e_ord:
+                    s_ord, e_ord = e_ord, s_ord
+                for val in range(s_ord, e_ord + 1):
+                    claimed.add(str(val))
+                    covered.add(val)
+            except (TypeError, ValueError):
+                pass
+        for r in filtered_refs:
+            claimed.add(r.locref_string)
+        claimed_by_group[group_id] = claimed
+        allowed_by_attr[attr] = (filtered_refs, filtered_ranges, covered)
+
+    dropped_claims = getattr(node, "dropped_ordnums", {}) if node else {}
+    attr_order_map = {attr: idx for idx, attr in enumerate(priority)}
+    part_lookup = {attr: (fmt_base, class_ranges, locclass) for attr, fmt_base, _, class_ranges, locclass in parts}
+    if style_state and style_state.attribute_groups:
+        group_list = style_state.attribute_groups
+    else:
+        group_list = [[attr] for attr in priority]
+
+    all_items: list[str] = []
+    global_separator: str | None = None
+    for group_attrs in group_list:
+        items: list[tuple[tuple[float, int], str]] = []
+        separator: str | None = None
+        for attr in group_attrs:
+            segment = part_lookup.get(attr)
+            if not segment:
+                continue
+            fmt_base, class_ranges, _ = segment
+            refs_filtered, ranges_filtered, covered = allowed_by_attr.get(attr, ([], [], set()))
+            if separator is None:
+                separator = cfg.attr_group_sep or fmt_base.separator
+            attr_idx = attr_order_map.get(attr, len(attr_order_map))
+            hierdepth = getattr(locclass, "hierdepth", 0) or 0
+            if hierdepth > 1:
+                content = _format_locrefs_for_class(
+                    refs_filtered,
+                    ranges_filtered,
+                    locclass,
+                    cfg,
+                    depth,
+                    fmt_base,
+                )
+                if content:
+                    ord_candidates = [
+                        _loc_ordnum(ref) for ref in refs_filtered
+                    ] + [_loc_ordnum(start) for start, _ in ranges_filtered]
+                    ord_candidates = [o for o in ord_candidates if o is not None]
+                    ordnum = min(ord_candidates) if ord_candidates else float("inf")
+                    items.append(((ordnum, attr_idx, 0), content))
+                continue
+            attr_items: list[tuple[tuple[float, int], str]] = []
+            for start, end in ranges_filtered:
+                ordnum_raw = _loc_ordnum(start)
+                ordnum = ordnum_raw if suppress_covered else float("inf")
+                key = (ordnum if ordnum is not None else float("inf"), attr_idx, 1)
+                text = _format_range_value(start, end, fmt_base, cfg, per_item_format)
+                attr_items.append((key, text))
+            for ref in refs_filtered:
+                ordnum = _loc_ordnum(ref)
+                if suppress_covered and covered and ordnum is not None and ordnum in covered:
+                    continue
+                key = (ordnum if ordnum is not None else float("inf"), attr_idx, 0)
+                if per_item_format:
+                    text = f"{fmt_base.open}{ref.locref_string}{fmt_base.close}"
+                else:
+                    text = ref.locref_string
+                attr_items.append((key, text))
+            if not attr_items:
+                continue
+            attr_items.sort(key=lambda item: item[0])
+            if not suppress_covered:
+                ref_items = [it for it in attr_items if it[0][2] == 0]
+                range_items = [it for it in attr_items if it[0][2] == 1]
+                attr_items = ref_items + range_items
+            if per_item_format:
+                if fmt_base.prefix:
+                    key, text = attr_items[0]
+                    attr_items[0] = (key, fmt_base.prefix + text)
+            else:
+                open_token = fmt_base.open or ""
+                close_token = fmt_base.close or ""
+                prefix = fmt_base.prefix or ""
+                key_first, text_first = attr_items[0]
+                attr_items[0] = (key_first, prefix + open_token + text_first)
+                key_last, text_last = attr_items[-1]
+                attr_items[-1] = (key_last, text_last + close_token)
+            items.extend(attr_items)
+        if not items:
+            continue
+        items.sort(key=lambda item: item[0])
+        if separator is None:
+            separator = cfg.attr_group_sep or cfg.default_locref_format.separator
+        if global_separator is None:
+            global_separator = separator
+        all_items.extend(text for _, text in items)
+    if not all_items:
+        return ""
     spacer = ""
     if cfg.backend == "text" and not cfg.attr_group_open:
         spacer = " "
-    body = sep.join(rendered_attrs)
+    sep = cfg.attr_group_sep or global_separator or locfmt.separator
+    body = sep.join(all_items)
     if cfg.attr_group_open:
         body = cfg.attr_group_open + body
     return spacer + body
@@ -294,7 +434,7 @@ def _format_locrefs_for_class(
     locclass: object,
     cfg: MarkupConfig,
     depth: int,
-    separator: str,
+    fmt: LocrefFormat,
 ) -> str:
     orig_refs = list(refs)
     hierdepth = getattr(locclass, "hierdepth", 0) or 0
@@ -329,20 +469,48 @@ def _format_locrefs_for_class(
                 if int(getattr(ref, "ordnums", [None])[0] or -1) not in covered_ordnums
             ]
     if hierdepth > 1:
-        return _format_hierarchical_locrefs(
+        body = _format_hierarchical_locrefs(
             refs,
             ranges,
             locclass,
             cfg,
             depth,
         )
+        if fmt.prefix or fmt.open or fmt.close:
+            return f"{fmt.prefix}{fmt.open}{body}{fmt.close}"
+        return body
+    separator = fmt.separator
+    wrap = (
+        (lambda val: f"{fmt.open}{val}{fmt.close}")
+        if (fmt.open or fmt.close)
+        else (lambda val: val)
+    )
     if cfg.backend == "text":
-        locref_chunks = [ref.locref_string for ref in orig_refs]
-        locref_chunks.extend(
-            f"{start.locref_string}{cfg.range_separator}{end.locref_string}"
-            for start, end in ranges
-        )
-        return separator.join(locref_chunks)
+        def ord_or_inf(ref: object) -> int | float:
+            try:
+                return int(getattr(ref, "ordnums", [None])[0])
+            except (TypeError, ValueError):
+                return float("inf")
+
+        covered: set[int] = set()
+        items: list[tuple[int | float, str]] = []
+        for start, end in ranges:
+            s = ord_or_inf(start)
+            e = ord_or_inf(end)
+            if s == float("inf") or e == float("inf"):
+                continue
+            if s > e:
+                s, e = e, s
+            covered.update(range(int(s), int(e) + 1))
+            items.append((s, f"{wrap(start.locref_string)}{cfg.range_separator}{wrap(end.locref_string)}"))
+        for ref in orig_refs:
+            ordnum = ord_or_inf(ref)
+            if covered and isinstance(ordnum, int) and ordnum in covered:
+                continue
+            items.append((ordnum, wrap(ref.locref_string)))
+        items.sort(key=lambda item: item[0])
+        joined = separator.join(val for _, val in items)
+        return f"{fmt.prefix}{joined}"
     items: list[tuple[int | float, str]] = []
     covered: set[int] = set()
     for start, end in ranges:
@@ -355,7 +523,7 @@ def _format_locrefs_for_class(
             if s > e:
                 s, e = e, s
             covered.update(range(s, e + 1))
-            items.append((s, f"{start.locref_string}{cfg.range_separator}{end.locref_string}"))
+            items.append((s, f"{wrap(start.locref_string)}{cfg.range_separator}{wrap(end.locref_string)}"))
     for ref in orig_refs:
         try:
             ordnum = int(ref.ordnums[0]) if ref.ordnums else None
@@ -363,9 +531,35 @@ def _format_locrefs_for_class(
             ordnum = None
         if cfg.backend == "tex" and covered and ordnum is not None and ordnum in covered:
             continue
-        items.append((ordnum if ordnum is not None else float("inf"), ref.locref_string))
+        items.append((ordnum if ordnum is not None else float("inf"), wrap(ref.locref_string)))
     items.sort(key=lambda item: item[0] if item[0] is not None else float("inf"))
-    return separator.join(val for _, val in items)
+    joined = separator.join(val for _, val in items)
+    return f"{fmt.prefix}{joined}"
+
+
+def _format_range_value(
+    start: object,
+    end: object,
+    fmt: LocrefFormat,
+    cfg: MarkupConfig,
+    per_item_format: bool,
+) -> str:
+    if per_item_format:
+        return f"{fmt.open}{start.locref_string}{fmt.close}{cfg.range_separator}{fmt.open}{end.locref_string}{fmt.close}"
+    return f"{start.locref_string}{cfg.range_separator}{end.locref_string}"
+
+
+def _loc_ordnum(ref: object) -> int | None:
+    try:
+        ordnums = getattr(ref, "ordnums", None)
+        if ordnums:
+            return int(ordnums[-1])
+    except (TypeError, ValueError):
+        return None
+    try:
+        return int(getattr(ref, "locref_string", None))
+    except (TypeError, ValueError):
+        return None
     entries: list[tuple[int | float, str]] = []
     for ref in refs:
         ordnum = None

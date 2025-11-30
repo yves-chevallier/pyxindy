@@ -40,6 +40,7 @@ class IndexNode:
     )
     children: list["IndexNode"] = field(default_factory=list)
     crossrefs: list[IndexCrossReference] = field(default_factory=list)
+    dropped_ordnums: dict[str | None, set[str]] = field(default_factory=dict)
 
     def add_child(self, node: "IndexNode") -> None:
         self.children.append(node)
@@ -49,9 +50,9 @@ class IndexNode:
 
     def add_locrefs(self, refs: Iterable[LayeredLocationReference]) -> bool:
         added = False
-        existing = {(ref.locref_string, ref.attribute) for ref in self.locrefs}
+        existing = {(ref.locref_string, ref.attribute, getattr(ref, "state", None)) for ref in self.locrefs}
         for ref in refs:
-            signature = (ref.locref_string, ref.attribute)
+            signature = (ref.locref_string, ref.attribute, getattr(ref, "state", None))
             if signature in existing:
                 continue
             self.locrefs.append(ref)

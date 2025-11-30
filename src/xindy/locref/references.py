@@ -25,7 +25,7 @@ class LocationReference:
     attribute: str | None
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, eq=False)
 class LayeredLocationReference(LocationReference):
     layers: tuple[str, ...]
     locref_string: str
@@ -33,8 +33,13 @@ class LayeredLocationReference(LocationReference):
     catattr: CategoryAttribute
     state: str = "normal"
     rangeattr: str | None = None
-    origin: str | None = None
+    origin: "LayeredLocationReference | None" = None
+    virtual: bool = False
+    merge_drop: bool = False
     subrefs: list["LayeredLocationReference"] = field(default_factory=list)
+
+    def __hash__(self) -> int:
+        return id(self)
 
 
 @dataclass(slots=True)

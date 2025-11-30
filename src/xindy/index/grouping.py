@@ -30,7 +30,11 @@ def group_entries_by_letter(
     ordered_labels = list(groups) + extra_labels
     for label in ordered_labels:
         entries = buckets.get(label, [])
-        nodes = build_hierarchy(entries, allowed_range_attrs=_range_attrs(style_state))
+        nodes = build_hierarchy(
+            entries,
+            allowed_range_attrs=_range_attrs(style_state),
+            suppress_covered_ranges=bool(style_state.markup_options),
+        )
         if nodes:
             result.append(
                 IndexLetterGroup(
@@ -52,6 +56,8 @@ def group_entries_by_letter(
 
 
 def _range_attrs(style_state: StyleState) -> list[str]:
+    if style_state.attributes:
+        return list(style_state.attributes.keys())
     return []
 
 
