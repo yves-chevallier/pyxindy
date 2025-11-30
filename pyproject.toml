@@ -11,10 +11,10 @@ requires-python = ">=3.10"
 dependencies = ["click>=8.1"]
 
 [project.scripts]
-xindy = "xindy.cli:main"
-tex2xindy = "xindy.tex.tex2xindy:main"
-makeindex4 = "xindy.tex.makeindex4:main"
-makeglossaries = "xindy.tex.makeglossaries:main"
+xindy-py = "xindy.cli:main"
+texindy-py = "xindy.tex.tex2xindy:main"
+makeindex-py = "xindy.tex.makeindex4:main"
+makeglossaries-py = "xindy.tex.makeglossaries:main"
 
 [project.optional-dependencies]
 dev = [
@@ -87,4 +87,12 @@ include = [
   "/src",
   "/src/xindy/_modules",
   "/README.md",
+]
+
+[dependency-groups]
+docs = [
+    "mkdocs>=1.6.1",
+    "mkdocs-awesome-nav>=3.2.0",
+    "mkdocs-material>=9.7.0",
+    "mkdocstrings[python]>=1.0.0",
 ]

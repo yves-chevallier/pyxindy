@@ -1,0 +1,82 @@
+site_name: PyXindy
+site_url: https://yves-chevallier.github.io/pyxindy
+site_author: Yves Chevallier
+repo_name: yves-chevallier/pyxindy
+repo_url: https://github.com/yves-chevallier/pyxindy
+copyright: Copyright &copy; 2025 Yves Chevallier
+theme:
+  language: en
+  name: material
+  features:
+    - search
+    - navigation.instant
+    - navigation.tabs
+    - navigation.top
+    - navigation.indexes
+    - navigation.tracking
+    - navigation.expand
+    - navigation.sections
+    - navigation.footer
+    - toc.follow
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - search.highlight
+    - search.share
+    - search.suggest
+  palette:
+    - scheme: default
+      primary: custom
+      accent: blue
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: custom
+      accent: blue
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+plugins:
+  - search
+  - awesome-nav
+  - autorefs:
+      resolve_closest: true
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            show_source: true
+            docstring_section_style: list
+            show_docstring_description: true
+            show_signature_annotations: true
+            docstring_style: google
+            separate_signature: true
+            merge_init_into_class: true
+extra:
+  version:
+    provider: mike
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/yves-chevallier/pyxindy
+markdown_extensions:
+  - abbr
+  - admonition
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.critic
+  - pymdownx.inlinehilite
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
+  - pymdownx.blocks.html
+  - pymdownx.blocks.caption
+  - def_list
+  - footnotes
+  - attr_list
+  - md_in_html

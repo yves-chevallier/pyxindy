@@ -29,27 +29,34 @@ lualatex document.tex
 - Generate an index from `.raw` with a `.xdy` style:
 
   ```bash
-  uv run xindy -M path/to/style.xdy -o output.ind path/to/index.raw
+  uv run xindy-py -M path/to/style.xdy -o output.ind path/to/index.raw
   ```
 
 - Convert a TeX `.idx` file to `.raw`:
 
   ```bash
-  uv run python -m xindy.tex.tex2xindy path/to/input.idx -o output.raw
+  uv run texindy-py path/to/input.idx -o output.raw
   ```
 
 - Use the makeindex-compatible interface:
 
   ```bash
-  uv run python -m xindy.tex.makeindex4 path/to/input.idx -o output.ind -t output.ilg -c
+  uv run makeindex-py path/to/input.idx -o output.ind -t output.ilg -c
   ```
 
-Historical xindy modules/styles (`vendor/xindy-2.1/modules`) are resolved automatically via `require`. The wrapper `makeindex4` supports the usual `-l/-c/-o/-t` flags.
+## Entry points
+
+- `xindy-py`: core processor; reads `.raw` plus `.xdy` style and renders the formatted index.
+- `texindy-py`: TeX converter; turns `.idx` into `.raw` suitable for xindy processing.
+- `makeindex-py`: makeindex-compatible wrapper layered on the xindy engine; accepts common `-c/-l/-o/-t` flags.
+- `makeglossaries-py`: glossaries helper; inspects LaTeX `.aux` to drive `makeindex-py`/xindy for glossary files.
+
+Historical xindy modules/styles (`vendor/xindy-2.1/modules`) are resolved automatically via `require`. The wrapper `makeindex-py` supports the usual `-l/-c/-o/-t` flags.
 
 ## xindy CLI
 
 ```bash
-uv run xindy [-M style.xdy] [-o output.ind] [-L searchpath] [-C encoding] [-l logfile] [-t] input.raw
+uv run xindy-py [-M style.xdy] [-o output.ind] [-L searchpath] [-C encoding] [-l logfile] [-t] input.raw
 ```
 
 - `-M/--module/--style`: `.xdy` style to use (defaults to `<raw>.xdy`)
@@ -62,7 +69,7 @@ uv run xindy [-M style.xdy] [-o output.ind] [-L searchpath] [-C encoding] [-l lo
 ## tex2xindy
 
 ```bash
-uv run tex2xindy input.idx -o output.raw --input-encoding latin-1 --output-encoding utf-8
+uv run texindy-py input.idx -o output.raw --input-encoding latin-1 --output-encoding utf-8
 ```
 
 - Handles hierarchies `!`, display `@`, encap `|`, basic TeX macros/escapes, crossrefs `see{target}` → `:xref`.
@@ -71,7 +78,7 @@ uv run tex2xindy input.idx -o output.raw --input-encoding latin-1 --output-encod
 ## makeindex4
 
 ```bash
-uv run makeindex4 input.idx -o output.ind -t output.ilg [-c] [-l]
+uv run makeindex-py input.idx -o output.ind -t output.ilg [-c] [-l]
 ```
 
 - `-c`: compress spaces in keys (makeindex behavior)
@@ -84,14 +91,14 @@ uv run makeindex4 input.idx -o output.ind -t output.ilg [-c] [-l]
 - Replay a historical fixture:
 
   ```bash
-  uv run xindy -M vendor/xindy-2.1/tests/ex1.xdy \
+  uv run xindy-py -M vendor/xindy-2.1/tests/ex1.xdy \
         -o /tmp/ex1.ind vendor/xindy-2.1/tests/ex1.raw
   ```
 
 - Chain `.idx → .ind` in one command:
 
   ```bash
-  uv run makeindex4 vendor/xindy-2.1/tests/infII.idx -o /tmp/infII.ind
+  uv run makeindex-py vendor/xindy-2.1/tests/infII.idx -o /tmp/infII.ind
   ```
 
 ## Development

@@ -5,15 +5,12 @@ previously lived as HTML under `vendor/xindy-2.1/Doc/`. The content is unchanged
 from light Markdown formatting so it is easier to browse alongside the rest of the docs.
 Images referenced by the manual now live in `docs/assets/`.
 
-## Table of contents
+Note: the Python port ships console scripts named `xindy-py`, `texindy-py`, and `makeindex-py`
+instead of the originals referenced in the upstream text. Command semantics are unchanged.
 
-1. [About this manual](../about.md)
-2. [How the index processor works](how-the-index-processor-works.md)
-3. [Command reference](command-reference.md)
-4. [Processing phases](processing-phases.md)
-5. [Invoking xindy](invoking-xindy.md)
-6. [Command index](command-index.md)
-7. [References](references.md)
-8. [xindy by Topic (FAQ/how-to)](by-topic/index.md)
-9. Manpages: [xindy](manpages/xindy.md), [tex2xindy](manpages/tex2xindy.md), [makeindex4](manpages/makeindex4.md)
-10. [Legacy doc README](doc-readme.md)
+### Python port entry points
+
+- `xindy-py`: run the index processor on `.raw` with a `.xdy` style.
+- `texindy-py`: convert LaTeX `.idx` to xindy `.raw`.
+- `makeindex-py`: makeindex-compatible wrapper on top of xindy.
+- `makeglossaries-py`: glossaries helper that routes to `makeindex-py`/xindy based on `.aux`.

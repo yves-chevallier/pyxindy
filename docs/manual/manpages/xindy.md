@@ -4,8 +4,9 @@ Edition February 1997 — a flexible indexing system.
 
 ## Synopsis
 
-```
-xindy [-t] [-l logfile] [-o outfile] [-f filterprog] [-L n] [-v] indexstyle rawindex
+```text
+xindy [-t] [-l logfile] [-o outfile] [-f filterprog] [-L n] [-v]
+  indexstyle rawindex
 ```
 
 ## Description

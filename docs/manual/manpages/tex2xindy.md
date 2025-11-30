@@ -4,7 +4,7 @@ Edition January 1997 — frontend filter for xindy.
 
 ## Synopsis
 
-```
+```text
 tex2xindy [file]
 ```
 

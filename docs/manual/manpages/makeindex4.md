@@ -4,7 +4,7 @@ Edition February 1997 — wrapper around xindy.
 
 ## Synopsis
 
-```
+```text
 makeindex4 [options]...
 ```
 

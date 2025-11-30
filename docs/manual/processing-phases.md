@@ -30,27 +30,29 @@ complex one and we will describe it in detail.
    description of how these classes can be defined. The classes are
    sorted according to an order defined with
    `define-location-class-order`.
-2. The processing of each location class group differs for location
-   classes and crossref classes:
+2.  The processing of each location class group differs for location
+    classes and crossref classes:
 
-   - Cross references are sorted lexicographically based on the
-     ISO-Latin alphabet.
-   - For location references, consider the following list:
+    - Cross references are sorted lexicographically based on the
+      ISO-Latin alphabet.
+    - For location references, consider the following list:
 
-     > _13_, _14_, _15_, _18_, **12**, **13**, **14**, **16**, 14, 16
+        ```text
+        _13_, _14_, _15_, _18_, **12**, **13**, **14**, **16**, 14, 16
+         ```
 
-     Italics use the `important` attribute, bold values use
-     `definition`, and unformatted values are `default`. Assume these
-     attribute groups:
+    Italics use the `important` attribute, bold values use
+    `definition`, and unformatted values are `default`. Assume these
+    attribute groups:
 
-     ```lisp
-        (define-attribute-groups (("definition" "important")
-                                  ("default")))
+    ```lisp
+    (define-attribute-groups (("definition" "important")
+                              ("default")))
 
-        (merge-to "definition" "default" :drop)
-     ```
+    (merge-to "definition" "default" :drop)
+    ```
 
-     Substitution rules turn the list into:
+    Substitution rules turn the list into:
 
      > _13_, _14_, _15_, _18_, **12**, **16**, 14, 16
 

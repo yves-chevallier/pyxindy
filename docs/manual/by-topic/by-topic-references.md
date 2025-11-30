@@ -1,4 +1,4 @@
-# xindy by Topic: References
+# References
 
 The following books and papers were referenced in this document:
 
@@ -19,5 +19,3 @@ University of Technology, 1997. Also accessible from the xindy
 homepage.
 8. Roger Kehr, xindy -- *A Flexible Indexing System*,
 Proceedings of the EuroTeX'98, St. Malo, France, March 1998
-
----

@@ -1,13 +1,13 @@
-# xindy by Topic: How to …
+# How to …
 
-## 1.1 I don't want to write style files. How can I proceed?
+## don't want to write style files. How can I proceed?
 
 You can use the wrapper program `makeindex4`. It tries to do it's
 very best to make **xindy** behave as `makeindex` does. But if you
 ever need to use some of the features of **xindy** you should learn
 how to write an index style. Its easy!
 
-## 1.2 Eventually, I decided to write my first index style. How can I start?
+## Eventually, I decided to write my first index style. How can I start?
 
 Congratulations! You have made a good decision, indeed.
 
@@ -36,7 +36,7 @@ Thus, there are many ways to learn writing an index style file. But it
 is very easy and after some experience you can process indexes your
 friends will be jealous of.
 
-## 1.3 How do I use `makeindex4`?
+## How do I use `makeindex4`?
 
 Process your document as usual. Then run `makeindex4` on the index
 file. It produces an index that should equal the one you would get
@@ -55,7 +55,7 @@ If you have written special style files for `makeindex` they will
 no longer work with `makeindex4`. Go ahead and write a new style
 file for **xindy**.
 
-## 1.4 Why a completely new indexing tool? `makeindex` works fine!
+## Why a completely new indexing tool? `makeindex` works fine!
 
 With the *International MakeIndex* project, Joachim Schrod and
 Gabor Herr [3, 6] have shown that adding extensions to
@@ -65,33 +65,31 @@ requirements analysis and offers very interesting features for
 processing very complex indexing schemes. The resulting index model is
 described in [5, 7, 8].
 
-## 1.5 I'm an old `makeindex` wizard. What does xindy offer that `makeindex` doesn't?
+## I'm an old `makeindex` wizard. What does xindy offer that `makeindex` doesn't?
 
 Here are the most important differences between **xindy** and
 `makeindex`:
 
 - **Internationalization.** xindy can be configured to process
-  indexes for many languages with different letter sets and different
-  sorting rules. For example, many roman languages such as Italian,
-  French, Portuguese or Spanish contain accentuated letters such as
-  À, Á, ñ. Other languages from northern Europe
-  have letters like Ä, Ø, æ or ß which often
-  can't be processed by many index processors not talking about sorting
-  them correctly into an index. The xindy-system can be configured
-  to process these alphabets by defining *sort* and
-  *merge-rules* that allow expressing of language specific rules.
-  One example of such a rule would be
+    indexes for many languages with different letter sets and different
+    sorting rules. For example, many roman languages such as Italian,
+    French, Portuguese or Spanish contain accentuated letters such as
+    À, Á, ñ. Other languages from northern Europe
+    have letters like Ä, Ø, æ or ß which often
+    can't be processed by many index processors not talking about sorting
+    them correctly into an index. The xindy-system can be configured
+    to process these alphabets by defining *sort* and
+    *merge-rules* that allow expressing of language specific rules.
+    One example of such a rule would be
 
-  ```
+    ```
+    (sort-rule 'ä' 'ae')
+    ```
 
-  (sort-rule 'ä' 'ae')
-
-  ```
-
-  defining that a word containing the umlaut-a will be sorted as if it
-  contained the letters `ae` instead. This is one form of how the
-  umlaut-a is sorted into german indexes. With an appropriate set of
-  rules one can express the complete rules of a specific language.
+    defining that a word containing the umlaut-a will be sorted as if it
+    contained the letters `ae` instead. This is one form of how the
+    umlaut-a is sorted into german indexes. With an appropriate set of
+    rules one can express the complete rules of a specific language.
 
 - **Location classes.** `makeindex` is able to recognize and
   process arabic numbers, roman numerals and letter-based alphabets as
@@ -103,11 +101,9 @@ Here are the most important differences between **xindy** and
   must be instructed to accept certain location-classes. A typical
   declaration might look like:
 
-> ````
->
-> (define-location-class "page-numbers" ("arabic-numbers"))
->
-> ````
+    ```
+    (define-location-class "page-numbers" ("arabic-numbers"))
+    ```
 
 This declares that page numbers consist of the enumeration of the
 arabic numbers. The arabic numbers are referred to as *alphabets*.
@@ -120,11 +116,9 @@ markup to each index entry using the encapsulators (usually following
 the vertical bar sign in an index entry command). For example in the
 specification
 
-> ````
->
-> \index{xindy|bold}
->
-> ````
+   ```text
+   \index{xindy|bold}
+   ```
 
 the encapsulator is `bold` which encapsulates the page-numbers in
 the markup-phase. An additional TeX-macro must be supplied to assign
@@ -175,7 +169,7 @@ instead of a end-user-tailored product. One should notice that writing
 an appropriate index style is an essential part of the document
 preparation process and should be tailored to each document anew.
 
-## 1.6 What is `tex2xindy`?
+## What is `tex2xindy`?
 
 `tex2xindy` is a filter that parses ``.idx`' or similar files
 and converts the
@@ -198,20 +192,18 @@ parsers in practice so we have written `tex2xindy` in a form that
 is easily maintainable. The input specifiers are stored symbolically
 in the source. The definiton section looks like this:
 
-> ````
->
-> KEYWORD  \\indexentry
-> ENCAP    \|
-> ACTUAL   @
-> ESCAPE   \\
-> LEVEL    !
-> QUOTE    \"
-> ROPEN    \(
-> RCLOSE   \)
-> ARGOPEN  \{
-> ARGCLOSE \}
->
-> ````
+```text
+KEYWORD  \\indexentry
+ENCAP    \|
+ACTUAL   @
+ESCAPE   \\
+LEVEL    !
+QUOTE    \"
+ROPEN    \(
+RCLOSE   \)
+ARGOPEN  \{
+ARGCLOSE \}
+```
 
 These definitions are essentially the input style specifiers as can be
 found in the man-page of `makeindex`. Changing this section
@@ -219,13 +211,13 @@ according to your needs and recompiling `tex2xindy` should be an
 easy task. Maybe we will include more pre-defined parsers in future
 releases if necessary.
 
-## 1.7 How to write my first index style?
+## How to write my first index style?
 
 Copy the file `tex/makeidx.xdy` from the library to your
 local directory. It is documented in in a way that should make it easy
 to fill in new commands or remove or modify others.
 
-## 1.8 How works `makeindex4`?
+## How works `makeindex4`?
 
 This job is now done automatically by `makeindex4`. It calls
 `tex2xindy` to transform the raw-index into the format suitable for
@@ -244,19 +236,15 @@ and replaced by a more powerful mechanism. To implement a simple
 plug-in mechanism we have extended the syntax of the `tex2xindy`
 filter to identify encapsulators of the form
 
-> ````
->
-> \indexentry{...|encap{...}}{...}
->
-> ````
+```tex
+\indexentry{...|encap{...}}{...}
+```
 
 as a cross-reference, whereas encapsulators of the form
 
-> ````
->
-> \indexentry{...|encap}{...}
->
-> ````
+```tex
+\indexentry{...|encap}{...}
+```
 
 are treated as ordinary attributes. This is standard practice
 defining cross-references in `makeindex`. Thus, `tex2xindy`
@@ -274,19 +262,15 @@ specific markup can be done in `makeindex` with the actual key. The
 limiting the need to specify an actual key. For example they support a
 style of writing
 
-> ````
->
-> \index{\bf{VIP}}
->
-> ````
+```tex
+\index{\bf{VIP}}
+```
 
 which can be transformed with a rule like
 
-> ````
->
-> (merge-rule "\bf{\(.*\)}" "\1" :again :bregexp)
->
-> ````
+```text
+(merge-rule "\bf{\(.*\)}" "\1" :again :bregexp)
+```
 
 which removes the macro definition for merging and sorting keywords,
 but keeping the original definition for markup purposes. Therefore we
@@ -294,44 +278,36 @@ don't need any actual keys for all keywords written in boldface.
 
 The `makeindex` behaviour, that the two keywords
 
-> ````
->
-> \index{VIP}
-> \index{VIP@\bf{VIP}}
->
-> ````
+```tex
+\index{VIP}
+\index{VIP@\bf{VIP}}
+```
 
 are seen as two distinct index entries, can be simulated using the
 following definition:
 
-> ````
->
-> (merge-rule "\bf{\(.*\)}" "\1~e" :again :bregexp)
->
-> ````
+```text
+(merge-rule "\bf{\(.*\)}" "\1~e" :again :bregexp)
+```
 
 This rule tells **xindy** to remove the boldface macro for merging
 and sorting purposes but defines the replacement to include the
-special character
-`~e`
-, which is the last character in the
+special character `~e`, which is the last character in the
 alphabet (ISO-Latin in our case). This makes **xindy** treat them as
 different keywords and positions the boldface keyword right behind the
 one without any markup. Thus we receive the following mapping:
 
-> ````
->
-> Keyword:    Merged and sorted as:   Appears in the index as:
-> VIP              VIP                     VIP
-> \bf{VIP}         VIP~e                   \bf{VIP}
->
-> ````
+```text
+Keyword:    Merged and sorted as:   Appears in the index as:
+VIP              VIP                     VIP
+\bf{VIP}         VIP~e                   \bf{VIP}
+```
 
 With this new style of writing keywords and defining their markup, the
 need to explicitly specifying the print key (aka. actual key) has
 convinced us to remove the `makeindex` way of defining keywords.
 
-## 1.10 I want to process an index for my native language. What must I do?
+## I want to process an index for my native language. What must I do?
 
 What makes `makeindex` hardly usable in non-English speaking
 countries is its lack of support of language specific alphabets and
@@ -368,11 +344,9 @@ The index style commands accomplishing this task are
 `sort-rule` and `merge-rule`. One example of such a rule would
 be
 
-> ````
->
-> (sort-rule "ä" "ae")
->
-> ````
+```text
+(sort-rule "ä" "ae")
+```
 
 defining that a word containing the umlaut-a will be sorted as if it
 contained the letters `ae` instead. This is one form of how the
@@ -382,16 +356,14 @@ rules on can express the complete rules of a specific language.
 An example of how an appropriate mapping for some of the Roman
 languages could look like is:
 
-> ````
->
-> (sort-rule "à" "a")
-> (sort-rule "á" "a")
-> (sort-rule "ã" "a")
-> (sort-rule "è" "e")
-> (sort-rule "é" "e")
-> (sort-rule "ç" "c")
->
-> ````
+```text
+(sort-rule "à" "a")
+(sort-rule "á" "a")
+(sort-rule "ã" "a")
+(sort-rule "è" "e")
+(sort-rule "é" "e")
+(sort-rule "ç" "c")
+```
 
 This makes the accented letters be sorted as their unaccented
 counterparts, yielding the desired sort ordering.
@@ -399,111 +371,90 @@ counterparts, yielding the desired sort ordering.
 Sometimes it is necessary to specify keyword mappings that tell the
 system to put something *behind* something else. For instance, we'd
 like to map the character *ö* behind the letter *o*. No problem
-if you use the special characters
-`~b`
- and
-`~e`
- which
+if you use the special characters `~b` and `~e` which
 are called the *beginning* and *ending* characters. The first
 letter lexicographically precedes all other letters whereas the latter
 one comes after all others. Our mapping problem can now be specified
 as follows.
 
-> ````
->
-> (sort-rule "ö" "o~e")
->
-> ````
+```text
+(sort-rule "ö" "o~e")
+```
 
-Now the *ö* is directly positioned after the *o* but before
-*p*.
+Now the *ö* is directly positioned after the *o* but before *p*.
 
 See the manual for a detailed description of this feature.
 Also be informed that the keyword mappings can be specified with
 regular expressions. Rules of the form
 
-> ````
->
-> (merge-rule "[-$()]" "")
->
-> ````
+```text
+(merge-rule "[-$()]" "")
+```
 
 are possible. This on removes all letters of the defined letter class.
 Regular expression substitutions are possible as well. Refer to the
 manual for an exact description.
 
-## 1.11 In my index the capitalized words appear after the lowercase words. Why?
+## In my index the capitalized words appear after the lowercase words. Why?
 
 The default sort ordering sorts letters according to their ordinal
 number in the ISO Latin alphabet. As a consequence the lowercase
 letters appear before the uppercase letters. To sort them
 case-insensitively use the command
 
-> ````
->
-> (require "lang/latin/caseisrt.xdy")
->
-> ````
+```text
+(require "lang/latin/caseisrt.xdy")
+```
 
 This module defines the appropriate sort rules for the letters `A-Z'
 for latin-based alphabets. If your language has more letters simply
 add the missing ones into your style file. Have a look at the module
 to see how to the sort rules are defined.
 
-## 1.12 In my index there are no letter groups, yet!
+## In my index there are no letter groups, yet!
 
 Letter groups for latin based alphabets can be defined with the command
 
-> ````
->
-> (require "lang/latin/letgroup.xdy")
->
-> ````
+```text
+(require "lang/latin/letgroup.xdy")
+```
 
 If your language needs additional letter groups you can insert them
 into the previously defined letter group with inserting definitions of
 the following form:
 
-> ````
->
-> (define-letter-group "ly" :after "l" :before "m")
-> (define-letter-group "ny" :after "n" :before "o")
->
-> ````
+```text
+(define-letter-group "ly" :after "l" :before "m")
+(define-letter-group "ny" :after "n" :before "o")
+```
 
 This adds two more letter groups to the latin alphabet. Group *ly*
 is inserted between *l* and *m*, and *ny* is inserted between
 *n* and *o*. This is how two additional letters of the Hungarian
 alphabet can be inserted.
 
-## 1.13 How can I get rid of any formatting information in the keyword?
+## How can I get rid of any formatting information in the keyword?
 
 Assume you have index entries containing arbitrary formatting
 information. For example you write your index entries in TeX in the
 following form:
 
-> ````
->
-> \index{\bf{In boldface please}}
->
-> ````
+```text
+\index{\bf{In boldface please}}
+```
 
 To avoid specifying for each index entry the print key separately as
 can be done with the following command
 
-> ````
->
-> \index{In boldface please@\bf{In boldface please}}
->
-> ````
+```text
+\index{In boldface please@\bf{In boldface please}}
+```
 
 you can instead define a rule doing this task for you:
 
-> ````
->
-> (merge-rule "\\bf *{(.*)}" "\1" :eregexp :again)
->
-> ````
+```text
+(merge-rule "\\bf *{(.*)}" "\1" :eregexp :again)
+```
 
 This extended regular expression matches all strings that are
 surrounded by this formatting command and in the *merge phase* the
@@ -513,20 +464,16 @@ write an explicit print key anymore.
 If for some reason the same word appears more than once in the index,
 each time having another markup tag as in the following example
 
-> ````
->
-> index
-> {\tt index}
->
-> ````
+```text
+index
+{\tt index}
+```
 
 you must be warned that a rule like
 
-> ````
->
-> (merge-rule "{\\tt *(.*)}" "\1" :eregexp :again)
->
-> ````
+```text
+(merge-rule "{\\tt *(.*)}" "\1" :eregexp :again)
+```
 
 is probably not correct. In this case the above strings are both
 mapped into the string `index` thus joining their location
@@ -534,22 +481,16 @@ references into one index entry. This happens because the result of
 the merge mapping is used as the equality citerium which views both
 keywords as equal. To avoid this you should specify instead
 
-> ````
->
-> (merge-rule "{\\tt *(.*)}" "\1~e" :eregexp :again)
->
-> ````
+```text
+(merge-rule "{\\tt *(.*)}" "\1~e" :eregexp :again)
+```
 
-With the additional meta character
-`~e`
- the substitution of the
+With the additional meta character `~e` the substitution of the
 second key word is placed *after* the first one making them
 different index entries. If the second keyword should appear first,
-use
-`~b`
- instead.
+use `~b` instead.
 
-## 1.14 In my index the word *-foo* appears before *bar*. What must I do?
+## In my index the word *-foo* appears before *bar*. What must I do?
 
 Especially for hierarchical indexes sometimes the result is not as
 expected due to special characters appearing in the keyword. In the
@@ -557,29 +498,25 @@ following example the word `card' should appear before `-eyed' since
 the hyphen should not count as an ordinary character by means of
 sorting.
 
-> ````
->
->   green
->      -eyed  12
->      card   15
->
-> ````
+```text
+  green
+     -eyed  12
+     card   15
+```
 
 This is especially problematic if the list of words on the second
 level is very long. To make the hyphen be simply ignored during the
 sorting process you should specify the following command in the index
 style:
 
-> ````
->
->   (sort-rule "-" "")
->
-> ````
+```text
+  (sort-rule "-" "")
+```
 
 This makes `-eyed' be sorted as `eyed' thus making it appear
 *after* `card' as desired.
 
-## 1.15 I want to use letter ordering instead of word ordering in my index.
+## I want to use letter ordering instead of word ordering in my index.
 
 According to the *Chicago Manual of Style* there exist two
 different schemes of sorting word lists. In *word ordering*
@@ -587,35 +524,29 @@ a blank precedes any letter in the alphabet, whereas in *letter
 ordering* it does not count at all. The following example borrowed
 from the `makeindex` man-page illustrates the difference:
 
-> ````
->
->  Word Order:         Letter Order:
->   sea lion            seal
->   seal                sea lion
->
-> ````
+```text
+ Word Order:         Letter Order:
+  sea lion            seal
+  seal                sea lion
+```
 
 By default, **xindy** uses word ordering. To use letter ordering
 include the appropriate module with the following command:
 
-> ````
->
-> (require "ord/letorder.xdy")
->
-> ````
+```text
+(require "ord/letorder.xdy")
+```
 
 It actually defines the following command:
 
-> ````
->
-> (sort-rule " " "")
->
-> ````
+```text
+(sort-rule " " "")
+```
 
 This simply removes all blanks from the keyword resulting in the
 desired behaviour.
 
-## 1.16 My document does not have page numbers, but a different scheme. What must I do?
+## My document does not have page numbers, but a different scheme. What must I do?
 
 The ability to deal with user-definable location structures is one of
 the most important new features of **xindy**. Many documents have a
@@ -633,20 +564,16 @@ can be the set of arabic numbers (0, 1, 2, ...) or the roman numerals
 Addtionally, one can define more alphabets in the index style with a
 command like
 
-```
-
+```text
   (define-alphabet "weekdays"
          ("mon" "tue" "wed" "thu" "fri" "sat" "sun"))
-
 ```
 
 Based on alphabets one can now compose a location class as follows:
 
-```
-
+```text
   (define-location-class "weekday-hours"
          ("weekday" :sep ":" "arabic-numbers"))
-
 ```
 
 This class description indicates that all location refernces matching
@@ -654,42 +581,34 @@ this template are viewed as correct instances of this class. Here
 `:sep` makes the dot serving as a *separation string* separation
 the alphabets from each other. Example instances of this class are:
 
-```
-
+```text
 mon:23, thu:45, sun:17
-
 ```
 
 For more detailed information consult the description of the command
 `define-location-class` in the reference manual.
 
-## 1.17 I don't want to have ranges in my index. What can I do?
+## I don't want to have ranges in my index. What can I do?
 
 By default, **xindy** joins three successive location references into a
 *range*. Ranges are used as an abbrevation for a long sequence of
 location references. For exmaple the sequence
 
-```
-
+```text
 12, 13, 14, 15, 16
-
 ```
 
 would be shorter represented as
 
-```
-
+```text
 12-16
-
 ```
 
 If you don't want to have ranges, simply define your location class in
 the form
 
-```
-
+```text
   (define-location-class ... :min-range-length none)
-
 ```
 
 The argument `:min-range-length none` avoids forming of ranges.
@@ -697,7 +616,7 @@ Arbitrary numbers instead of `none` define the minimum length of a
 sequence of location references that are needed to form a range.
 **xindy**s default value is 2.
 
-## 1.18 I want to markup ranges of different length differently. How do I accomplish this?
+## I want to markup ranges of different length differently. How do I accomplish this?
 
 A common way of tagging ranges is as follows: a range of length 1 is
 printed with the starting page number and the suffix `f.', those of
@@ -706,13 +625,11 @@ length 2 with suffix `ff.', and all others in the form `*X--Y*'.
 Assume we want to do this for the location class *pagenums* we can
 specify the markup as follows:
 
-> ````
->
-> (markup-range :class "pagenums" :close "f."  :length 1 :ignore-end)
-> (markup-range :class "pagenums" :close "ff." :length 2 :ignore-end)
-> (markup-range :class "pagenums" :sep "--")
->
-> ````
+```text
+(markup-range :class "pagenums" :close "f."  :length 1 :ignore-end)
+(markup-range :class "pagenums" :close "ff." :length 2 :ignore-end)
+(markup-range :class "pagenums" :sep "--")
+```
 
 The first command indicates that a range *(X,Y)* of length 1 should
 be printed in the form *Xf.*, a range of length 2 as *Xff.* and
@@ -720,7 +637,7 @@ all others in the form *X--Y*. The switch `:ignore-end` causes
 the end of range location reference Y to be suppressed in the
 resulting output.
 
-## 1.19 I need to suppress some of the markup tags. How can I do this?
+## I need to suppress some of the markup tags. How can I do this?
 
 Sometimes it is necessary to hide some of the parts of the index. If
 you have a text formatter that allows comments or macros that possibly
@@ -728,29 +645,27 @@ expand to nothing, just define appropriate markup that makes things
 invisible to the formatter. For example, with TeX you can define a
 macro like this
 
-> ````
->
-> \def\ignore#1{}
->
-> ````
+```tex
+\def\ignore#1{}
+```
 
 If you additionally define markup like this
 
-> ````
->
-> (markup-index :open "\ignore{" :close "}")
->
-> ````
+```text
+(markup-index :open "\ignore{" :close "}")
+```
 
 you can throw away the complete index if you like, which would be a
 real pity!
 
-## 1.20 Whats it all about those cross references?
+## Whats it all about those cross references?
 
 Cross references are references pointing to an item in the index
 itself. Typical examples are:
 
-> `foo-bar *see* baz`
+```text
+foo-bar *see* baz
+```
 
 With `makeindex` cross references could be specified with the
 encapsulation mechanism. This has completely been removed in **xindy**
@@ -762,10 +677,8 @@ each other, and (b) to specify appropriate markup with them.
 
 `tex2xindy` recognises all index entries of the form
 
-```
-
-  \index{...|\macro{where}}
-
+```tex
+\index{...|\macro{where}}
 ```
 
 as cross references. Here `macro` stands for an arbitrary macro
@@ -775,13 +688,9 @@ references.
 If you want to use these cross references with **xindy**; add the
 following line to your style file.
 
-```
-
+```text
   (define-crossref-class "macro")
-
 ```
 
 Additionally, you can assign specific markup to cross references using
 the `markup-crossref`-commands.
-
----
