@@ -10,6 +10,7 @@ from .basetypes import (
     MatchResult,
     calculate_base_alphabet,
     prefix_match_for_radix_numbers,
+    prefix_match_for_roman_numbers,
 )
 from .classes import (
     CrossrefLocationClass,
@@ -66,4 +67,5 @@ __all__ = [
     "make_category_attribute",
     "perform_match",
     "prefix_match_for_radix_numbers",
+    "prefix_match_for_roman_numbers",
 ]

@@ -17,11 +17,24 @@ class LocrefFormat:
 
 
 @dataclass(slots=True)
+class LocrefListFormat:
+    open: str = ""
+    sep: str = ", "
+
+
+@dataclass(slots=True)
+class LocrefLayerFormat:
+    open: str = ""
+    close: str = ""
+
+
+@dataclass(slots=True)
 class MarkupConfig:
     show_letter_headers: bool = True
     letter_header_template: str = "{label}"
     letter_header_prefix: str = ""
     letter_header_suffix: str = ""
+    letter_header_capitalize: bool = False
     index_open: str = ""
     index_close: str = ""
     letter_group_open: str = ""
@@ -37,6 +50,12 @@ class MarkupConfig:
     entry_separator: str = ""
     verbose: bool = False
     locref_formats: dict[str, LocrefFormat] = field(default_factory=dict)
+    locref_list_formats: dict[str, dict[int, LocrefListFormat]] = field(
+        default_factory=dict
+    )
+    locref_layer_formats: dict[str, dict[int, dict[int, LocrefLayerFormat]]] = field(
+        default_factory=dict
+    )
     default_locref_format: LocrefFormat = field(default_factory=LocrefFormat)
     range_separator: str = "-"
     crossref_prefix: str = "see "
@@ -54,14 +73,21 @@ def render_index(
     style_state: StyleState | None = None,
 ) -> str:
     cfg = config or (_config_from_style(style_state) if style_state else MarkupConfig())
+    if cfg.backend == "tex" and cfg.entry_template == "{indent}{term}{locrefs}":
+        cfg.entry_template = "{term}{locrefs}"
     lines: list[str] = []
     if cfg.index_open:
         lines.append(cfg.index_open)
     for idx, group in enumerate(index.groups):
+        label_text = (
+            group.label.capitalize()
+            if cfg.letter_header_capitalize
+            else group.label.upper()
+        )
         if cfg.letter_group_open:
             lines.append(cfg.letter_group_open.format(label=group.label.upper()))
         if cfg.show_letter_headers:
-            header = cfg.letter_header_template.format(label=group.label.upper())
+            header = cfg.letter_header_template.format(label=label_text)
             lines.append(f"{cfg.letter_header_prefix}{header}{cfg.letter_header_suffix}")
         _render_nodes(group.nodes, lines, cfg, depth=0)
         if cfg.letter_group_separator and idx != len(index.groups) - 1:
@@ -71,8 +97,6 @@ def render_index(
     if cfg.index_close:
         lines.append(cfg.index_close)
     output = "\n".join(lines).rstrip()
-    if cfg.backend == "tex":
-        output = _wrap_tex(output)
     return output + ("\n" if output else "")
 
 
@@ -86,23 +110,15 @@ def _render_node(
     # choose locref format based on attribute (fallback to default)
     locfmt = cfg.default_locref_format
     if node.attribute and node.attribute in cfg.locref_formats:
-        locfmt = cfg.locref_formats[node.attribute]
+        override = cfg.locref_formats[node.attribute]
+        locfmt = LocrefFormat(
+            prefix=override.prefix or locfmt.prefix,
+            open=override.open or locfmt.open,
+            close=override.close or locfmt.close,
+            separator=override.separator or locfmt.separator,
+        )
 
-    locref_chunks = []
-    if node.locrefs:
-        locref_chunks.extend(ref.locref_string for ref in node.locrefs)
-    if node.ranges:
-        locref_chunks.extend(
-            f"{start.locref_string}{cfg.range_separator}{end.locref_string}"
-            for start, end in node.ranges
-        )
-    locref_part = ""
-    if locref_chunks:
-        locref_body = locfmt.separator.join(locref_chunks)
-        locref_part = (
-            f" {locfmt.prefix}{locfmt.open}"
-            f"{locref_body}{locfmt.close}"
-        )
+    locref_part = _render_locref_part(node, cfg, locfmt, depth)
 
     template = cfg.entry_templates_by_depth.get(depth, cfg.entry_template)
     line = template.format(
@@ -114,9 +130,15 @@ def _render_node(
     open_template = cfg.entry_open_templates.get(depth)
     close_template = cfg.entry_close_templates.get(depth)
     if open_template:
-        line = open_template.format(content=line, depth=depth)
+        if "{content}" in open_template:
+            line = open_template.format(content=line, depth=depth)
+        else:
+            line = _normalize_markup_string(open_template) + line
     if close_template:
-        line = line + close_template.format(depth=depth)
+        if "{content}" in close_template:
+            line = close_template.format(content=line, depth=depth)
+        else:
+            line = line + _normalize_markup_string(close_template)
     if cfg.verbose:
         line = f"[d={depth}] {line}"
     lines.append(line)
@@ -156,25 +178,272 @@ def _render_nodes(
         lines.append(close_template.format(depth=depth))
 
 
+def _render_locref_part(
+    node: IndexNode,
+    cfg: MarkupConfig,
+    locfmt: LocrefFormat,
+    depth: int,
+) -> str:
+    if not node.locrefs and not node.ranges:
+        return ""
+    locrefs_by_class: dict[str, list[object]] = {}
+    locclass_map: dict[str, object] = {}
+    for ref in node.locrefs:
+        class_name = getattr(ref.locclass, "name", "")
+        locclass_map[class_name] = ref.locclass
+        locrefs_by_class.setdefault(class_name, []).append(ref)
+    ranges_by_class: dict[str, list[tuple[object, object]]] = {}
+    for start, end in node.ranges:
+        class_name = getattr(start.locclass, "name", "")
+        ranges_by_class.setdefault(class_name, []).append((start, end))
+    parts: list[str] = []
+    for class_name, refs in locrefs_by_class.items():
+        class_ranges = ranges_by_class.get(class_name, [])
+        locclass = locclass_map.get(class_name)
+        content = _format_locrefs_for_class(
+            refs,
+            class_ranges,
+            locclass,
+            cfg,
+            depth,
+            locfmt.separator,
+        )
+        if content:
+            parts.append(f"{locfmt.prefix}{locfmt.open}{content}{locfmt.close}")
+    if not parts and node.ranges:
+        for class_name, class_ranges in ranges_by_class.items():
+            content = _format_locrefs_for_class(
+                [],
+                class_ranges,
+                locclass_map.get(class_name),
+                cfg,
+                depth,
+                locfmt.separator,
+            )
+            if content:
+                parts.append(f"{locfmt.prefix}{locfmt.open}{content}{locfmt.close}")
+    if not parts:
+        return ""
+    spacer = " " if cfg.backend == "text" else ""
+    return spacer + locfmt.separator.join(parts)
+
+
+def _format_locrefs_for_class(
+    refs: list[object],
+    ranges: list[tuple[object, object]],
+    locclass: object,
+    cfg: MarkupConfig,
+    depth: int,
+    separator: str,
+) -> str:
+    hierdepth = getattr(locclass, "hierdepth", 0) or 0
+    if hierdepth > 1:
+        return _format_hierarchical_locrefs(
+            refs,
+            ranges,
+            locclass,
+            cfg,
+            depth,
+        )
+    locref_chunks = [ref.locref_string for ref in refs]
+    locref_chunks.extend(
+        f"{start.locref_string}{cfg.range_separator}{end.locref_string}"
+        for start, end in ranges
+    )
+    if not locref_chunks:
+        return ""
+    return separator.join(locref_chunks)
+
+
+def _format_hierarchical_locrefs(
+    refs: list[object],
+    ranges: list[tuple[object, object]],
+    locclass: object,
+    cfg: MarkupConfig,
+    depth: int,
+) -> str:
+    class_name = getattr(locclass, "name", "__default__")
+    hierdepth = getattr(locclass, "hierdepth", 0) or 0
+    if hierdepth < 2:
+        return cfg.default_locref_format.separator.join(
+            ref.locref_string for ref in refs
+        )
+    groups: dict[tuple[str, ...], list[str]] = {}
+    for ref in refs:
+        layers = ref.layers or (ref.locref_string,)
+        if len(layers) < hierdepth:
+            prefix = tuple(layers[:-1])
+            value = layers[-1]
+        else:
+            prefix = tuple(layers[: hierdepth - 1])
+            value = layers[hierdepth - 1]
+        groups.setdefault(prefix, []).append(value)
+    for start, end in ranges:
+        layers = start.layers or (start.locref_string,)
+        if len(layers) < hierdepth:
+            prefix = tuple(layers[:-1])
+            start_val = layers[-1]
+            end_val = start_val
+        else:
+            prefix = tuple(layers[: hierdepth - 1])
+            start_val = layers[hierdepth - 1]
+            end_layers = end.layers or (end.locref_string,)
+            end_val = (
+                end_layers[hierdepth - 1]
+                if len(end_layers) >= hierdepth
+                else end_layers[-1]
+            )
+        groups.setdefault(prefix, []).append(f"{start_val}{cfg.range_separator}{end_val}")
+
+    rendered_groups: list[str] = []
+    for prefix_layers in sorted(groups):
+        values = groups[prefix_layers]
+        min_len = getattr(locclass, "join_length", 2)
+        collapsed = _collapse_layer_values(values, cfg.range_separator, min_len)
+        value_fmt = _get_locref_list_format(cfg, class_name, 1)
+        sep = value_fmt.sep if value_fmt else cfg.default_locref_format.separator
+        formatted_values = [
+            _apply_layer_format(
+                val,
+                cfg,
+                class_name,
+                depth,
+                hierdepth - 1,
+            )
+            for val in collapsed
+        ]
+        tail = sep.join(formatted_values)
+        if value_fmt and value_fmt.open:
+            tail = f"{value_fmt.open}{tail}"
+        prefix_rendered = "-".join(
+            _apply_layer_format(
+                layer_val,
+                cfg,
+                class_name,
+                depth,
+                idx,
+            )
+            for idx, layer_val in enumerate(prefix_layers)
+        )
+        group_str = f"{prefix_rendered}{tail}"
+        rendered_groups.append(group_str)
+    list_fmt = _get_locref_list_format(cfg, class_name, 0)
+    outer_sep = list_fmt.sep if list_fmt else cfg.default_locref_format.separator
+    body = outer_sep.join(rendered_groups)
+    if list_fmt and list_fmt.open:
+        body = f"{list_fmt.open}{body}"
+    return body
+
+
+def _collapse_layer_values(
+    values: list[str],
+    range_sep: str,
+    min_length: int,
+) -> list[str]:
+    ints: list[int] = []
+    try:
+        ints = sorted({int(val) for val in values})
+    except ValueError:
+        return values
+    if not ints:
+        return values
+    collapsed: list[str] = []
+    start = prev = ints[0]
+    run_length = 1
+    for num in ints[1:]:
+        if num == prev + 1:
+            prev = num
+            run_length += 1
+            continue
+        if run_length >= min_length:
+            collapsed.append(f"{start}{range_sep}{prev}")
+        else:
+            collapsed.extend(str(n) for n in range(start, prev + 1))
+        start = prev = num
+        run_length = 1
+    if run_length >= min_length:
+        collapsed.append(f"{start}{range_sep}{prev}")
+    else:
+        collapsed.extend(str(n) for n in range(start, prev + 1))
+    return collapsed
+
+
+def _apply_layer_format(
+    value: str,
+    cfg: MarkupConfig,
+    class_name: str,
+    depth: int,
+    layer_idx: int,
+) -> str:
+    fmt = _get_locref_layer_format(cfg, class_name, depth, layer_idx)
+    if not fmt:
+        return value
+    return f"{fmt.open}{value}{fmt.close}"
+
+
+def _get_locref_list_format(
+    cfg: MarkupConfig,
+    class_name: str,
+    depth: int,
+) -> LocrefListFormat | None:
+    return (
+        cfg.locref_list_formats.get(class_name, {}).get(depth)
+        or cfg.locref_list_formats.get("__default__", {}).get(depth)
+    )
+
+
+def _get_locref_layer_format(
+    cfg: MarkupConfig,
+    class_name: str,
+    depth: int,
+    layer_idx: int,
+) -> LocrefLayerFormat | None:
+    depth_map = cfg.locref_layer_formats.get(class_name) or cfg.locref_layer_formats.get(
+        "__default__"
+    )
+    if not depth_map:
+        return None
+    return depth_map.get(depth, {}).get(layer_idx)
+
+
 def _config_from_style(style_state: StyleState) -> MarkupConfig:
     cfg = MarkupConfig()
     opts = style_state.markup_options
 
     index_opts = opts.get("index", {})
     cfg.index_open = _normalize_markup_string(index_opts.get("open", cfg.index_open))
-    cfg.index_close = _normalize_markup_string(index_opts.get("close", cfg.index_close))
+    close_val = _normalize_markup_string(index_opts.get("close", cfg.index_close))
+    if close_val:
+        close_val = "\n" + close_val.lstrip("\n")
+        close_val = close_val.rstrip("\n")
+    cfg.index_close = close_val
     if "\\begin{theindex}" in cfg.index_open:
         cfg.backend = "tex"
 
+    letter_group_opts = opts.get("letter_group", {})
     lg_opts = opts.get("letter_group_list", {})
-    cfg.letter_group_separator = lg_opts.get("sep", cfg.letter_group_separator)
+    separator = _normalize_markup_string(lg_opts.get("sep", cfg.letter_group_separator))
+    if separator:
+        separator = "\n" + separator.lstrip("\n")
+        separator = separator.rstrip("\n") + "\n"
+    cfg.letter_group_separator = separator
     cfg.letter_group_open = _normalize_markup_string(
         lg_opts.get("open", cfg.letter_group_open)
     )
     cfg.letter_group_close = _normalize_markup_string(
         lg_opts.get("close", cfg.letter_group_close)
     )
-    if lg_opts:
+    if letter_group_opts:
+        cfg.show_letter_headers = True
+        cfg.letter_header_prefix = _normalize_markup_string(
+            letter_group_opts.get("open_head", cfg.letter_header_prefix)
+        )
+        cfg.letter_header_suffix = _normalize_markup_string(
+            letter_group_opts.get("close_head", cfg.letter_header_suffix)
+        )
+        if letter_group_opts.get("capitalize"):
+            cfg.letter_header_capitalize = True
+    elif lg_opts:
         # if no explicit header, do not emit headers
         cfg.show_letter_headers = False
 
@@ -182,24 +451,26 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
     if "sep" in entry_list_opts:
         cfg.entry_separator = entry_list_opts["sep"]
     if "open" in entry_list_opts:
-        cfg.entry_list_open_templates[0] = entry_list_opts["open"]
+        cfg.entry_list_open_templates[0] = _normalize_markup_string(
+            entry_list_opts["open"]
+        )
     if "close" in entry_list_opts:
-        cfg.entry_list_close_templates[0] = entry_list_opts["close"]
+        cfg.entry_list_close_templates[0] = _normalize_markup_string(
+            entry_list_opts["close"]
+        )
 
     entries = opts.get("indexentries", {})
     for depth, entry_cfg in entries.items():
         if "open" in entry_cfg:
-            cfg.entry_open_templates[depth] = _normalize_markup_string(
-                entry_cfg["open"]
-            )
+            open_val = _normalize_markup_string(entry_cfg["open"]).lstrip("\n")
+            cfg.entry_open_templates[depth] = open_val
         if "close" in entry_cfg:
-            cfg.entry_close_templates[depth] = _normalize_markup_string(
-                entry_cfg["close"]
-            )
+            close_val = _normalize_markup_string(entry_cfg["close"]).rstrip("\n")
+            cfg.entry_close_templates[depth] = close_val
         if "template" in entry_cfg:
             cfg.entry_templates_by_depth[depth] = entry_cfg["template"]
-        elif cfg.backend == "tex" and "open" in entry_cfg:
-            cfg.entry_templates_by_depth[depth] = "{indent}{locrefs}"
+        elif cfg.backend == "tex":
+            cfg.entry_templates_by_depth[depth] = "{term}{locrefs}"
 
     locref_opts = opts.get("locref", {})
     default_locref = locref_opts.get("__default__", {})
@@ -212,6 +483,19 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
             continue
         cfg.locref_formats[attr] = _update_locfmt(LocrefFormat(), raw_cfg)
 
+    locref_lists = opts.get("locref_lists", {})
+    for class_name, depth_map in locref_lists.items():
+        for depth, raw_cfg in depth_map.items():
+            fmt = LocrefListFormat()
+            if "open" in raw_cfg:
+                fmt.open = _normalize_markup_string(raw_cfg["open"])
+            if "sep" in raw_cfg:
+                fmt.sep = _normalize_markup_string(raw_cfg["sep"])
+            cfg.locref_list_formats.setdefault(class_name, {})[int(depth)] = fmt
+    default_list_fmt = cfg.locref_list_formats.get("__default__", {}).get(0)
+    if default_list_fmt and default_list_fmt.sep:
+        cfg.default_locref_format.separator = default_list_fmt.sep
+
     locref_list = opts.get("locref_list", {})
     if locref_list.get("sep"):
         cfg.default_locref_format.separator = locref_list["sep"]
@@ -220,6 +504,17 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
         cfg.default_locref_format.prefix = _normalize_markup_string(
             locclass_list["open"]
         )
+
+    locref_layers = opts.get("locref_layers", {})
+    for class_name, depth_map in locref_layers.items():
+        for depth, layer_map in depth_map.items():
+            depth_fmt = cfg.locref_layer_formats.setdefault(class_name, {})
+            layer_fmt = depth_fmt.setdefault(int(depth), {})
+            for layer_idx, raw_cfg in layer_map.items():
+                layer_fmt[int(layer_idx)] = LocrefLayerFormat(
+                    open=_normalize_markup_string(raw_cfg.get("open", "")),
+                    close=_normalize_markup_string(raw_cfg.get("close", "")),
+                )
 
     crossref_opts = opts.get("crossref_list", {})
     if "open" in crossref_opts:

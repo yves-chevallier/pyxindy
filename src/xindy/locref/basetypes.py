@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Callable, Sequence
 
@@ -133,6 +134,41 @@ def prefix_match_for_radix_numbers(
     return matched, rest, value
 
 
+def _roman_to_int(roman: str) -> int | None:
+    mapping = {"I": 1, "V": 5, "X": 10, "L": 50, "C": 100, "D": 500, "M": 1000}
+    total = 0
+    prev = 0
+    for char in roman:
+        value = mapping.get(char)
+        if value is None:
+            return None
+        if value > prev:
+            total += value - 2 * prev
+        else:
+            total += value
+        prev = value
+    return total if total > 0 else None
+
+
+def prefix_match_for_roman_numbers(
+    text: str,
+    lowercase: bool = False,
+) -> tuple[str, str, int | None]:
+    """Return (matched, rest, numeric value) for roman numerals."""
+    pattern = r"^(m{0,4}(cm|cd|d?c{0,3})(xc|xl|l?x{0,3})(ix|iv|v?i{0,3}))"
+    if not lowercase:
+        match = re.match(pattern, text.upper())
+        matched = match.group(0) if match else ""
+        matched_original = text[: len(matched)]
+    else:
+        match = re.match(pattern, text.lower())
+        matched = match.group(0) if match else ""
+        matched_original = text[: len(matched)]
+    value = _roman_to_int(matched.upper()) if matched else None
+    rest = text[len(matched_original) :]
+    return matched_original, rest, value
+
+
 __all__ = [
     "Alphabet",
     "BaseType",
@@ -143,4 +179,5 @@ __all__ = [
     "MatchResult",
     "calculate_base_alphabet",
     "prefix_match_for_radix_numbers",
+    "prefix_match_for_roman_numbers",
 ]

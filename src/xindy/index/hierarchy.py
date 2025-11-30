@@ -50,6 +50,7 @@ def _detect_numeric_ranges(node: IndexNode) -> None:
     if len(node.locrefs) < 2:
         return
     node.ranges.clear()
+    join_length = getattr(node.locrefs[0].locclass, "join_length", 2)
 
     def to_int(ref: LayeredLocationReference) -> int | None:
         try:
@@ -63,15 +64,18 @@ def _detect_numeric_ranges(node: IndexNode) -> None:
     numeric.sort(key=lambda item: item[1])
     start_ref, start_val = numeric[0]
     prev_ref, prev_val = start_ref, start_val
+    run_length = 1
     for ref, value in numeric[1:]:
         if value == prev_val + 1:
             prev_ref, prev_val = ref, value
+            run_length += 1
             continue
-        if prev_val != start_val:
+        if run_length >= join_length:
             node.ranges.append((start_ref, prev_ref))
         start_ref, start_val = ref, value
         prev_ref, prev_val = ref, value
-    if prev_val != start_val:
+        run_length = 1
+    if run_length >= join_length:
         node.ranges.append((start_ref, prev_ref))
 
 

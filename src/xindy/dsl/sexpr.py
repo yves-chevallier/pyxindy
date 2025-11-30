@@ -182,11 +182,13 @@ def _parse_string(scanner: _Scanner) -> str:
             escape_map = {
                 "n": "\n",
                 "r": "\r",
-                "t": "\t",
                 '"': '"',
                 "\\": "\\",
             }
-            result.append(escape_map.get(escaped, escaped))
+            if escaped in escape_map:
+                result.append(escape_map[escaped])
+            else:
+                result.append("\\" + escaped)
         else:
             result.append(ch)
     return "".join(result)

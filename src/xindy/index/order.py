@@ -12,8 +12,15 @@ from .models import IndexEntry
 
 def apply_sort_rules(text: str, style_state: StyleState) -> str:
     result = text
-    for pattern, replacement in style_state.sort_rules:
-        result = re.sub(pattern, replacement, result)
+    for pattern, replacement, repeat in style_state.sort_rules:
+        if not repeat:
+            result = re.sub(pattern, replacement, result)
+            continue
+        while True:
+            updated = re.sub(pattern, replacement, result)
+            if updated == result:
+                break
+            result = updated
     return result
 
 

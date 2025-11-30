@@ -20,6 +20,7 @@ from xindy.locref import (
     checked_make_var_location_class,
     make_category_attribute,
     prefix_match_for_radix_numbers,
+    prefix_match_for_roman_numbers,
 )
 
 from .sexpr import Keyword, Symbol, parse_many
@@ -42,7 +43,7 @@ class StyleState:
     search_paths: list[Path] = field(default_factory=list)
     loaded_files: set[Path] = field(default_factory=set)
     letter_groups: list[str] = field(default_factory=list)
-    sort_rules: list[tuple[str, str]] = field(default_factory=list)
+    sort_rules: list[tuple[str, str, bool]] = field(default_factory=list)
     sort_rule_orientations: list[str] = field(
         default_factory=lambda: ["forward"] * 8
     )
@@ -93,6 +94,24 @@ class StyleInterpreter:
                 match_func=lambda text: prefix_match_for_radix_numbers(text, 10),
             )
         )
+        self.state.register_basetype(
+            Enumeration(
+                name="roman-numbers-uppercase",
+                base_alphabet=tuple("IVXLCDM"),
+                match_func=lambda text: prefix_match_for_roman_numbers(
+                    text, lowercase=False
+                ),
+            )
+        )
+        self.state.register_basetype(
+            Enumeration(
+                name="roman-numbers-lowercase",
+                base_alphabet=tuple("ivxlcdm"),
+                match_func=lambda text: prefix_match_for_roman_numbers(
+                    text, lowercase=True
+                ),
+            )
+        )
 
     def _current_dir(self) -> Path:
         return self._file_stack[-1].parent if self._file_stack else Path.cwd()
@@ -110,7 +129,17 @@ class StyleInterpreter:
                 content = path.read_text(encoding="utf-8")
             except UnicodeDecodeError:
                 content = path.read_text(encoding="latin-1")
-            for form in parse_many(content):
+            forms = parse_many(content)
+            pending_feature: str | None = None
+            for form in forms:
+                if pending_feature:
+                    if pending_feature in self.state.features:
+                        self._eval_form(form)
+                    pending_feature = None
+                    continue
+                if isinstance(form, Symbol) and form.name.startswith("#+"):
+                    pending_feature = form.name[2:]
+                    continue
                 self._eval_form(form)
         finally:
             self._file_stack.pop()
@@ -139,13 +168,16 @@ class StyleInterpreter:
             "merge-to": self._handle_merge_to,
             "markup-index": self._handle_markup_index,
             "markup-letter-group-list": self._handle_markup_letter_group_list,
+            "markup-letter-group": self._handle_markup_letter_group,
             "markup-indexentry": self._handle_markup_indexentry,
             "markup-indexentry-list": self._handle_markup_indexentry_list,
             "markup-locref": self._handle_markup_locref,
             "markup-locref-list": self._handle_markup_locref_list,
+            "markup-locref-layer": self._handle_markup_locref_layer,
             "markup-locclass-list": self._handle_markup_locclass_list,
             "markup-crossref-list": self._handle_markup_crossref_list,
             "markup-range": self._handle_markup_range,
+            "progn": self._handle_progn,
         }
         if head.name == "mapc":
             self._handle_mapc(form[1:])
@@ -184,8 +216,12 @@ class StyleInterpreter:
             raise StyleError("layer list must be a list")
 
         kwargs = self._parse_keyword_args(args[2:])
-        join_length = self._parse_int_option(kwargs.get("min-range-length"), default=2)
         hierdepth = self._parse_int_option(kwargs.get("hierdepth"), default=0)
+        default_join = 3 if hierdepth else 2
+        join_length = self._parse_int_option(
+            kwargs.get("min-range-length"),
+            default=default_join,
+        )
         is_var = kwargs.get("var", False)
 
         layers = self._build_locclass_layers(layer_tokens)
@@ -240,7 +276,22 @@ class StyleInterpreter:
             raise StyleError("sort-rule requires pattern and replacement")
         pattern = self._stringify(args[0])
         replacement = self._stringify(args[1])
-        self.state.sort_rules.append((pattern, replacement))
+        again = False
+        use_basic_regex = False
+        for token in args[2:]:
+            if isinstance(token, Keyword):
+                if token.name == "again":
+                    again = True
+                if token.name == "bregexp":
+                    use_basic_regex = True
+        if use_basic_regex:
+            pattern = (
+                pattern.replace("\\(", "(")
+                .replace("\\)", ")")
+                .replace("{", "\\{")
+                .replace("}", "\\}")
+            )
+        self.state.sort_rules.append((pattern, replacement, again))
 
     def _coerce_orientation(self, value: object) -> str:
         if isinstance(value, Symbol):
@@ -266,6 +317,9 @@ class StyleInterpreter:
     def _handle_markup_letter_group_list(self, args: list[object]) -> None:
         self.state.markup_options["letter_group_list"] = self._parse_markup_kwargs(args)
 
+    def _handle_markup_letter_group(self, args: list[object]) -> None:
+        self.state.markup_options["letter_group"] = self._parse_markup_kwargs(args)
+
     def _handle_markup_indexentry(self, args: list[object]) -> None:
         entries = self.state.markup_options.setdefault("indexentries", {})
         kwargs = self._parse_markup_kwargs(args)
@@ -283,8 +337,31 @@ class StyleInterpreter:
 
     def _handle_markup_locref_list(self, args: list[object]) -> None:
         kwargs = self._parse_markup_kwargs(args)
-        locref_list = self.state.markup_options.setdefault("locref_list", {})
-        locref_list["sep"] = kwargs.get("sep")
+        class_name = (
+            self._stringify(kwargs["class"]) if "class" in kwargs else "__default__"
+        )
+        depth = self._parse_int_option(kwargs.get("depth"), default=0)
+        lists = self.state.markup_options.setdefault("locref_lists", {})
+        by_depth = lists.setdefault(class_name, {})
+        by_depth[depth] = {key: value for key, value in kwargs.items() if key != "class"}
+        # maintain legacy structure for simple uses
+        if class_name == "__default__" and depth == 0:
+            locref_list = self.state.markup_options.setdefault("locref_list", {})
+            locref_list.update(kwargs)
+
+    def _handle_markup_locref_layer(self, args: list[object]) -> None:
+        kwargs = self._parse_markup_kwargs(args)
+        class_name = (
+            self._stringify(kwargs["class"]) if "class" in kwargs else "__default__"
+        )
+        depth = self._parse_int_option(kwargs.get("depth"), default=0)
+        layer_idx = self._parse_int_option(kwargs.get("layer"), default=0)
+        layers = self.state.markup_options.setdefault("locref_layers", {})
+        by_depth = layers.setdefault(class_name, {})
+        by_layer = by_depth.setdefault(depth, {})
+        by_layer[layer_idx] = {
+            key: value for key, value in kwargs.items() if key not in {"class", "depth", "layer"}
+        }
 
     def _handle_markup_locclass_list(self, args: list[object]) -> None:
         kwargs = self._parse_markup_kwargs(args)
@@ -316,20 +393,21 @@ class StyleInterpreter:
 
     def _handle_mapc(self, args: list[object]) -> None:
         # crude handling of (mapc #'(lambda (x) (pushnew x *features*)) '(STEP1 ...))
-        if len(args) != 2:
-            return
-        lst = args[1]
-        if (
-            isinstance(lst, list)
-            and lst
-            and isinstance(lst[0], Symbol)
-            and lst[0].name == "quote"
-        ):
-            feature_list = lst[1]
-            if isinstance(feature_list, list):
-                for sym in feature_list:
+        for arg in args:
+            if (
+                isinstance(arg, list)
+                and arg
+                and isinstance(arg[0], Symbol)
+                and arg[0].name == "quote"
+                and isinstance(arg[1], list)
+            ):
+                for sym in arg[1]:
                     if isinstance(sym, Symbol):
                         self.state.features.add(sym.name)
+
+    def _handle_progn(self, args: list[object]) -> None:
+        for subform in args:
+            self._eval_form(subform)
 
     # ------------------------------------------------------------------ parsing helpers
 

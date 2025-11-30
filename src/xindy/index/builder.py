@@ -28,7 +28,7 @@ def build_index_entries(
     default_locclass: str | None = None,
 ) -> Index:
     """Convert raw entries into structured :class:`IndexEntry` objects."""
-    locclass = _resolve_location_class(style_state, default_locclass)
+    locclasses = _resolve_location_classes(style_state, default_locclass)
     entries: list[IndexEntry] = []
     for raw in raw_entries:
         attr_token, dropped = _apply_merge_rules(raw.attr, style_state)
@@ -42,12 +42,19 @@ def build_index_entries(
         if xref_target is None:
             if raw.locref is None:
                 raise IndexBuilderError("Missing :locref for non-crossref entry")
-            locref = build_location_reference(locclass, raw.locref, catattr, attr_name)
-            if not locref:
+            locref = None
+            for loccls in locclasses:
+                locref = build_location_reference(
+                    loccls, raw.locref, catattr, attr_name
+                )
+                if locref:
+                    break
+            if locref:
+                locrefs.append(locref)
+            else:
                 raise IndexBuilderError(
                     f"Could not build location reference for {raw.locref!r}"
                 )
-            locrefs.append(locref)
         entry = IndexEntry(
             key=raw.key,
             attribute=attr_name,
@@ -74,6 +81,15 @@ def _resolve_location_class(
         raise IndexBuilderError("No location classes defined in style")
     # dict preserves insertion order -> first defined class becomes default
     return next(iter(style_state.location_classes.values()))
+
+
+def _resolve_location_classes(
+    style_state: StyleState,
+    provided: str | None,
+) -> list[LayeredLocationClass]:
+    if provided:
+        return [_resolve_location_class(style_state, provided)]
+    return list(style_state.location_classes.values())
 
 
 def _resolve_attribute(
