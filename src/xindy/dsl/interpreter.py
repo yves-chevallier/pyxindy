@@ -68,15 +68,13 @@ class StyleInterpreter:
         if not self.state.basetypes:
             self._register_default_basetypes()
         module_paths: list[Path] = []
-        repo_modules = (
-            Path(__file__).resolve().parents[3].joinpath("xindy-src", "xindy-2.1", "modules")
-        )
+        repo_modules = Path(__file__).resolve().parents[3].joinpath("vendor", "xindy-2.1", "modules")
         module_paths.append(repo_modules)
         try:
             bundled = resources.files("xindy").joinpath("_modules")
         except ModuleNotFoundError:
             bundled = None
-        if bundled:
+        if bundled and bundled.exists():
             with resources.as_file(bundled) as bundled_path:
                 module_paths.append(bundled_path)
         for candidate in module_paths:

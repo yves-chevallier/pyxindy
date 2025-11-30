@@ -1,10 +1,6 @@
-from pathlib import Path
-
+from tests_paths import XINDY_TESTS_DIR as TESTS_DIR
 from xindy.raw.reader import load_raw_index
 from xindy.tex.tex2xindy import convert_idx_to_raw_entries, parse_idx_line
-
-
-TESTS_DIR = Path(__file__).resolve().parents[2] / "xindy-src" / "xindy-2.1" / "tests"
 
 
 def test_parse_idx_line_extracts_term_attr_and_loc():

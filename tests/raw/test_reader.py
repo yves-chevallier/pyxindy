@@ -1,12 +1,7 @@
-from pathlib import Path
-
 import pytest
 
+from tests_paths import XINDY_TESTS_DIR as FIXTURES
 from xindy.raw.reader import RawIndexSyntaxError, load_raw_index, parse_raw_index
-
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
-FIXTURES = REPO_ROOT / "xindy-src" / "xindy-2.1" / "tests"
 
 
 def test_load_raw_index_reads_fixture():

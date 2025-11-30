@@ -14,6 +14,7 @@ dependencies = ["click>=8.1"]
 xindy = "xindy.cli:main"
 tex2xindy = "xindy.tex.tex2xindy:main"
 makeindex4 = "xindy.tex.makeindex4:main"
+makeglossaries = "xindy.tex.makeglossaries:main"
 
 [project.optional-dependencies]
 dev = [
@@ -38,7 +39,7 @@ extend-exclude = [
   "site",
   "docs/_build",
   "**/migrations",
-  "xindy-src",
+  "vendor",
 ]
 fix = true
 unsafe-fixes = false
@@ -79,11 +80,11 @@ max-complexity = 10
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/xindy"]
-force-include = {"xindy-src/xindy-2.1/modules" = "xindy/_modules"}
+force-include = {"vendor/xindy-2.1/modules" = "xindy/_modules"}
 
 [tool.hatch.build.targets.sdist]
 include = [
   "/src",
-  "/xindy-src/xindy-2.1/modules",
+  "/vendor/xindy-2.1/modules",
   "/README.md",
 ]

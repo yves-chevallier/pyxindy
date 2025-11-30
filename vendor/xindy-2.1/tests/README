@@ -1,0 +1,14 @@
+$Id: README,v 1.1 1996/07/03 18:39:14 kehr Exp $
+----------------------------------------------------------------------
+
+This directory contains a set of tests for the index-processor.
+
+Files with the extension `.raw' contain raw-indexes, such with a `.xdy'
+contain xindy-styles. The expected results are stored in the files
+with the extension `.cmp'.
+
+
+=====================================================================
+Roger Kehr	           email: kehr@iti.informatik.th-darmstadt.de
+Computer Science Department
+Technical University of Darmstadt, Germany

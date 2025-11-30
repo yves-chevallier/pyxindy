@@ -1,10 +1,6 @@
-from pathlib import Path
-
+from tests_paths import XINDY_TESTS_DIR as TESTS_DIR
 from xindy.raw.reader import load_raw_index
 from xindy.tex import tex2xindy
-
-
-TESTS_DIR = Path(__file__).resolve().parents[2] / "xindy-src" / "xindy-2.1" / "tests"
 
 
 def test_tex2xindy_cli_writes_expected_raw(tmp_path, capsys):

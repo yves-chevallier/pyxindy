@@ -1,0 +1,91 @@
+;; $Id: ranges1.raw,v 1.1 1997/03/13 15:59:36 kehr Exp $
+
+;; a: 10-12, {15}-{17}, 20, 21, 30
+
+(indexentry :key ("a") :locref "10")
+(indexentry :key ("a") :locref "11")
+(indexentry :key ("a") :locref "12")
+
+(indexentry :key ("a") :locref "15" :attr "foo")
+(indexentry :key ("a") :locref "16" :attr "foo")
+(indexentry :key ("a") :locref "17" :attr "foo")
+
+(indexentry :key ("a") :locref "20")
+(indexentry :key ("a") :locref "21")
+
+(indexentry :key ("a") :locref "30")
+
+
+;; b: 30-40, 50, 51, 60
+
+(indexentry :key ("b") :locref "30" :open-range)
+(indexentry :key ("b") :locref "40" :close-range)
+
+(indexentry :key ("b") :locref "50" :open-range)
+(indexentry :key ("b") :locref "51" :close-range)
+
+(indexentry :key ("b") :locref "60" :open-range)
+(indexentry :key ("b") :locref "60" :close-range)
+
+
+;; c: 10-15
+
+(indexentry :key ("c") :locref "10" :open-range)
+(indexentry :key ("c") :locref "11")
+(indexentry :key ("c") :locref "15" :close-range)
+
+
+;; d: 10-15
+
+(indexentry :key ("d") :locref "10" :open-range)
+(indexentry :key ("d") :locref "13" :close-range)
+(indexentry :key ("d") :locref "13" :open-range)
+(indexentry :key ("d") :locref "15" :close-range)
+
+
+;; e: 10, 12, 40, 50, 60-62, 70-72
+
+(indexentry :key ("e") :locref "10" :open-range)
+(indexentry :key ("e") :locref "10" :close-range)
+(indexentry :key ("e") :locref "12")
+
+(indexentry :key ("e") :locref "40" :open-range)
+(indexentry :key ("e") :locref "40" :close-range)
+
+(indexentry :key ("e") :locref "50" :open-range)
+(indexentry :key ("e") :locref "50")
+(indexentry :key ("e") :locref "50" :close-range)
+
+(indexentry :key ("e") :locref "60" :open-range)
+(indexentry :key ("e") :locref "60")
+(indexentry :key ("e") :locref "60" :close-range)
+(indexentry :key ("e") :locref "61")
+(indexentry :key ("e") :locref "62")
+
+(indexentry :key ("e") :locref "70")
+(indexentry :key ("e") :locref "71" :open-range)
+(indexentry :key ("e") :locref "71")
+(indexentry :key ("e") :locref "71" :close-range)
+(indexentry :key ("e") :locref "72")
+
+
+;; f: {10}-{12}, {20}, {22}, {30}, {31}, {40}--{42}
+
+(indexentry :key ("f") :locref "10" :attr "foo")
+(indexentry :key ("f") :locref "11" :attr "foo")
+(indexentry :key ("f") :locref "12" :attr "foo")
+
+(indexentry :key ("f") :locref "20" :attr "foo":open-range)
+(indexentry :key ("f") :locref "20" :attr "foo":close-range)
+(indexentry :key ("f") :locref "22" :attr "foo")
+
+(indexentry :key ("f") :locref "30" :attr "foo")
+(indexentry :key ("f") :locref "31" :attr "foo" :open-range)
+(indexentry :key ("f") :locref "31" :attr "foo" :close-range)
+
+(indexentry :key ("f") :locref "40" :attr "foo")
+(indexentry :key ("f") :locref "41" :attr "foo" :open-range)
+(indexentry :key ("f") :locref "41" :attr "foo" :close-range)
+(indexentry :key ("f") :locref "42" :attr "foo")
+
+

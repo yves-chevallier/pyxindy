@@ -1,0 +1,65 @@
+;; tests letter "a"
+
+(indexentry :key ("a") :locref "13" :attr "def")
+(indexentry :key ("a") :locref "14" :attr "def")
+(indexentry :key ("a") :locref "15" :attr "def")
+(indexentry :key ("a") :locref "18" :attr "def")
+
+(indexentry :key ("a") :locref "12" :attr "imp")
+(indexentry :key ("a") :locref "13" :attr "imp")
+(indexentry :key ("a") :locref "14" :attr "imp")
+(indexentry :key ("a") :locref "16" :attr "imp")
+
+(indexentry :key ("a") :locref "14")
+(indexentry :key ("a") :locref "16")
+
+
+;; tests letter "b"
+
+(indexentry :key ("b") :locref "12" :attr "imp")
+(indexentry :key ("b") :locref "13" :attr "imp")
+(indexentry :key ("b") :locref "14" :attr "imp")
+
+(indexentry :key ("b") :locref "10" :attr "def")
+(indexentry :key ("b") :locref "11" :attr "def")
+(indexentry :key ("b") :locref "12" :attr "def")
+
+
+;; tests letter "c"
+
+(indexentry :key ("c") :locref "12" :attr "imp")
+(indexentry :key ("c") :locref "13" :attr "imp")
+(indexentry :key ("c") :locref "14" :attr "imp")
+
+(indexentry :key ("c") :locref "10")
+(indexentry :key ("c") :locref "11")
+(indexentry :key ("c") :locref "12")
+
+
+;; tests letter "d"
+
+(indexentry :key ("d") :locref "12" :attr "def")
+(indexentry :key ("d") :locref "13" :attr "def")
+(indexentry :key ("d") :locref "14" :attr "def")
+
+(indexentry :key ("d") :locref "10")
+(indexentry :key ("d") :locref "11")
+(indexentry :key ("d") :locref "12")
+
+
+;; tests attribute "fol", checking for follow-attributes
+
+(indexentry :key ("f") :locref "a")
+(indexentry :key ("f") :locref "b")
+(indexentry :key ("f") :locref "d")
+(indexentry :key ("f") :locref "e")
+(indexentry :key ("f") :locref "f")
+(indexentry :key ("f") :locref "h")
+(indexentry :key ("f") :locref "i")
+(indexentry :key ("f") :locref "j")
+(indexentry :key ("f") :locref "k")
+(indexentry :key ("f") :locref "m")
+(indexentry :key ("f") :locref "n")
+(indexentry :key ("f") :locref "o")
+(indexentry :key ("f") :locref "p")
+(indexentry :key ("f") :locref "q")

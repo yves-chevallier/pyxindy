@@ -1,0 +1,21 @@
+;; This is another example using `xindy'.
+
+(define-location-class "page-numbers" ("arabic-numbers"))
+(define-attributes (("default")))
+
+(markup-index :open  "~n\begin{theindex}~n"
+	      :close "~n~n\end{theindex}~n"
+	      :tree)
+
+(markup-locref :class "page-numbers" :attr "default"
+	       :open  "{\bf " :close "}")
+
+(markup-locref-list :sep ", ")
+(markup-locclass-list :open "\quad{}")
+
+(markup-indexentry :open "~n \item "            :depth 0)
+(markup-indexentry :open "~n    \subitem "      :depth 1)
+(markup-indexentry :open "~n      \subsubitem " :depth 2)
+(markup-indexentry :open "~n       \sssitem "   :depth 3)
+(markup-indexentry :open "~n       \ssssitem "  :depth 4)
+(markup-indexentry :open "~n       \sssssitem " :depth 5)

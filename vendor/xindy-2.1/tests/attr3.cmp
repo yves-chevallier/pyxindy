@@ -1,0 +1,5 @@
+a: \imp{12}, \imp{16}, \def{18}, \dfl{13}-\dfl{16}
+b: \imp{13}, \imp{14}, \dfl{10}-\dfl{12}
+c: \imp{12}-\imp{14}, \dfl{10}-\dfl{12}
+d: \dfl{10}-\dfl{14}
+e: \def{14}, \dfl{10}-\dfl{12}

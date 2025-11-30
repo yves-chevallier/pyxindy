@@ -1,13 +1,9 @@
-from pathlib import Path
-
+from tests_paths import XINDY_TESTS_DIR as TESTS_DIR
 from xindy.dsl.interpreter import StyleInterpreter
 from xindy.index import build_index_entries
 from xindy.markup import render_index
 from xindy.raw.reader import load_raw_index
 from xindy.tex.tex2xindy import convert_idx_to_raw_entries
-
-
-TESTS_DIR = Path(__file__).resolve().parents[2] / "xindy-src" / "xindy-2.1" / "tests"
 
 
 def test_infII_snapshot():

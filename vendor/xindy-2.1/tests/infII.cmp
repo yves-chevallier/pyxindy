@@ -1,0 +1,722 @@
+\begin{theindex}
+
+{\large\textbf{A}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item Ablauf\hbox {}invarianz\enspace\textbf{113}
+  \item Abstraktion\enspace\textbf{1}
+  \item AC\enspace\textbf{71}
+  \item Adre\IeC  {\ss }arithmetik\enspace\textbf{99}
+  \item Adre\IeC  {\ss }bus\enspace\textbf{15}
+  \item Adresse\enspace\textbf{10}
+  \item adressierbare Einheit\enspace\textbf{10}
+  \item Adressierung
+    \subitem absolute\enspace\textbf{72}
+    \subitem indirekte\enspace\textbf{73}
+    \subitem mit Basisregister\enspace\textbf{74}
+    \subitem mit Indexregister\enspace\textbf{76}
+    \subitem Register-\enspace\textbf{70}
+    \subitem relative\enspace\textbf{72}
+    \subitem Stapel-\enspace\textbf{78}
+  \item Adre\IeC  {\ss }operator\enspace\textbf{94}
+  \item Akkumulator\enspace\textbf{71}
+  \item aktives Warten\enspace\textbf{185}
+  \item Aliasing\enspace\textbf{161}
+  \item Alignment\enspace28, \textbf{64}
+  \item Alphabet\enspace\textbf{47}
+  \item Amdahl's Gesetz\enspace\textbf{220}
+  \item Amplitudenmodulation\enspace\textbf{18}
+  \item Anwendungsebene\enspace\textbf{1}
+  \item arithmetischer Shift\enspace\textbf{42}
+  \item ASCII-Code\enspace\textbf{47}
+  \item Assembler\enspace\textbf{25}
+  \item Assemblersprache\enspace\textbf{25}
+  \item Assemblierung\enspace\textbf{25}
+  \item Assoziativregister\enspace\textbf{159}
+  \item Asynchron\"ubertragung\enspace\textbf{19}
+  \item Ausf\"uhrungsschutz-Bit\enspace\textbf{162}
+  \item Autodekrement-Instruktion\enspace\textbf{77}
+  \item Autoinkrement-Instruktion\enspace\textbf{77}
+
+  \indexspace
+
+{\large\textbf{B}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item backplane bus\enspace\textbf{16}
+  \item backslash\enspace\textbf{49}
+  \item Bakery-Algorithmus\enspace\textbf{182}
+  \item Basisadresse\enspace74
+  \item Basisregister\enspace\textbf{74}
+  \item batch processing\enspace\textbf{164}
+  \item Bedingungsschl\"ussel\enspace\textbf{59}
+  \item Belady-Algorithmus\enspace\textbf{157}
+  \item Benutzermodus\enspace\textbf{169}
+  \item Bernstein-Bedingungen\enspace\textbf{176}
+  \item Best-fit-Methode\enspace\textbf{123}
+  \item Betriebssystem\enspace\textbf{163}
+  \item Bin\"arstelle\enspace\textbf{10}
+  \item Bit\enspace\textbf{10}
+  \item Bit-Feld\enspace\textbf{125}
+  \item bitfield\enspace\textbf{125}
+  \item Block-Caching\enspace\textbf{151}
+  \item Blockcode\enspace\textbf{47}
+  \item Block-Multiplexing\enspace\textbf{14}
+  \item Blocktransfermodus\enspace\textbf{199}
+  \item Bootstrap-Lader\enspace\textbf{13}
+  \item Boundary-Tag-Verfahren\enspace\textbf{124}
+  \item BR\enspace\textbf{74}
+  \item break-Anweisung\enspace\textbf{82}
+  \item Buddy-Verfahren\enspace\textbf{130}
+  \item Bus\enspace\textbf{15}
+    \subitem Adre\IeC  {\ss }-\enspace\textbf{15}
+    \subitem -anordnung\enspace\textbf{218}
+    \subitem Daten-\enspace\textbf{15}
+    \subitem Kontroll-\enspace\textbf{15}
+    \subitem master\enspace\textbf{197}
+    \subitem slave\enspace\textbf{197}
+    \subitem Standard-\enspace\textbf{16}
+    \subitem Universal-\enspace\textbf{16}
+  \item Bussystem
+    \subitem externes\enspace\textbf{17}
+    \subitem internes\enspace\textbf{17}
+  \item busy wait\enspace\textbf{185}
+  \item Byte\enspace\textbf{11}
+  \item Byte-Multiplexing\enspace\textbf{14}
+
+  \indexspace
+
+{\large\textbf{C}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item Cache\enspace\textbf{65}
+  \item cache\enspace\textbf{147}
+  \item cache flushing\enspace\textbf{202}
+  \item call frame\enspace\textbf{114}
+  \item Callee save\enspace\textbf{104}
+  \item Caller save\enspace\textbf{104}
+  \item case label\enspace\textbf{82}
+  \item cast\enspace\textbf{44}
+  \item cause-Register\enspace\textbf{172}
+  \item C-Deklaration\enspace\textbf{29}
+  \item CISC\enspace62, \textbf{64}
+  \item coarse grain parallelism\enspace\textbf{206}
+  \item cobegin\enspace\textbf{205}
+  \item Code\enspace\textbf{47}
+  \item Code-W\"orter\enspace\textbf{47}
+  \item coend\enspace\textbf{205}
+  \item coherency problem\enspace\textbf{201}
+  \item common memory arbiter\enspace\textbf{183}
+  \item Compiler\enspace\textbf{3}
+  \item concurrency\enspace\textbf{203}
+  \item conservative pointer finding\enspace\textbf{135}
+  \item continue-Anweisung\enspace\textbf{88}
+  \item CPU\enspace\textbf{7}
+  \item critical section\enspace\textbf{179}
+  \item cycle stealing\enspace\textbf{199}, \textbf{210}
+
+  \indexspace
+
+{\large\textbf{D}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item dangling reference\enspace\textbf{133}
+  \item Darstellungsl\"ange von Typen\enspace\textbf{39}
+  \item Datenabh\"angigkeit\enspace\textbf{206}
+  \item Datenbasisregister\enspace\textbf{116}
+  \item Datenbereich eines Prozeduraufrufs\enspace\textbf{114}
+  \item Datenbus\enspace\textbf{15}
+  \item Datenfern\"ubertragung\enspace\textbf{17}
+  \item Datenflu\IeC  {\ss }graph\enspace\textbf{207}
+  \item Datenflu\IeC  {\ss }rechner\enspace\textbf{206}
+  \item Datenkonsistenz\enspace\textbf{174}
+  \item Datenpfadbreite\enspace\textbf{15}
+  \item Datensegment\enspace\textbf{27}
+  \item deadlock\enspace\textbf{181}
+  \item Demandpaging\enspace\textbf{158}
+  \item Demodulation\enspace\textbf{18}
+  \item direct mapping\enspace\textbf{148}
+  \item direct memory access\enspace\textbf{196}
+  \item direkte Abbildung\enspace\textbf{148}
+  \item direkter Speicherzugriff\enspace\textbf{196}
+  \item direkter Zugriff\enspace\textbf{14}
+  \item disk cache\enspace\textbf{193}
+  \item Distanzadresse\enspace\textbf{74}, 76
+  \item Distanzadressenfeld\enspace\textbf{22}
+  \item DMA\enspace\textbf{196}
+    \subitem acknowledge\enspace\textbf{197}
+    \subitem request\enspace\textbf{197}
+    \subitem -request-Interrupt\enspace\textbf{199}
+  \item Doppelwort\enspace\textbf{12}
+  \item DRAM\enspace\textbf{13}, \textbf{144}
+  \item Dreioperandenbefehl\enspace\textbf{70}
+  \item dynamic random access memory\enspace\textbf{144}
+  \item dynamische Speicherplatzreservierung\enspace\textbf{120}
+  \item dynamischer Bereich\enspace115
+
+  \indexspace
+
+{\large\textbf{E}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item E/A-Werk\enspace\textbf{164}
+  \item EBCDIC-Code\enspace\textbf{47}
+  \item Echtzeitbetrieb\enspace\textbf{174}
+  \item Ein-/Ausgabe
+    \subitem doppelte Pufferung\enspace\textbf{166}
+    \subitem -ger\"ate\enspace\textbf{14}
+    \subitem -Instruktion\enspace\textbf{195}
+    \subitem -Kanal\enspace\textbf{199}
+    \subitem programmierte\enspace\textbf{195}
+    \subitem -Prozessor\enspace\textbf{199}
+    \subitem -Puffer\enspace\textbf{165}
+    \subitem speicheradressierte\enspace\textbf{195}
+    \subitem -Steuerwerk\enspace\textbf{189}
+    \subitem -Subsystem\enspace\textbf{189}
+    \subitem transparente\enspace\textbf{199}
+    \subitem -Werk\enspace\textbf{164}
+  \item Eingangsknoten\enspace\textbf{140}
+  \item Einoperandenbefehl\enspace\textbf{71}
+  \item End-Around-Carry\enspace\textbf{39}
+  \item environment\enspace\textbf{108}
+  \item Ersatzdarstellung\enspace\textbf{49}
+  \item Ersetzung des Cache-Inhaltes\enspace\textbf{148}
+  \item escape character\enspace\textbf{49}
+  \item Ethernet\enspace\textbf{17}
+  \item Euklidscher Algorithmus\enspace\textbf{88}
+  \item exception\enspace\textbf{171}
+  \item exception handler\enspace\textbf{172}
+  \item execute protect bit\enspace\textbf{162}
+  \item expanded storage\enspace\textbf{193}
+  \item externes Bussystem\enspace\textbf{17}
+
+  \indexspace
+
+{\large\textbf{F}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item Fehlbedingung\enspace\textbf{147}
+  \item Fehlseitenbedingung\enspace\textbf{154}
+  \item Feingranularit\"at der Parallelit\"at\enspace\textbf{206}
+  \item Feld\enspace75
+  \item fester Bereich\enspace115
+  \item Festwertspeicher\enspace\textbf{13}
+  \item FIFO\enspace151, \textbf{157}
+  \item file cache\enspace\textbf{193}
+  \item fine grain parallelism\enspace\textbf{206}
+  \item First-fit-Methode\enspace\textbf{123}
+  \item first-in, first-out\enspace\textbf{157}
+  \item floating point register\enspace\textbf{7}
+  \item Flynnsche Schema\enspace\textbf{211}
+  \item free\enspace\textbf{121}
+  \item Frequenzmodulation\enspace\textbf{18}
+  \item Funktionsfeld F\enspace\textbf{23}
+
+  \indexspace
+
+{\large\textbf{G}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item Ganzwort\enspace\textbf{12}
+  \item Ganzwortdarstellung\enspace\textbf{40}
+  \item Ganzzahldarstellung\enspace33
+  \item Ganzzahlmultiplikation\enspace41
+  \item garbage\enspace\textbf{135}
+  \item garbage collector\enspace\textbf{135}
+    \subitem copy\enspace\textbf{141}
+    \subitem konservativer\enspace\textbf{143}
+    \subitem mark-compact\enspace\textbf{141}
+    \subitem mark-sweep\enspace\textbf{140}
+    \subitem on the fly\enspace\textbf{143}
+  \item gemeinsamer Speicher\enspace\textbf{216}
+  \item gerichteter Graph\enspace\textbf{140}
+  \item Gleitpunkt
+    \subitem -register\enspace\textbf{7}
+    \subitem -\"uberlauf\enspace\textbf{54}
+    \subitem -unterlauf\enspace\textbf{54}
+    \subitem -zahlendarstellung\enspace\textbf{50}
+    \subitem -zahlensystem\enspace\textbf{50}
+  \item Grobgranularit\"at der Parallelit\"at\enspace\textbf{206}
+  \item gr\"o\IeC  {\ss }ter gemeinsamer Teiler\enspace88
+  \item G\"ultigkeits-Bit\enspace\textbf{148}
+
+  \indexspace
+
+{\large\textbf{H}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item Halbduplex\"ubertragung\enspace\textbf{20}
+  \item Halbwort\enspace\textbf{12}
+  \item Halbwortdarstellung\enspace\textbf{40}
+  \item Haldenorganisation\enspace\textbf{121}
+  \item Hardware/Software-Schnittstelle\enspace\textbf{2}
+  \item Hauptspeicher\enspace\textbf{13}
+  \item Hazard-Situation\enspace\textbf{210}
+  \item heap\enspace\textbf{121}
+  \item hit\enspace\textbf{147}
+  \item hit rate\enspace\textbf{147}
+  \item Hornerschema\enspace90
+
+  \indexspace
+
+{\large\textbf{I}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item I/O-Controller\enspace\textbf{164}
+  \item IC\enspace\textbf{7}
+  \item Indexregister\enspace\textbf{76}
+  \item indirekte Speicheradressierung\enspace\textbf{73}
+  \item Indirektionsoperator\enspace\textbf{95}
+  \item indizierte Variable\enspace75
+  \item Inhaltsoperator\enspace\textbf{95}
+  \item instruction counter\enspace\textbf{7}
+  \item instruction register\enspace\textbf{7}
+  \item Instruktion
+    \subitem bin\"ar codierte\enspace\textbf{22}
+    \subitem Ein-/Ausgabe\enspace\textbf{195}
+    \subitem privilegierte\enspace\textbf{170}
+    \subitem test-and-set\enspace\textbf{184}
+  \item Instruktions
+    \subitem -format\enspace\textbf{21}
+    \subitem -register\enspace\textbf{7}
+    \subitem -z\"ahler\enspace\textbf{7}
+    \subitem -zyklus\enspace\textbf{209}
+  \item Instruktionsformat\enspace23
+  \item integer-Erweiterung\enspace\textbf{45}
+  \item Integrated Services Digital Network\enspace\textbf{18}
+  \item interface\enspace\textbf{1}
+  \item interleaving\enspace\textbf{179}
+  \item internes Bussystem\enspace\textbf{17}
+  \item Interproze\IeC  {\ss }kommunikation\enspace\textbf{174}
+  \item Interrupt\enspace\textbf{172}
+    \subitem DMA-request-\enspace\textbf{199}
+    \subitem handler\enspace\textbf{173}
+    \subitem -Hierarchie\enspace\textbf{173}
+    \subitem -Vektor\enspace\textbf{172}
+  \item IO mapped Organisation\enspace\textbf{195}
+  \item IR\enspace\textbf{7}
+  \item ISDN\enspace\textbf{18}
+
+  \indexspace
+
+{\large\textbf{J}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item job\enspace\textbf{164}
+  \item job spool\enspace\textbf{167}
+  \item jump-and-link\enspace\textbf{102}
+
+  \indexspace
+
+{\large\textbf{K}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item Kachel\enspace\textbf{154}
+  \item Kanal\enspace\textbf{199}
+  \item Kommaausdruck\enspace\textbf{88}
+  \item Kompaktifizierung\enspace\textbf{122}
+  \item Kontrollbus\enspace\textbf{15}
+  \item Kontrollspeicher\enspace\textbf{65}
+  \item kritischer Abschnitt\enspace\textbf{179}
+
+  \indexspace
+
+{\large\textbf{L}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item last-in, first-out\enspace\textbf{157}
+  \item latency time\enspace\textbf{192}
+  \item Latenzzeit\enspace\textbf{192}
+  \item least frequently used\enspace\textbf{157}
+  \item least recently used\enspace\textbf{157}
+  \item Leitwerk\enspace\textbf{7}
+  \item Lesekopf\enspace\textbf{191}
+  \item Leseschutz-Bit\enspace\textbf{162}
+  \item LFU\enspace\textbf{157}
+  \item LIFO\enspace115, \textbf{157}
+  \item LIFO-Prinzip\enspace78
+  \item lineare Adre\IeC  {\ss }fortschaltung\enspace90, \textbf{91}
+  \item logische Operationen\enspace\textbf{45}
+  \item logischer Shift\enspace\textbf{42}
+  \item lokale Rechnervernetzung\enspace\textbf{17}
+  \item Lokalit\"atseigenschaft\enspace\textbf{146}
+  \item LRU\enspace\textbf{157}
+
+  \indexspace
+
+{\large\textbf{M}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item Makroinstruktion\enspace\textbf{65}
+  \item Makroprogrammierung\enspace\textbf{28}
+  \item malloc\enspace\textbf{121}
+  \item MAR\enspace\textbf{13}
+  \item Maschinensprache\enspace\textbf{2}
+  \item Maskenbit\enspace\textbf{173}
+  \item massiv paralleles System\enspace\textbf{217}
+  \item MDR\enspace\textbf{13}
+  \item memory
+    \subitem address register\enspace\textbf{13}
+    \subitem centralized\enspace\textbf{215}
+    \subitem data register\enspace\textbf{13}
+    \subitem distributed\enspace\textbf{215}
+    \subitem leak\enspace\textbf{134}
+    \subitem management unit\enspace\textbf{161}
+    \subitem -mapped I/O\enspace\textbf{195}
+    \subitem shared\enspace\textbf{174}, \textbf{216}
+  \item message passing\enspace\textbf{174}
+  \item Metabit\enspace\textbf{10}
+  \item Microprocessor without Interlocked Pipe Stages\enspace\textbf{67}
+  \item Mikroinstruktion\enspace\textbf{65}
+  \item Mikroprogramm\enspace\textbf{65}
+  \item Mikroprogrammierung\enspace\textbf{65}
+  \item MIMD\enspace\textbf{211}
+  \item MIPS-Architektur\enspace\textbf{67}
+  \item MISD\enspace\textbf{211}
+  \item miss\enspace\textbf{147}
+  \item MMU\enspace\textbf{161}
+  \item Modem\enspace\textbf{18}
+  \item Modulation\enspace\textbf{18}
+  \item multi tasking\enspace\textbf{162}
+  \item Multiple instruction stream, multiple data stream\enspace\textbf{211}
+  \item Multiple instruction stream, single data stream\enspace\textbf{211}
+  \item Multiplex-Verfahren\enspace\textbf{14}
+  \item Multiprogrammierungsbetrieb\enspace\textbf{167}
+  \item Multiprozessor\enspace\textbf{17}
+    \subitem -Betrieb\enspace\textbf{204}
+    \subitem -System
+      \subsubitem eng gekoppeltes\enspace\textbf{215}
+      \subsubitem lose gekoppeltes\enspace\textbf{215}
+  \item mutual exclusion\enspace\textbf{178}
+
+  \indexspace
+
+{\large\textbf{N}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item $(n+{1\over 2})$-Schleife\enspace\textbf{87}
+  \item Nachrichtenaustausch\enspace\textbf{216}
+  \item Nachrichtenaustauschmechanismus\enspace\textbf{216}
+  \item Namensaufruf\enspace\textbf{107}
+  \item Namensersetzung\enspace\textbf{108}
+  \item NaN\enspace\textbf{53}
+  \item Nebenl\"aufigkeit\enspace\textbf{203}
+  \item non-uniform memory access\enspace\textbf{215}
+  \item NORA\enspace\textbf{216}
+  \item no-remote memory access\enspace\textbf{216}
+  \item Not a Number\enspace\textbf{53}
+  \item Nulloperandenbefehl\enspace\textbf{71}, 78
+  \item NUMA\enspace\textbf{215}
+
+  \indexspace
+
+{\large\textbf{O}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item OBL\enspace\textbf{153}
+  \item one block lookahead\enspace\textbf{153}
+  \item opcode\enspace\textbf{20}
+  \item Operandenfelder\enspace\textbf{22}
+  \item operation code\enspace\textbf{20}
+  \item Operationsteil\enspace\textbf{22}
+  \item Operationsverschl\"usselung\enspace\textbf{20}, 24, 27
+  \item orthogonaler Systementwurf\enspace\textbf{70}
+  \item Orthogonalit\"at\enspace\textbf{70}
+
+  \indexspace
+
+{\large\textbf{P}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item $(p-1)$-Komplement-Darstellung\enspace\textbf{38}
+  \item $p$-adische Darstellung\enspace\textbf{33}
+  \item page\enspace\textbf{154}
+  \item page fault\enspace\textbf{154}
+  \item page frame\enspace\textbf{154}
+  \item paging table\enspace\textbf{155}
+  \item Parallelit\"at\enspace\textbf{203}
+  \item Parameter\"ubergabe\enspace\textbf{105}
+  \item Parameterwort\enspace\textbf{105}
+  \item Phasenmodulation\enspace\textbf{18}
+  \item Pipeline
+    \subitem -Phase\enspace\textbf{209}
+    \subitem -Prinzip\enspace\textbf{209}
+    \subitem -Zyklus\enspace\textbf{209}
+  \item Pipelining\enspace\textbf{203}
+  \item $p$-Komplement-Darstellung\enspace\textbf{35}
+  \item Plattenspeicher\enspace\textbf{191}
+  \item pointer\enspace\textbf{94}
+  \item Polling\enspace\textbf{199}
+  \item port\enspace\textbf{195}
+  \item Positionierungszeit\enspace\textbf{192}
+  \item Postfixnotation\enspace79
+  \item prefetch\enspace\textbf{153}
+  \item prepaging\enspace\textbf{158}
+  \item problemorientierte Programmiersprache\enspace\textbf{2}
+  \item procedure call frame\enspace\textbf{114}
+  \item process identifier\enspace\textbf{162}
+  \item Programm
+    \subitem -status\enspace59
+  \item programmed IO\enspace\textbf{195}
+  \item Programmoptimierung\enspace94
+  \item Programmstatus
+    \subitem -register\enspace\textbf{8}, 59
+    \subitem -wort\enspace\textbf{8}
+  \item Programmunterbrechung\enspace176
+  \item Programmz\"ahler\enspace\textbf{7}
+  \item Prozedurorganisation\enspace102
+  \item Prozedurumgebung\enspace\textbf{108}
+  \item Proze\IeC  {\ss }\enspace\textbf{169}
+    \subitem -synchronisation\enspace\textbf{174}
+    \subitem -verklemmung\enspace\textbf{181}
+  \item Prozessor\enspace7
+  \item Pseudoinstruktion\enspace\textbf{28}
+  \item Pufferspeicher\enspace\textbf{147}
+
+  \indexspace
+
+{\large\textbf{Q}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item Quellprogramm\enspace\textbf{3}
+
+  \indexspace
+
+{\large\textbf{R}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item r\"aumliche Lokalit\"at\enspace\textbf{147}
+  \item r\"aumliche Parallelisierung\enspace\textbf{203}
+  \item RAID\enspace\textbf{194}
+  \item RD-Format\enspace\textbf{23}
+  \item read only memory\enspace\textbf{13}
+  \item read protect bit\enspace\textbf{162}
+  \item real time processing\enspace\textbf{174}
+  \item Realzeitbetrieb\enspace\textbf{174}
+  \item Rechenwerk\enspace\textbf{6}
+  \item Rechnerarchitektur\enspace\textbf{2}
+  \item Rechnerkern\enspace\textbf{7}
+  \item Recycling\enspace\textbf{142}
+  \item reduced instruction set computer\enspace\textbf{3}
+  \item redundant arrays of independent disks\enspace\textbf{194}
+  \item reference counting\enspace\textbf{135}
+  \item Referenzaufruf\enspace\textbf{106}
+  \item Referenzz\"ahlung\enspace\textbf{136}
+  \item Register\enspace\textbf{7}
+    \subitem -adressierung\enspace\textbf{70}
+    \subitem Akkumulator\enspace\textbf{71}
+    \subitem allgemeine\enspace\textbf{7}
+    \subitem Assoziativ-\enspace\textbf{159}
+    \subitem Basis-\enspace\textbf{74}
+    \subitem cause-\enspace\textbf{172}
+    \subitem Datenbasis-\enspace\textbf{116}
+    \subitem Gleitpunkt\enspace\textbf{7}
+    \subitem Index-\enspace\textbf{76}
+    \subitem Instruktions-\enspace\textbf{7}
+    \subitem Programmstatus-\enspace\textbf{8}
+    \subitem R\"ucksprung-\enspace\textbf{103}
+    \subitem Seitentabellen-\enspace\textbf{155}
+    \subitem -sicherung
+      \subsubitem durch Aufrufer\enspace\textbf{104}
+      \subsubitem durch Unterprogramm\enspace\textbf{104}
+    \subitem Sicherungs-\enspace\textbf{104}
+    \subitem Speicheradre\IeC  {\ss }-\enspace\textbf{13}
+    \subitem Speicherdaten-\enspace\textbf{13}
+    \subitem Stack-\enspace\textbf{81}
+    \subitem -variable\enspace\textbf{30}
+  \item rekursiver Aufruf\enspace117
+  \item Relativadressierung\enspace\textbf{72}
+  \item repeat-Schleife\enspace\textbf{61}
+  \item RISC\enspace3, 62, \textbf{67}
+  \item RISC-Architektur\enspace3
+  \item ROM\enspace\textbf{13}
+  \item RRR-Format\enspace\textbf{23}
+  \item R\"ucksprungregister\enspace\textbf{103}
+
+  \indexspace
+
+{\large\textbf{S}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item safe points\enspace\textbf{143}
+  \item Sammelleitungen\enspace\textbf{15}
+  \item Schleifenorganisation\enspace\textbf{85}
+  \item Schnittstelle\enspace\textbf{1}
+  \item Schreibkopf\enspace\textbf{191}
+  \item Schreibschutz-Bit\enspace\textbf{162}
+  \item seek time\enspace\textbf{192}
+  \item Seite\enspace\textbf{154}
+  \item Seitentabelle\enspace\textbf{155}
+  \item Seitentabellenregister\enspace\textbf{155}
+  \item Sektor\enspace\textbf{191}
+  \item Sekund\"arspeicher\enspace\textbf{13}
+  \item semantic gap\enspace\textbf{3}
+  \item Semaphor\enspace\textbf{185}
+  \item shared memory\enspace\textbf{174}, \textbf{216}
+  \item Shiftbefehle\enspace\textbf{42}
+  \item SIC\enspace\textbf{69}
+  \item Sicherungsregister\enspace\textbf{104}
+  \item Signaltr\"ager\enspace\textbf{18}
+  \item SIMD\enspace\textbf{211}
+  \item Simplex\"ubertragung\enspace\textbf{20}
+  \item simultaner Ablauf\enspace\textbf{203}
+  \item single assignment language\enspace\textbf{207}
+  \item single assignment-Regel\enspace\textbf{209}
+  \item single instruction computer\enspace\textbf{69}
+  \item Single instruction stream, multiple data stream\enspace\textbf{211}
+  \item Single instruction stream, single data stream\enspace\textbf{211}
+  \item single tasking\enspace\textbf{162}
+  \item SISD\enspace\textbf{211}
+  \item Skalierbarkeit\enspace\textbf{217}
+  \item speedup\enspace\textbf{210}, \textbf{220}
+  \item Speicher\enspace\textbf{10}
+    \subitem -adre\IeC  {\ss }register\enspace\textbf{13}
+    \subitem -anordnung\enspace\textbf{215}
+    \subitem -datenregister\enspace\textbf{13}
+    \subitem dynamische Reservierung\enspace\textbf{120}
+    \subitem gemeinsamer\enspace\textbf{216}
+    \subitem Haupt-\enspace\textbf{13}
+    \subitem -hierarchien\enspace\textbf{144}
+    \subitem -klasse\enspace\textbf{29}
+    \subitem Puffer-\enspace\textbf{147}
+    \subitem -schutz\enspace\textbf{161}
+    \subitem statische Reservierung\enspace\textbf{114}
+    \subitem verteilter\enspace\textbf{215}
+    \subitem -wort\enspace\textbf{11}
+    \subitem zentraler\enspace\textbf{215}
+    \subitem -zykluszeit\enspace\textbf{13}
+  \item SPOOL\enspace\textbf{167}
+  \item Sprungbefehl\enspace\textbf{58}
+  \item Sprungtabelle\enspace\textbf{83}
+  \item Spur\enspace\textbf{191}
+  \item SRAM\enspace\textbf{144}
+  \item stack\enspace\textbf{78}
+  \item stack pointer\enspace\textbf{78}
+  \item Stackregister\enspace\textbf{81}
+  \item stale data problem\enspace\textbf{201}
+  \item stalling\enspace\textbf{211}
+  \item Standardbus\enspace\textbf{16}
+  \item Stapel\enspace\textbf{78}, 115
+  \item Stapelverarbeitung\enspace\textbf{164}
+  \item Startbit\enspace\textbf{20}
+  \item static random access memory\enspace\textbf{144}
+  \item statische Prozedurhierarchie\enspace118
+  \item statische Speicherplatzreservierung\enspace\textbf{114}
+  \item Steuerwerk\enspace\textbf{7}
+  \item Stopbit\enspace\textbf{20}
+  \item Summation\enspace77
+  \item supervisor call\enspace\textbf{170}
+  \item supervisor mode\enspace\textbf{169}
+  \item swapping\enspace\textbf{158}
+  \item switch-Anweisung\enspace\textbf{81}
+  \item symbolischer Maschinencode\enspace\textbf{25}
+  \item Synchron\"ubertragung\enspace\textbf{19}
+  \item system call\enspace\textbf{170}
+  \item system mode\enspace\textbf{169}
+  \item Systemebene\enspace\textbf{2}
+  \item Systemmakro\enspace\textbf{170}
+  \item Systemmodus\enspace\textbf{169}
+
+  \indexspace
+
+{\large\textbf{T}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item tag\enspace\textbf{148}
+  \item task identifier\enspace\textbf{162}
+  \item test-and-set-Instruktion\enspace\textbf{184}
+  \item Thunk\enspace\textbf{109}
+  \item time slicing\enspace\textbf{167}
+  \item Time-Sharing\enspace\textbf{168}
+  \item TLB\enspace\textbf{158}
+  \item tracing\enspace\textbf{135}
+  \item Transferzeit\enspace\textbf{192}
+  \item translation-lookaside-buffer\enspace\textbf{158}
+  \item trap\enspace\textbf{172}
+  \item Treffer\enspace\textbf{147}
+  \item Trefferrate\enspace\textbf{147}
+  \item Typ\enspace\textbf{29}
+
+  \indexspace
+
+{\large\textbf{U}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item \"Uberlauf\enspace\textbf{41}
+  \item \"Ubertragungsprotokoll\enspace\textbf{20}
+  \item UMA\enspace\textbf{215}
+  \item unbedingter Sprung\enspace\textbf{58}
+  \item uniform memory access\enspace\textbf{215}
+  \item Universalbus\enspace\textbf{16}
+  \item Unterbrechung\enspace\textbf{171}
+  \item Unterprogrammorganisation\enspace102
+  \item Urlader\enspace\textbf{13}
+  \item user mode\enspace\textbf{169}
+
+  \indexspace
+
+{\large\textbf{V}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item valid bit\enspace\textbf{148}
+  \item Verbindungsnetz\enspace\textbf{218}
+  \item Verklemmung\enspace\textbf{181}
+  \item verteilter Speicher\enspace\textbf{215}
+  \item Verweis\enspace\textbf{94}
+  \item virtually adressed cache\enspace\textbf{161}
+  \item virtuelle Adressierung\enspace\textbf{154}
+  \item virtueller Adre\IeC  {\ss }raum\enspace\textbf{154}
+  \item virtueller Speicher\enspace\textbf{154}
+  \item voll assoziative Abbildung\enspace\textbf{155}
+  \item Vollduplex\"ubertragung\enspace\textbf{20}
+  \item Von-Neumann-Maschine\enspace10, 62
+  \item Von-Neumann-Rechner\enspace\textbf{6}
+  \item von-Neumannscher Flaschenhals\enspace\textbf{62}
+  \item Vorzeichen-Betrag-Darstellung\enspace\textbf{34}
+  \item vorzeichenlose Zahlen\enspace\textbf{43}
+
+  \indexspace
+
+{\large\textbf{W}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item Wechselpuffer\enspace\textbf{166}
+  \item wechselseitiger Ausschlu\IeC  {\ss }\enspace\textbf{178}
+  \item Wertaufruf\enspace\textbf{107}
+  \item where-Ausdruck\enspace\textbf{207}
+  \item where-Klausel\enspace\textbf{207}
+  \item while-Schleife\enspace\textbf{61}
+  \item Worst-fit-Methode\enspace\textbf{123}
+  \item Wort\enspace\textbf{11}
+  \item write protect bit\enspace\textbf{162}
+  \item write-back\enspace\textbf{151}, \textbf{157}, \textbf{202}
+  \item write-hit\enspace\textbf{153}
+  \item write-miss\enspace\textbf{153}
+  \item write-Puffer\enspace\textbf{151}
+  \item write-through\enspace\textbf{151}
+
+  \indexspace
+
+{\large\textbf{Z}}
+\nopagebreak\vskip 2pt\nopagebreak
+
+  \item Zahlendarstellung
+    \subitem $(p-1)$-Komplement-\enspace\textbf{38}
+    \subitem $p$-adische\enspace\textbf{33}
+    \subitem $p$-Komplement-\enspace\textbf{35}
+    \subitem Vorzeichen-Betrag-\enspace\textbf{34}
+  \item Zeichendarstellung\enspace\textbf{46}
+  \item Zeiger\enspace\textbf{94}
+  \item zeitliche Lokalit\"at\enspace\textbf{146}
+  \item zeitliche Parallelisierung\enspace\textbf{204}
+  \item Zeitscheibenverfahren\enspace\textbf{167}
+  \item Zelle\enspace\textbf{10}
+  \item Zentraleinheit\enspace7
+  \item zentraler Speicher\enspace\textbf{215}
+  \item Zugriffszeit\enspace\textbf{13}
+  \item Zuteilungsstrategie\enspace\textbf{123}
+  \item Zweioperandenbefehl\enspace\textbf{71}
+  \item Zyklus\enspace14
+  \item Zylinder\enspace\textbf{191}
+
+\end{theindex}

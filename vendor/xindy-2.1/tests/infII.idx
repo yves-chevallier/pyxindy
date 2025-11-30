@@ -1,0 +1,587 @@
+\indexentry{Abstraktion|textbf}{1}
+\indexentry{Schnittstelle|textbf}{1}
+\indexentry{Schnittstelle}{1}
+\indexentry{interface|textbf}{1}
+\indexentry{Anwendungsebene|textbf}{1}
+\indexentry{Systemebene|textbf}{2}
+\indexentry{Hardware/Software-Schnittstelle|textbf}{2}
+\indexentry{Rechnerarchitektur|textbf}{2}
+\indexentry{Maschinensprache|textbf}{2}
+\indexentry{problemorientierte Programmiersprache|textbf}{2}
+\indexentry{Compiler|textbf}{3}
+\indexentry{Quellprogramm|textbf}{3}
+\indexentry{semantic gap|textbf}{3}
+\indexentry{RISC-Architektur}{3}
+\indexentry{RISC}{3}
+\indexentry{reduced instruction set computer|textbf}{3}
+\indexentry{Von-Neumann-Rechner|textbf}{6}
+\indexentry{Rechenwerk|textbf}{6}
+\indexentry{Steuerwerk|textbf}{7}
+\indexentry{Leitwerk|textbf}{7}
+\indexentry{Rechnerkern|textbf}{7}
+\indexentry{Prozessor}{7}
+\indexentry{Zentraleinheit}{7}
+\indexentry{CPU|textbf}{7}
+\indexentry{Register|textbf}{7}
+\indexentry{Register!allgemeine|textbf}{7}
+\indexentry{Gleitpunkt!-register|textbf}{7}
+\indexentry{Register!Gleitpunkt|textbf}{7}
+\indexentry{floating point register|textbf}{7}
+\indexentry{Instruktions!-z\"ahler|textbf}{7}
+\indexentry{Programmz\"ahler|textbf}{7}
+\indexentry{instruction counter|textbf}{7}
+\indexentry{IC|textbf}{7}
+\indexentry{Instruktions!-register|textbf}{7}
+\indexentry{Register!Instruktions-|textbf}{7}
+\indexentry{instruction register|textbf}{7}
+\indexentry{IR|textbf}{7}
+\indexentry{Programmstatus!-register|textbf}{8}
+\indexentry{Register!Programmstatus-|textbf}{8}
+\indexentry{Programmstatus!-wort|textbf}{8}
+\indexentry{Speicher|textbf}{10}
+\indexentry{Bin\"arstelle|textbf}{10}
+\indexentry{Bit|textbf}{10}
+\indexentry{adressierbare Einheit|textbf}{10}
+\indexentry{Zelle|textbf}{10}
+\indexentry{Adresse|textbf}{10}
+\indexentry{Von-Neumann-Maschine}{10}
+\indexentry{Metabit|textbf}{10}
+\indexentry{Wort|textbf}{11}
+\indexentry{Speicher!-wort|textbf}{11}
+\indexentry{Byte|textbf}{11}
+\indexentry{Halbwort|textbf}{12}
+\indexentry{Ganzwort|textbf}{12}
+\indexentry{Doppelwort|textbf}{12}
+\indexentry{Speicher!-adre\IeC  {\ss }register|textbf}{13}
+\indexentry{Register!Speicheradre\IeC  {\ss }-|textbf}{13}
+\indexentry{memory!address register|textbf}{13}
+\indexentry{MAR|textbf}{13}
+\indexentry{Speicher!-datenregister|textbf}{13}
+\indexentry{Register!Speicherdaten-|textbf}{13}
+\indexentry{memory!data register|textbf}{13}
+\indexentry{MDR|textbf}{13}
+\indexentry{Zugriffszeit|textbf}{13}
+\indexentry{Speicher!-zykluszeit|textbf}{13}
+\indexentry{Hauptspeicher|textbf}{13}
+\indexentry{Speicher!Haupt-|textbf}{13}
+\indexentry{DRAM|textbf}{13}
+\indexentry{Sekund\"arspeicher|textbf}{13}
+\indexentry{Festwertspeicher|textbf}{13}
+\indexentry{read only memory|textbf}{13}
+\indexentry{ROM|textbf}{13}
+\indexentry{Urlader|textbf}{13}
+\indexentry{Bootstrap-Lader|textbf}{13}
+\indexentry{Ein-/Ausgabe!-ger\"ate|textbf}{14}
+\indexentry{Multiplex-Verfahren|textbf}{14}
+\indexentry{Byte-Multiplexing|textbf}{14}
+\indexentry{Block-Multiplexing|textbf}{14}
+\indexentry{direkter Zugriff|textbf}{14}
+\indexentry{Zyklus}{14}
+\indexentry{Datenpfadbreite|textbf}{15}
+\indexentry{Sammelleitungen|textbf}{15}
+\indexentry{Bus|textbf}{15}
+\indexentry{Datenbus|textbf}{15}
+\indexentry{Bus!Daten-|textbf}{15}
+\indexentry{Adre\IeC  {\ss }bus|textbf}{15}
+\indexentry{Bus!Adre\IeC  {\ss }-|textbf}{15}
+\indexentry{Kontrollbus|textbf}{15}
+\indexentry{Bus!Kontroll-|textbf}{15}
+\indexentry{Universalbus|textbf}{16}
+\indexentry{Bus!Universal-|textbf}{16}
+\indexentry{backplane bus|textbf}{16}
+\indexentry{Standardbus|textbf}{16}
+\indexentry{Bus!Standard-|textbf}{16}
+\indexentry{internes Bussystem|textbf}{17}
+\indexentry{Bussystem!internes|textbf}{17}
+\indexentry{externes Bussystem|textbf}{17}
+\indexentry{Bussystem!externes|textbf}{17}
+\indexentry{Multiprozessor|textbf}{17}
+\indexentry{lokale Rechnervernetzung|textbf}{17}
+\indexentry{Ethernet|textbf}{17}
+\indexentry{Datenfern\"ubertragung|textbf}{17}
+\indexentry{Signaltr\"ager|textbf}{18}
+\indexentry{Modem|textbf}{18}
+\indexentry{Modulation|textbf}{18}
+\indexentry{Demodulation|textbf}{18}
+\indexentry{Amplitudenmodulation|textbf}{18}
+\indexentry{Frequenzmodulation|textbf}{18}
+\indexentry{Phasenmodulation|textbf}{18}
+\indexentry{ISDN|textbf}{18}
+\indexentry{Integrated Services Digital Network|textbf}{18}
+\indexentry{Synchron\"ubertragung|textbf}{19}
+\indexentry{Asynchron\"ubertragung|textbf}{19}
+\indexentry{Startbit|textbf}{20}
+\indexentry{Stopbit|textbf}{20}
+\indexentry{Simplex\"ubertragung|textbf}{20}
+\indexentry{Halbduplex\"ubertragung|textbf}{20}
+\indexentry{Vollduplex\"ubertragung|textbf}{20}
+\indexentry{\"Ubertragungsprotokoll|textbf}{20}
+\indexentry{Operationsverschl\"usselung|textbf}{20}
+\indexentry{operation code|textbf}{20}
+\indexentry{opcode|textbf}{20}
+\indexentry{Instruktions!-format|textbf}{21}
+\indexentry{Instruktion!bin\"ar codierte|textbf}{22}
+\indexentry{Operationsteil|textbf}{22}
+\indexentry{Operandenfelder|textbf}{22}
+\indexentry{Distanzadressenfeld|textbf}{22}
+\indexentry{RD-Format|textbf}{23}
+\indexentry{Instruktionsformat}{23}
+\indexentry{RRR-Format|textbf}{23}
+\indexentry{Funktionsfeld F|textbf}{23}
+\indexentry{Operationsverschl\"usselung}{24}
+\indexentry{symbolischer Maschinencode|textbf}{25}
+\indexentry{Assemblierung|textbf}{25}
+\indexentry{Assembler|textbf}{25}
+\indexentry{Assemblersprache|textbf}{25}
+\indexentry{Datensegment|textbf}{27}
+\indexentry{Operationsverschl\"usselung}{27}
+\indexentry{Pseudoinstruktion|textbf}{28}
+\indexentry{Alignment}{28}
+\indexentry{Pseudoinstruktion}{28}
+\indexentry{Makroprogrammierung|textbf}{28}
+\indexentry{Typ|textbf}{29}
+\indexentry{C-Deklaration|textbf}{29}
+\indexentry{Speicher!-klasse|textbf}{29}
+\indexentry{Register!-variable|textbf}{30}
+\indexentry{Ganzzahldarstellung}{33}
+\indexentry{$p$-adische Darstellung|textbf}{33}
+\indexentry{Zahlendarstellung!$p$-adische|textbf}{33}
+\indexentry{Vorzeichen-Betrag-Darstellung|textbf}{34}
+\indexentry{Zahlendarstellung!Vorzeichen-Betrag-|textbf}{34}
+\indexentry{$p$-Komplement-Darstellung|textbf}{35}
+\indexentry{Zahlendarstellung!$p$-Komplement-|textbf}{35}
+\indexentry{$(p-1)$-Komplement-Darstellung|textbf}{38}
+\indexentry{Zahlendarstellung!$(p-1)$-Komplement-|textbf}{38}
+\indexentry{End-Around-Carry|textbf}{39}
+\indexentry{Darstellungsl\"ange von Typen|textbf}{39}
+\indexentry{Ganzwortdarstellung|textbf}{40}
+\indexentry{Halbwortdarstellung|textbf}{40}
+\indexentry{Ganzzahlmultiplikation}{41}
+\indexentry{\"Uberlauf|textbf}{41}
+\indexentry{Shiftbefehle|textbf}{42}
+\indexentry{arithmetischer Shift|textbf}{42}
+\indexentry{logischer Shift|textbf}{42}
+\indexentry{vorzeichenlose Zahlen|textbf}{43}
+\indexentry{cast|textbf}{44}
+\indexentry{logische Operationen|textbf}{45}
+\indexentry{integer-Erweiterung|textbf}{45}
+\indexentry{Zeichendarstellung|textbf}{46}
+\indexentry{Code|textbf}{47}
+\indexentry{Code-W\"orter|textbf}{47}
+\indexentry{Alphabet|textbf}{47}
+\indexentry{Blockcode|textbf}{47}
+\indexentry{ASCII-Code|textbf}{47}
+\indexentry{EBCDIC-Code|textbf}{47}
+\indexentry{Ersatzdarstellung|textbf}{49}
+\indexentry{escape character|textbf}{49}
+\indexentry{backslash|textbf}{49}
+\indexentry{Gleitpunkt!-zahlensystem|textbf}{50}
+\indexentry{Gleitpunkt!-zahlendarstellung|textbf}{50}
+\indexentry{NaN|textbf}{53}
+\indexentry{Not a Number|textbf}{53}
+\indexentry{Gleitpunkt!-\"uberlauf|textbf}{54}
+\indexentry{Gleitpunkt!-unterlauf|textbf}{54}
+\indexentry{Sprungbefehl|textbf}{58}
+\indexentry{unbedingter Sprung|textbf}{58}
+\indexentry{Programm!-status}{59}
+\indexentry{Programmstatus!-register}{59}
+\indexentry{Bedingungsschl\"ussel|textbf}{59}
+\indexentry{while-Schleife|textbf}{61}
+\indexentry{repeat-Schleife|textbf}{61}
+\indexentry{CISC}{62}
+\indexentry{RISC}{62}
+\indexentry{Von-Neumann-Maschine}{62}
+\indexentry{von-Neumannscher Flaschenhals|textbf}{62}
+\indexentry{Alignment|textbf}{64}
+\indexentry{CISC|textbf}{64}
+\indexentry{Mikroprogrammierung|textbf}{65}
+\indexentry{Mikroinstruktion|textbf}{65}
+\indexentry{Makroinstruktion|textbf}{65}
+\indexentry{Mikroprogramm|textbf}{65}
+\indexentry{Kontrollspeicher|textbf}{65}
+\indexentry{Cache|textbf}{65}
+\indexentry{RISC|textbf}{67}
+\indexentry{MIPS-Architektur|textbf}{67}
+\indexentry{Microprocessor without Interlocked Pipe Stages|textbf}{67}
+\indexentry{SIC|textbf}{69}
+\indexentry{single instruction computer|textbf}{69}
+\indexentry{orthogonaler Systementwurf|textbf}{70}
+\indexentry{Orthogonalit\"at|textbf}{70}
+\indexentry{Register!-adressierung|textbf}{70}
+\indexentry{Adressierung!Register-|textbf}{70}
+\indexentry{Dreioperandenbefehl|textbf}{70}
+\indexentry{Zweioperandenbefehl|textbf}{71}
+\indexentry{Einoperandenbefehl|textbf}{71}
+\indexentry{Akkumulator|textbf}{71}
+\indexentry{Register!Akkumulator|textbf}{71}
+\indexentry{AC|textbf}{71}
+\indexentry{Nulloperandenbefehl|textbf}{71}
+\indexentry{Adressierung!absolute|textbf}{72}
+\indexentry{Relativadressierung|textbf}{72}
+\indexentry{Adressierung!relative|textbf}{72}
+\indexentry{indirekte Speicheradressierung|textbf}{73}
+\indexentry{Adressierung!indirekte|textbf}{73}
+\indexentry{Basisadresse}{74}
+\indexentry{Adressierung!mit Basisregister|textbf}{74}
+\indexentry{Basisregister|textbf}{74}
+\indexentry{Register!Basis-|textbf}{74}
+\indexentry{BR|textbf}{74}
+\indexentry{Distanzadresse|textbf}{74}
+\indexentry{indizierte Variable}{75}
+\indexentry{Feld}{75}
+\indexentry{Indexregister|textbf}{76}
+\indexentry{Register!Index-|textbf}{76}
+\indexentry{Adressierung!mit Indexregister|textbf}{76}
+\indexentry{Distanzadresse}{76}
+\indexentry{Autodekrement-Instruktion|textbf}{77}
+\indexentry{Autoinkrement-Instruktion|textbf}{77}
+\indexentry{Summation}{77}
+\indexentry{Stapel|textbf}{78}
+\indexentry{Adressierung!Stapel-|textbf}{78}
+\indexentry{stack|textbf}{78}
+\indexentry{LIFO-Prinzip}{78}
+\indexentry{stack pointer|textbf}{78}
+\indexentry{Nulloperandenbefehl}{78}
+\indexentry{Postfixnotation}{79}
+\indexentry{Stackregister|textbf}{81}
+\indexentry{Register!Stack-|textbf}{81}
+\indexentry{switch-Anweisung|textbf}{81}
+\indexentry{case label|textbf}{82}
+\indexentry{break-Anweisung|textbf}{82}
+\indexentry{Sprungtabelle|textbf}{83}
+\indexentry{Schleifenorganisation|textbf}{85}
+\indexentry{$(n+{1\over 2})$-Schleife|textbf}{87}
+\indexentry{Euklidscher Algorithmus|textbf}{88}
+\indexentry{gr\"o\IeC  {\ss }ter gemeinsamer Teiler}{88}
+\indexentry{Kommaausdruck|textbf}{88}
+\indexentry{continue-Anweisung|textbf}{88}
+\indexentry{lineare Adre\IeC  {\ss }fortschaltung}{90}
+\indexentry{Hornerschema}{90}
+\indexentry{lineare Adre\IeC  {\ss }fortschaltung|textbf}{91}
+\indexentry{Programmoptimierung}{94}
+\indexentry{Verweis|textbf}{94}
+\indexentry{Zeiger|textbf}{94}
+\indexentry{pointer|textbf}{94}
+\indexentry{Adre\IeC  {\ss }operator|textbf}{94}
+\indexentry{Indirektionsoperator|textbf}{95}
+\indexentry{Inhaltsoperator|textbf}{95}
+\indexentry{Adre\IeC  {\ss }arithmetik|textbf}{99}
+\indexentry{Unterprogrammorganisation}{102}
+\indexentry{Prozedurorganisation}{102}
+\indexentry{jump-and-link|textbf}{102}
+\indexentry{R\"ucksprungregister|textbf}{103}
+\indexentry{Register!R\"ucksprung-|textbf}{103}
+\indexentry{Register!-sicherung!durch Aufrufer|textbf}{104}
+\indexentry{Caller save|textbf}{104}
+\indexentry{Register!-sicherung!durch Unterprogramm|textbf}{104}
+\indexentry{Callee save|textbf}{104}
+\indexentry{Sicherungsregister|textbf}{104}
+\indexentry{Register!Sicherungs-|textbf}{104}
+\indexentry{Parameter\"ubergabe|textbf}{105}
+\indexentry{Parameterwort|textbf}{105}
+\indexentry{Referenzaufruf|textbf}{106}
+\indexentry{Wertaufruf|textbf}{107}
+\indexentry{Namensaufruf|textbf}{107}
+\indexentry{Namensersetzung|textbf}{108}
+\indexentry{Prozedurumgebung|textbf}{108}
+\indexentry{environment|textbf}{108}
+\indexentry{Thunk|textbf}{109}
+\indexentry{Ablaufinvarianz@Ablauf\hbox {}invarianz|textbf}{113}
+\indexentry{statische Speicherplatzreservierung|textbf}{114}
+\indexentry{Speicher!statische Reservierung|textbf}{114}
+\indexentry{Datenbereich eines Prozeduraufrufs|textbf}{114}
+\indexentry{procedure call frame|textbf}{114}
+\indexentry{call frame|textbf}{114}
+\indexentry{fester Bereich}{115}
+\indexentry{dynamischer Bereich}{115}
+\indexentry{LIFO}{115}
+\indexentry{Stapel}{115}
+\indexentry{Datenbasisregister|textbf}{116}
+\indexentry{Register!Datenbasis-|textbf}{116}
+\indexentry{rekursiver Aufruf}{117}
+\indexentry{statische Prozedurhierarchie}{118}
+\indexentry{dynamische Speicherplatzreservierung|textbf}{120}
+\indexentry{Speicher!dynamische Reservierung|textbf}{120}
+\indexentry{Haldenorganisation|textbf}{121}
+\indexentry{heap|textbf}{121}
+\indexentry{malloc|textbf}{121}
+\indexentry{free|textbf}{121}
+\indexentry{Kompaktifizierung|textbf}{122}
+\indexentry{Zuteilungsstrategie|textbf}{123}
+\indexentry{First-fit-Methode|textbf}{123}
+\indexentry{Best-fit-Methode|textbf}{123}
+\indexentry{Worst-fit-Methode|textbf}{123}
+\indexentry{Boundary-Tag-Verfahren|textbf}{124}
+\indexentry{Bit-Feld|textbf}{125}
+\indexentry{bitfield|textbf}{125}
+\indexentry{Buddy-Verfahren|textbf}{130}
+\indexentry{dangling reference|textbf}{133}
+\indexentry{memory!leak|textbf}{134}
+\indexentry{garbage|textbf}{135}
+\indexentry{garbage collector|textbf}{135}
+\indexentry{reference counting|textbf}{135}
+\indexentry{tracing|textbf}{135}
+\indexentry{conservative pointer finding|textbf}{135}
+\indexentry{Referenzz\"ahlung|textbf}{136}
+\indexentry{gerichteter Graph|textbf}{140}
+\indexentry{Eingangsknoten|textbf}{140}
+\indexentry{garbage collector!mark-sweep|textbf}{140}
+\indexentry{garbage collector!mark-compact|textbf}{141}
+\indexentry{garbage collector!copy|textbf}{141}
+\indexentry{Recycling|textbf}{142}
+\indexentry{garbage collector!konservativer|textbf}{143}
+\indexentry{safe points|textbf}{143}
+\indexentry{garbage collector!on the fly|textbf}{143}
+\indexentry{Speicher!-hierarchien|textbf}{144}
+\indexentry{static random access memory|textbf}{144}
+\indexentry{SRAM|textbf}{144}
+\indexentry{dynamic random access memory|textbf}{144}
+\indexentry{DRAM|textbf}{144}
+\indexentry{Lokalit\"atseigenschaft|textbf}{146}
+\indexentry{zeitliche Lokalit\"at|textbf}{146}
+\indexentry{r\"aumliche Lokalit\"at|textbf}{147}
+\indexentry{Treffer|textbf}{147}
+\indexentry{hit|textbf}{147}
+\indexentry{Fehlbedingung|textbf}{147}
+\indexentry{miss|textbf}{147}
+\indexentry{Trefferrate|textbf}{147}
+\indexentry{hit rate|textbf}{147}
+\indexentry{Pufferspeicher|textbf}{147}
+\indexentry{Speicher!Puffer-|textbf}{147}
+\indexentry{cache|textbf}{147}
+\indexentry{direkte Abbildung|textbf}{148}
+\indexentry{direct mapping|textbf}{148}
+\indexentry{tag|textbf}{148}
+\indexentry{G\"ultigkeits-Bit|textbf}{148}
+\indexentry{valid bit|textbf}{148}
+\indexentry{Ersetzung des Cache-Inhaltes|textbf}{148}
+\indexentry{write-through|textbf}{151}
+\indexentry{write-Puffer|textbf}{151}
+\indexentry{FIFO}{151}
+\indexentry{write-back|textbf}{151}
+\indexentry{Block-Caching|textbf}{151}
+\indexentry{write-hit|textbf}{153}
+\indexentry{write-miss|textbf}{153}
+\indexentry{prefetch|textbf}{153}
+\indexentry{one block lookahead|textbf}{153}
+\indexentry{OBL|textbf}{153}
+\indexentry{virtuelle Adressierung|textbf}{154}
+\indexentry{virtueller Adre\IeC  {\ss }raum|textbf}{154}
+\indexentry{virtueller Speicher|textbf}{154}
+\indexentry{Seite|textbf}{154}
+\indexentry{page|textbf}{154}
+\indexentry{Kachel|textbf}{154}
+\indexentry{page frame|textbf}{154}
+\indexentry{Fehlseitenbedingung|textbf}{154}
+\indexentry{page fault|textbf}{154}
+\indexentry{voll assoziative Abbildung|textbf}{155}
+\indexentry{Seitentabelle|textbf}{155}
+\indexentry{paging table|textbf}{155}
+\indexentry{Seitentabellenregister|textbf}{155}
+\indexentry{Register!Seitentabellen-|textbf}{155}
+\indexentry{least recently used|textbf}{157}
+\indexentry{LRU|textbf}{157}
+\indexentry{first-in, first-out|textbf}{157}
+\indexentry{FIFO|textbf}{157}
+\indexentry{least frequently used|textbf}{157}
+\indexentry{LFU|textbf}{157}
+\indexentry{last-in, first-out|textbf}{157}
+\indexentry{LIFO|textbf}{157}
+\indexentry{Belady-Algorithmus|textbf}{157}
+\indexentry{write-back|textbf}{157}
+\indexentry{Demandpaging|textbf}{158}
+\indexentry{prepaging|textbf}{158}
+\indexentry{swapping|textbf}{158}
+\indexentry{translation-lookaside-buffer|textbf}{158}
+\indexentry{TLB|textbf}{158}
+\indexentry{Assoziativregister|textbf}{159}
+\indexentry{Register!Assoziativ-|textbf}{159}
+\indexentry{memory!management unit|textbf}{161}
+\indexentry{MMU|textbf}{161}
+\indexentry{virtually adressed cache|textbf}{161}
+\indexentry{Aliasing|textbf}{161}
+\indexentry{Speicher!-schutz|textbf}{161}
+\indexentry{Leseschutz-Bit|textbf}{162}
+\indexentry{read protect bit|textbf}{162}
+\indexentry{Schreibschutz-Bit|textbf}{162}
+\indexentry{write protect bit|textbf}{162}
+\indexentry{Ausf\"uhrungsschutz-Bit|textbf}{162}
+\indexentry{execute protect bit|textbf}{162}
+\indexentry{process identifier|textbf}{162}
+\indexentry{task identifier|textbf}{162}
+\indexentry{single tasking|textbf}{162}
+\indexentry{multi tasking|textbf}{162}
+\indexentry{Betriebssystem|textbf}{163}
+\indexentry{job|textbf}{164}
+\indexentry{Stapelverarbeitung|textbf}{164}
+\indexentry{batch processing|textbf}{164}
+\indexentry{E/A-Werk|textbf}{164}
+\indexentry{Ein-/Ausgabe!-Werk|textbf}{164}
+\indexentry{I/O-Controller|textbf}{164}
+\indexentry{Ein-/Ausgabe!-Puffer|textbf}{165}
+\indexentry{Ein-/Ausgabe!doppelte Pufferung|textbf}{166}
+\indexentry{Wechselpuffer|textbf}{166}
+\indexentry{Multiprogrammierungsbetrieb|textbf}{167}
+\indexentry{Zeitscheibenverfahren|textbf}{167}
+\indexentry{time slicing|textbf}{167}
+\indexentry{SPOOL|textbf}{167}
+\indexentry{job spool|textbf}{167}
+\indexentry{Time-Sharing|textbf}{168}
+\indexentry{Proze\IeC  {\ss }|textbf}{169}
+\indexentry{Systemmodus|textbf}{169}
+\indexentry{supervisor mode|textbf}{169}
+\indexentry{system mode|textbf}{169}
+\indexentry{Benutzermodus|textbf}{169}
+\indexentry{user mode|textbf}{169}
+\indexentry{Instruktion!privilegierte|textbf}{170}
+\indexentry{system call|textbf}{170}
+\indexentry{supervisor call|textbf}{170}
+\indexentry{Systemmakro|textbf}{170}
+\indexentry{Unterbrechung|textbf}{171}
+\indexentry{exception|textbf}{171}
+\indexentry{trap|textbf}{172}
+\indexentry{exception handler|textbf}{172}
+\indexentry{cause-Register|textbf}{172}
+\indexentry{Register!cause-|textbf}{172}
+\indexentry{Interrupt!-Vektor|textbf}{172}
+\indexentry{Interrupt|textbf}{172}
+\indexentry{Interrupt!handler|textbf}{173}
+\indexentry{Interrupt!-Hierarchie|textbf}{173}
+\indexentry{Maskenbit|textbf}{173}
+\indexentry{Realzeitbetrieb|textbf}{174}
+\indexentry{Echtzeitbetrieb|textbf}{174}
+\indexentry{real time processing|textbf}{174}
+\indexentry{Interproze\IeC  {\ss }kommunikation|textbf}{174}
+\indexentry{Proze\IeC  {\ss }!-synchronisation|textbf}{174}
+\indexentry{shared memory|textbf}{174}
+\indexentry{memory!shared|textbf}{174}
+\indexentry{message passing|textbf}{174}
+\indexentry{Datenkonsistenz|textbf}{174}
+\indexentry{Programmunterbrechung}{176}
+\indexentry{Bernstein-Bedingungen|textbf}{176}
+\indexentry{wechselseitiger Ausschlu\IeC  {\ss }|textbf}{178}
+\indexentry{mutual exclusion|textbf}{178}
+\indexentry{interleaving|textbf}{179}
+\indexentry{kritischer Abschnitt|textbf}{179}
+\indexentry{critical section|textbf}{179}
+\indexentry{Proze\IeC  {\ss }!-verklemmung|textbf}{181}
+\indexentry{Verklemmung|textbf}{181}
+\indexentry{deadlock|textbf}{181}
+\indexentry{Bakery-Algorithmus|textbf}{182}
+\indexentry{common memory arbiter|textbf}{183}
+\indexentry{test-and-set-Instruktion|textbf}{184}
+\indexentry{Instruktion!test-and-set|textbf}{184}
+\indexentry{aktives Warten|textbf}{185}
+\indexentry{busy wait|textbf}{185}
+\indexentry{Semaphor|textbf}{185}
+\indexentry{Ein-/Ausgabe!-Subsystem|textbf}{189}
+\indexentry{Ein-/Ausgabe!-Steuerwerk|textbf}{189}
+\indexentry{Plattenspeicher|textbf}{191}
+\indexentry{Lesekopf|textbf}{191}
+\indexentry{Schreibkopf|textbf}{191}
+\indexentry{Spur|textbf}{191}
+\indexentry{Sektor|textbf}{191}
+\indexentry{Zylinder|textbf}{191}
+\indexentry{Positionierungszeit|textbf}{192}
+\indexentry{seek time|textbf}{192}
+\indexentry{Latenzzeit|textbf}{192}
+\indexentry{latency time|textbf}{192}
+\indexentry{Transferzeit|textbf}{192}
+\indexentry{file cache|textbf}{193}
+\indexentry{expanded storage|textbf}{193}
+\indexentry{disk cache|textbf}{193}
+\indexentry{RAID|textbf}{194}
+\indexentry{redundant arrays of independent disks|textbf}{194}
+\indexentry{Ein-/Ausgabe!programmierte|textbf}{195}
+\indexentry{programmed IO|textbf}{195}
+\indexentry{port|textbf}{195}
+\indexentry{memory!-mapped I/O|textbf}{195}
+\indexentry{Ein-/Ausgabe!speicheradressierte|textbf}{195}
+\indexentry{IO mapped Organisation|textbf}{195}
+\indexentry{Ein-/Ausgabe!-Instruktion|textbf}{195}
+\indexentry{Instruktion!Ein-/Ausgabe|textbf}{195}
+\indexentry{direkter Speicherzugriff|textbf}{196}
+\indexentry{direct memory access|textbf}{196}
+\indexentry{DMA|textbf}{196}
+\indexentry{Bus!master|textbf}{197}
+\indexentry{Bus!slave|textbf}{197}
+\indexentry{DMA!request|textbf}{197}
+\indexentry{DMA!acknowledge|textbf}{197}
+\indexentry{Blocktransfermodus|textbf}{199}
+\indexentry{cycle stealing|textbf}{199}
+\indexentry{Ein-/Ausgabe!transparente|textbf}{199}
+\indexentry{DMA!-request-Interrupt|textbf}{199}
+\indexentry{Interrupt!DMA-request-|textbf}{199}
+\indexentry{Polling|textbf}{199}
+\indexentry{Ein-/Ausgabe!-Prozessor|textbf}{199}
+\indexentry{Kanal|textbf}{199}
+\indexentry{Ein-/Ausgabe!-Kanal|textbf}{199}
+\indexentry{stale data problem|textbf}{201}
+\indexentry{coherency problem|textbf}{201}
+\indexentry{write-back|textbf}{202}
+\indexentry{cache flushing|textbf}{202}
+\indexentry{concurrency|textbf}{203}
+\indexentry{Nebenl\"aufigkeit|textbf}{203}
+\indexentry{Parallelit\"at|textbf}{203}
+\indexentry{simultaner Ablauf|textbf}{203}
+\indexentry{Pipelining|textbf}{203}
+\indexentry{r\"aumliche Parallelisierung|textbf}{203}
+\indexentry{zeitliche Parallelisierung|textbf}{204}
+\indexentry{Multiprozessor!-Betrieb|textbf}{204}
+\indexentry{cobegin|textbf}{205}
+\indexentry{coend|textbf}{205}
+\indexentry{Feingranularit\"at der Parallelit\"at|textbf}{206}
+\indexentry{fine grain parallelism|textbf}{206}
+\indexentry{Grobgranularit\"at der Parallelit\"at|textbf}{206}
+\indexentry{coarse grain parallelism|textbf}{206}
+\indexentry{Datenflu\IeC  {\ss }rechner|textbf}{206}
+\indexentry{Datenabh\"angigkeit|textbf}{206}
+\indexentry{Datenflu\IeC  {\ss }graph|textbf}{207}
+\indexentry{where-Klausel|textbf}{207}
+\indexentry{where-Ausdruck|textbf}{207}
+\indexentry{single assignment language|textbf}{207}
+\indexentry{single assignment-Regel|textbf}{209}
+\indexentry{Pipeline!-Prinzip|textbf}{209}
+\indexentry{Instruktions!-zyklus|textbf}{209}
+\indexentry{Pipeline!-Zyklus|textbf}{209}
+\indexentry{Pipeline!-Phase|textbf}{209}
+\indexentry{speedup|textbf}{210}
+\indexentry{Hazard-Situation|textbf}{210}
+\indexentry{cycle stealing|textbf}{210}
+\indexentry{stalling|textbf}{211}
+\indexentry{Flynnsche Schema|textbf}{211}
+\indexentry{Single instruction stream, single data stream|textbf}{211}
+\indexentry{SISD|textbf}{211}
+\indexentry{Single instruction stream, multiple data stream|textbf}{211}
+\indexentry{SIMD|textbf}{211}
+\indexentry{Multiple instruction stream, single data stream|textbf}{211}
+\indexentry{MISD|textbf}{211}
+\indexentry{Multiple instruction stream, multiple data stream|textbf}{211}
+\indexentry{MIMD|textbf}{211}
+\indexentry{Multiprozessor!-System!eng gekoppeltes|textbf}{215}
+\indexentry{Multiprozessor!-System!lose gekoppeltes|textbf}{215}
+\indexentry{Speicher!-anordnung|textbf}{215}
+\indexentry{zentraler Speicher|textbf}{215}
+\indexentry{Speicher!zentraler|textbf}{215}
+\indexentry{memory!centralized|textbf}{215}
+\indexentry{uniform memory access|textbf}{215}
+\indexentry{UMA|textbf}{215}
+\indexentry{verteilter Speicher|textbf}{215}
+\indexentry{Speicher!verteilter|textbf}{215}
+\indexentry{memory!distributed|textbf}{215}
+\indexentry{non-uniform memory access|textbf}{215}
+\indexentry{NUMA|textbf}{215}
+\indexentry{no-remote memory access|textbf}{216}
+\indexentry{NORA|textbf}{216}
+\indexentry{Nachrichtenaustauschmechanismus|textbf}{216}
+\indexentry{gemeinsamer Speicher|textbf}{216}
+\indexentry{Speicher!gemeinsamer|textbf}{216}
+\indexentry{shared memory|textbf}{216}
+\indexentry{memory!shared|textbf}{216}
+\indexentry{Nachrichtenaustausch|textbf}{216}
+\indexentry{massiv paralleles System|textbf}{217}
+\indexentry{Skalierbarkeit|textbf}{217}
+\indexentry{Verbindungsnetz|textbf}{218}
+\indexentry{Bus!-anordnung|textbf}{218}
+\indexentry{Amdahl's Gesetz|textbf}{220}
+\indexentry{speedup|textbf}{220}

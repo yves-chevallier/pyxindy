@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from tests_paths import XINDY_TESTS_DIR as REFERENCE_DIR
 from xindy.dsl.interpreter import StyleInterpreter
 from xindy.index import build_index_entries
 from xindy.markup import render_index
@@ -7,9 +8,6 @@ from xindy.raw.reader import load_raw_index
 
 
 DOCS_DIR = Path(__file__).resolve().parents[2] / "docs" / "tutorial"
-REFERENCE_DIR = (
-    Path(__file__).resolve().parents[2] / "xindy-src" / "xindy-2.1" / "tests"
-)
 
 
 def _render(style_name: str, raw_name: str) -> str:

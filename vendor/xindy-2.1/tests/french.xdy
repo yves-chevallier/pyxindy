@@ -1,0 +1,75 @@
+;; $Id: mappings.xdy,v 1.2 1997/01/22 16:42:46 kehr Exp $
+;;
+;; This style-file tests the mapping scheme with several runs. We use
+;; some examples in French and German to test these new features.
+;;
+
+(require "testbed.xdy")
+
+(define-location-class "arabic-page-numbers" ("arabic-numbers"))
+
+(markup-index :open  "~n\begin{theindex}~n"
+	      :close "~n~n\end{theindex}~n"
+	      :tree)
+(markup-letter-group-list :sep "~n~n \indexspace~n")
+(markup-indexentry :open "~n  \item "           :depth 0)
+(markup-locclass-list :open " ")
+(markup-locref-list :sep ", ")
+
+(define-letter-groups
+    ("a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m"
+	 "n" "o" "p" "q" "r" "s" "t" "u" "v" "w" "x" "y" "z"))
+
+(define-attributes (("default")))
+
+;; The sorting rules in our example are a mixture of German and French
+;; sorting rules.
+
+(define-sort-rule-orientations (forward forward backward))
+
+;; RUN 0
+
+;; Case-insensitive run 0
+(sort-rule "A" "a" :run 0)
+(sort-rule "R" "r" :run 0)
+(sort-rule "M" "m" :run 0)
+
+;; Ignore accents in first run
+(sort-rule "é" "e" :run 0)
+(sort-rule "ô" "o" :run 0)
+
+
+;; RUN 1
+
+;; The previous rules leave the keyword groups
+;; {arm,Arm,ARM}, {cote,côte,côté,coté}.
+
+;; The next run decides that uppercase follows lowercase. This is done
+;; by the following rules. We have only defined the rules necessary in
+;; our concrete example.
+
+(sort-rule "a" "a0" :run 1)
+(sort-rule "A" "a1" :run 1)
+(sort-rule "r" "r0" :run 1)
+(sort-rule "R" "r1" :run 1)
+(sort-rule "m" "m0" :run 1)
+(sort-rule "M" "m1" :run 1)
+
+;; Ignore accents in this run, too.
+(sort-rule "é" "e" :run 1)
+(sort-rule "ô" "o" :run 1)
+
+;; RUN 1
+
+;; The previous rules leave the keyword group. {cote,côte,côté,coté}.
+;; The other group is now sorted. This run must now sort backwards,
+;; due to the French sorting rules.
+
+;; Now define an order on the accents. Since the comparison now is
+;; from right to left (backwards) the tokens must define their order
+;; number *before* the character.
+
+(sort-rule "e" "0e" :run 2)
+(sort-rule "é" "1e" :run 2)
+(sort-rule "o" "0o" :run 2)
+(sort-rule "ô" "1o" :run 2)

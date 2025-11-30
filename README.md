@@ -44,7 +44,7 @@ lualatex document.tex
   uv run python -m xindy.tex.makeindex4 path/to/input.idx -o output.ind -t output.ilg -c
   ```
 
-Historical xindy modules/styles (`xindy-src/xindy-2.1/modules`) are resolved automatically via `require`. The wrapper `makeindex4` supports the usual `-l/-c/-o/-t` flags.
+Historical xindy modules/styles (`vendor/xindy-2.1/modules`) are resolved automatically via `require`. The wrapper `makeindex4` supports the usual `-l/-c/-o/-t` flags.
 
 ## xindy CLI
 
@@ -84,14 +84,14 @@ uv run makeindex4 input.idx -o output.ind -t output.ilg [-c] [-l]
 - Replay a historical fixture:
 
   ```bash
-  uv run xindy -M xindy-src/xindy-2.1/tests/ex1.xdy \
-        -o /tmp/ex1.ind xindy-src/xindy-2.1/tests/ex1.raw
+  uv run xindy -M vendor/xindy-2.1/tests/ex1.xdy \
+        -o /tmp/ex1.ind vendor/xindy-2.1/tests/ex1.raw
   ```
 
 - Chain `.idx → .ind` in one command:
 
   ```bash
-  uv run makeindex4 xindy-src/xindy-2.1/tests/infII.idx -o /tmp/infII.ind
+  uv run makeindex4 vendor/xindy-2.1/tests/infII.idx -o /tmp/infII.ind
   ```
 
 ## Development

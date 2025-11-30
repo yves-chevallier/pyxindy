@@ -2,10 +2,8 @@ from pathlib import Path
 
 import pytest
 
+from tests_paths import XINDY_MODULES_DIR as MODULES_DIR
 from xindy.dsl.interpreter import StyleInterpreter
-
-
-MODULES_DIR = Path(__file__).resolve().parents[2] / "xindy-src" / "xindy-2.1" / "modules"
 
 
 @pytest.mark.parametrize(

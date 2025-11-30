@@ -2,13 +2,12 @@ from pathlib import Path
 
 import pytest
 
+from tests_paths import XINDY_TESTS_DIR as TESTS_DIR
 from xindy.dsl.interpreter import StyleInterpreter
 from xindy.index import IndexBuilderError, build_index_entries
 from xindy.raw.reader import load_raw_index
 
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-TESTS_DIR = REPO_ROOT / "xindy-src" / "xindy-2.1" / "tests"
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 
 
