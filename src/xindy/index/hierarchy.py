@@ -33,8 +33,7 @@ def build_hierarchy(
                 node.add_crossref(entry.xref_target, entry.attribute)
                 continue
             changed = node.add_locrefs(entry.locrefs)
-            if changed:
-                _detect_numeric_ranges(node, range_allowed, allow_all_ranges)
+            # defer range detection to final sweep
     for node in roots:
         _finalize_ranges(node, range_allowed, allow_all_ranges)
     return roots

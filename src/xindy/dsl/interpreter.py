@@ -63,6 +63,14 @@ class StyleInterpreter:
         self._file_stack: list[Path] = []
         if not self.state.basetypes:
             self._register_default_basetypes()
+        modules_dir = (
+            Path(__file__)
+            .resolve()
+            .parents[3]
+            .joinpath("xindy-src", "xindy-2.1", "modules")
+        )
+        if modules_dir.exists():
+            self.state.search_paths.append(modules_dir)
 
     def load(
         self,

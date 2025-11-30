@@ -279,7 +279,9 @@ def _render_locref_part(
     parts.sort(key=sort_key)
     rendered_attrs = [chunk for _, _, chunk in parts]
     sep = cfg.attr_group_sep or locfmt.separator
-    spacer = " " if cfg.backend == "text" else ""
+    spacer = ""
+    if cfg.backend == "text" and not cfg.attr_group_open:
+        spacer = " "
     body = sep.join(rendered_attrs)
     if cfg.attr_group_open:
         body = cfg.attr_group_open + body
@@ -341,6 +343,29 @@ def _format_locrefs_for_class(
             for start, end in ranges
         )
         return separator.join(locref_chunks)
+    items: list[tuple[int | float, str]] = []
+    covered: set[int] = set()
+    for start, end in ranges:
+        try:
+            s = int(start.ordnums[0]) if start.ordnums else None
+            e = int(end.ordnums[0]) if end.ordnums else None
+        except (TypeError, ValueError):
+            s = e = None
+        if s is not None and e is not None:
+            if s > e:
+                s, e = e, s
+            covered.update(range(s, e + 1))
+            items.append((s, f"{start.locref_string}{cfg.range_separator}{end.locref_string}"))
+    for ref in orig_refs:
+        try:
+            ordnum = int(ref.ordnums[0]) if ref.ordnums else None
+        except (TypeError, ValueError):
+            ordnum = None
+        if cfg.backend == "tex" and covered and ordnum is not None and ordnum in covered:
+            continue
+        items.append((ordnum if ordnum is not None else float("inf"), ref.locref_string))
+    items.sort(key=lambda item: item[0] if item[0] is not None else float("inf"))
+    return separator.join(val for _, val in items)
     entries: list[tuple[int | float, str]] = []
     for ref in refs:
         ordnum = None

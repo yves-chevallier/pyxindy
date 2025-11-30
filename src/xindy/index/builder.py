@@ -50,6 +50,10 @@ def build_index_entries(
                 if locref:
                     break
             if locref:
+                if "open-range" in raw.extras:
+                    locref.state = "open-range"
+                if "close-range" in raw.extras:
+                    locref.state = "close-range"
                 locrefs.append(locref)
             else:
                 raise IndexBuilderError(
