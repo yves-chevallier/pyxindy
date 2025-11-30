@@ -1,105 +1,117 @@
-## xindy (Python port)
+# PyXindy (Python port of xindy)
 
-Ce dépôt héberge le portage progressif de **xindy** (flexible indexing system) de
-CLISP vers Python.
+Python reimplementation of **xindy**, the flexible index processor originally written in CLISP. PyXindy aims to be a drop-in replacement where the original xindy is difficult to install or integrate (for example with Tectonic or minimal TeX setups).
 
-### Installation
+## Background and history
+
+- **makeindex**: introduced in 1987 by Pehong Chen, bundled with TeX distributions through the late 1980s and 1990s as the default indexer for LaTeX. It remains widely available in TeX Live and MiKTeX.
+- **xindy**: created in the mid-1990s (first public releases in 1996) by Joachim Schrod to handle multilingual indexing, flexible sort rules, and markup targets beyond TeX (SGML/HTML). Version 2.x has shipped with TeX Live since the early 2000s.
+
+Together they form a decades-old toolchain; PyXindy keeps the mature behavior while modernizing the implementation and packaging.
+
+## Why PyXindy port
+
+1. Easier installation: pure-Python stack, no CLISP dependency, plays nicely with `uv`, `pip`, and containerized CI.
+2. Better integration: Tectonic and other minimal TeX environments can use xindy-like features without installing a full TeX Live.
+3. Maintainability: Python codebase lowers the barrier for contributors and makes testing/CI straightforward.
+4. Extensibility: reuses the historical xindy modules/styles while making it simpler to experiment with new features or diagnostics.
+
+## Usage
 
 ```bash
-uv sync            # installe les dépendances
-uv run pip install -e .  # ou uv build && pip install dist/xindy-*.whl
+lualatex document.tex
+uv run xindy -M path/to/style.xdy -o document.ind document.raw
+lualatex document.tex
 ```
 
-### Utilisation rapide
+## Quick commands
 
-- Générer un index depuis un `.raw` et un style `.xdy` :
+- Generate an index from `.raw` with a `.xdy` style:
 
   ```bash
   uv run xindy -M path/to/style.xdy -o output.ind path/to/index.raw
   ```
 
-- Convertir un fichier TeX `.idx` en `.raw` :
+- Convert a TeX `.idx` file to `.raw`:
 
   ```bash
   uv run python -m xindy.tex.tex2xindy path/to/input.idx -o output.raw
   ```
 
-- Utiliser l’interface type `makeindex` :
+- Use the makeindex-compatible interface:
 
   ```bash
   uv run python -m xindy.tex.makeindex4 path/to/input.idx -o output.ind -t output.ilg -c
   ```
 
-Les modules/styles xindy historiques (`xindy-src/xindy-2.1/modules`) sont
-résolus automatiquement via `require`. Les options `-l/-c/-o/-t` sont supportées
-par le wrapper `makeindex4`.
+Historical xindy modules/styles (`xindy-src/xindy-2.1/modules`) are resolved automatically via `require`. The wrapper `makeindex4` supports the usual `-l/-c/-o/-t` flags.
 
-### CLI xindy
+## xindy CLI
 
 ```bash
 uv run xindy [-M style.xdy] [-o output.ind] [-L searchpath] [-C encoding] [-l logfile] [-t] input.raw
 ```
 
-- `-M/--module` : style `.xdy` à utiliser (par défaut `<raw>.xdy`)
-- `-o/--output` : cible du rendu (`stdout` si absent)
-- `-L/--searchpath` : chemins additionnels pour `require` (cumule avec `XINDY_SEARCHPATH`)
-- `-C/--codepage` : encodage de sortie (utf-8 par défaut)
-- `-l/--log` : écrit un log succinct
-- `-t/--trace` : affiche les traces Python en cas d’erreur
+- `-M/--module/--style`: `.xdy` style to use (defaults to `<raw>.xdy`)
+- `-o/--output`: output target (`stdout` if omitted)
+- `-L/--searchpath`: extra search paths for `require` (merged with `XINDY_SEARCHPATH`)
+- `-C/--codepage`: output encoding (default: utf-8)
+- `-l/--log`: write a brief log file
+- `-t/--trace`: show Python tracebacks on errors
 
-### tex2xindy
+## tex2xindy
 
 ```bash
 uv run tex2xindy input.idx -o output.raw --input-encoding latin-1 --output-encoding utf-8
 ```
 
-- Gère hiérarchies `!`, affichage `@`, encap `|`, macros TeX basiques/escapes, crossrefs `see{target}` → `:xref`.
-- Produit des `:tkey` quand l’affichage diffère du tri.
+- Handles hierarchies `!`, display `@`, encap `|`, basic TeX macros/escapes, crossrefs `see{target}` → `:xref`.
+- Emits `:tkey` when the displayed form differs from the sort key.
 
-### makeindex4
+## makeindex4
 
 ```bash
 uv run makeindex4 input.idx -o output.ind -t output.ilg [-c] [-l]
 ```
 
-- `-c` : compresse les espaces dans les clés (comme makeindex)
-- `-l` : ignore les espaces pour le tri (insert un `sort-rule " " ""`)
-- Génère un style temporaire, détecte les attributs/crossrefs, charge `tex/makeidx4.xdy`.
+- `-c`: compress spaces in keys (makeindex behavior)
+- `-l`: ignore spaces for sorting (adds `sort-rule " " ""`)
+- Generates a temporary style, detects attributes/crossrefs, loads `tex/makeidx4.xdy`.
 
-### Exemples rapides
+## Examples
 
-- Rejouer un fixture historique :
+- Replay a historical fixture:
 
   ```bash
   uv run xindy -M xindy-src/xindy-2.1/tests/ex1.xdy \
         -o /tmp/ex1.ind xindy-src/xindy-2.1/tests/ex1.raw
   ```
 
-- Chaîner `.idx → .ind` en une commande :
+- Chain `.idx → .ind` in one command:
 
   ```bash
   uv run makeindex4 xindy-src/xindy-2.1/tests/infII.idx -o /tmp/infII.ind
   ```
 
-### Développement local
+## Development
 
-1. Créer un virtualenv et installer les dépendances :
+1. Create a virtual environment and install dependencies:
 
    ```bash
-   uv sync --extra dev  # ou pip install -e .[dev]
+   uv sync --extra dev  # or: pip install -e .[dev]
    ```
 
-2. Lancer les tests et linters :
+2. Run tests and linters:
 
    ```bash
    uv run pytest
    uv run ruff check
    ```
 
-3. Tester le binaire :
+3. Smoke-test the binary:
 
    ```bash
    python -m xindy --version
    ```
 
-Le plan détaillé et la feuille de route sont maintenus dans `PLAN.md`.
+The roadmap is tracked in `PLAN.md`.
