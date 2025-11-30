@@ -76,6 +76,7 @@ uv run makeindex4 input.idx -o output.ind -t output.ilg [-c] [-l]
 
 - `-c`: compress spaces in keys (makeindex behavior)
 - `-l`: ignore spaces for sorting (adds `sort-rule " " ""`)
+- `--debug`: print tracebacks; otherwise errors are summarized and written to the `.ilg` log
 - Generates a temporary style, detects attributes/crossrefs, loads `tex/makeidx4.xdy`.
 
 ## Examples

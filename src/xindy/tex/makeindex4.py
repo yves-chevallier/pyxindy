@@ -7,6 +7,7 @@ from collections.abc import Iterable, Sequence
 from pathlib import Path
 import sys
 import tempfile
+import traceback
 
 from xindy.dsl.interpreter import StyleInterpreter
 from xindy.index import build_index_entries
@@ -70,6 +71,51 @@ def _build_temp_style(
     return dest
 
 
+class _Logger:
+    """Minimal logger that mirrors to stderr when requested and writes .ilg output."""
+
+    def __init__(self, path: Path):
+        self.path = path
+        self._lines: list[str] = []
+        self._mirror = path == Path("-")
+
+    def info(self, message: str, *, mirror: bool | None = None) -> None:
+        self._write(message, mirror=mirror)
+
+    def warn(self, message: str, *, mirror: bool | None = None) -> None:
+        self._write(f"warning: {message}", mirror=mirror)
+
+    def error(self, message: str, *, mirror: bool | None = None) -> None:
+        self._write(f"error: {message}", mirror=mirror)
+
+    def _write(self, message: str, *, mirror: bool | None = None) -> None:
+        self._lines.append(message)
+        if mirror is None:
+            mirror = self._mirror
+        if mirror:
+            sys.stderr.write(message + "\n")
+
+    def flush(self) -> None:
+        if self.path == Path("-"):
+            return
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.path.write_text("\n".join(self._lines) + ("\n" if self._lines else ""), encoding="utf-8")
+
+
+def _format_error(exc: Exception) -> str:
+    if isinstance(exc, FileNotFoundError):
+        filename = getattr(exc, "filename", None) or getattr(exc, "filename2", None)
+        if filename:
+            return f"file not found: {filename}"
+        return str(exc)
+    if isinstance(exc, UnicodeDecodeError):
+        return (
+            f"could not decode input with encoding '{exc.encoding}' "
+            f"(invalid bytes at position {exc.start}-{exc.end})"
+        )
+    return str(exc)
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="makeindex4",
@@ -95,6 +141,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument("-p", help="(makeindex -p) not supported, emits warning")
     parser.add_argument("-s", help="(makeindex -s) not supported, emits warning")
+    parser.add_argument("--debug", action="store_true", help="Show tracebacks on errors.")
     args = parser.parse_args(argv)
 
     idx_path = Path(args.idx) if args.idx != "-" else None
@@ -103,40 +150,47 @@ def main(argv: Sequence[str] | None = None) -> int:
         Path(args.output) if args.output else (base.with_suffix(".ind") if idx_path else Path("-"))
     )
     log_path = Path(args.log) if args.log else (base.with_suffix(".ilg") if idx_path else Path("-"))
+    logger = _Logger(log_path)
 
-    if idx_path is None:
-        idx_text = sys.stdin.buffer.read().decode(args.input_encoding)
-        entries = [e.to_raw() for e in parse_idx(idx_text)]
-    else:
-        entries = convert_idx_to_raw_entries(idx_path, encoding=args.input_encoding)
-    if args.c:
-        entries = [_compress_key_parts(e) for e in entries]
-    attrs = {e.attr for e in entries if e.attr}
-
-    crossref_attrs = {e.attr for e in entries if e.attr and e.extras.get("xref")}
-
-    with tempfile.TemporaryDirectory() as tmpdir:
-        style_path = _build_temp_style(
-            attrs,
-            Path(tmpdir) / "makeindex4.xdy",
-            ignore_blanks=args.l,
-            crossref_attrs=crossref_attrs,
-        )
-        raw_path = Path(tmpdir) / "tmp.raw"
-        write_raw(entries, raw_path, encoding=args.output_encoding)
-
-        state = StyleInterpreter().load(style_path)
-        index = build_index_entries(entries, state)
-        output = render_index(index, style_state=state)
-        if out_path == Path("-"):
-            sys.stdout.write(output)
+    try:
+        if idx_path is None:
+            idx_text = sys.stdin.buffer.read().decode(args.input_encoding)
+            entries = [e.to_raw() for e in parse_idx(idx_text)]
         else:
-            out_path.write_text(output, encoding=args.output_encoding)
-        log_content = f"Processed {len(entries)} entries\n"
-        if log_path == Path("-"):
-            sys.stderr.write(log_content)
-        else:
-            log_path.write_text(log_content, encoding="utf-8")
+            entries = convert_idx_to_raw_entries(idx_path, encoding=args.input_encoding)
+        if args.c:
+            entries = [_compress_key_parts(e) for e in entries]
+        attrs = {e.attr for e in entries if e.attr}
+
+        crossref_attrs = {e.attr for e in entries if e.attr and e.extras.get("xref")}
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            style_path = _build_temp_style(
+                attrs,
+                Path(tmpdir) / "makeindex4.xdy",
+                ignore_blanks=args.l,
+                crossref_attrs=crossref_attrs,
+            )
+            raw_path = Path(tmpdir) / "tmp.raw"
+            write_raw(entries, raw_path, encoding=args.output_encoding)
+
+            state = StyleInterpreter().load(style_path)
+            index = build_index_entries(entries, state)
+            output = render_index(index, style_state=state)
+            if out_path == Path("-"):
+                sys.stdout.write(output)
+            else:
+                out_path.write_text(output, encoding=args.output_encoding)
+            logger.info(f"Processed {len(entries)} entries")
+    except Exception as exc:  # pragma: no cover - defensive path
+        if args.debug:
+            traceback.print_exc()
+        friendly = _format_error(exc)
+        print(f"makeindex4 error: {friendly}", file=sys.stderr)
+        logger.error(friendly, mirror=False)
+        logger.flush()
+        return 1
+
     for flag, name in [
         (args.g, "-g"),
         (args.q, "-q"),
@@ -145,9 +199,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         (bool(args.s), "-s"),
     ]:
         if flag:
-            print(
-                f"Warning: makeindex option {name} not supported by Python wrapper", file=sys.stderr
-            )
+            message = f"makeindex option {name} not supported by Python wrapper"
+            if log_path != Path("-"):
+                print(f"Warning: {message}", file=sys.stderr)
+            logger.warn(message)
+    logger.flush()
     return 0
 
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass, field
+from importlib import resources
 from pathlib import Path
 import re
 
@@ -66,11 +67,21 @@ class StyleInterpreter:
         self._file_stack: list[Path] = []
         if not self.state.basetypes:
             self._register_default_basetypes()
-        modules_dir = (
+        module_paths: list[Path] = []
+        repo_modules = (
             Path(__file__).resolve().parents[3].joinpath("xindy-src", "xindy-2.1", "modules")
         )
-        if modules_dir.exists():
-            self.state.search_paths.append(modules_dir)
+        module_paths.append(repo_modules)
+        try:
+            bundled = resources.files("xindy").joinpath("_modules")
+        except ModuleNotFoundError:
+            bundled = None
+        if bundled:
+            with resources.as_file(bundled) as bundled_path:
+                module_paths.append(bundled_path)
+        for candidate in module_paths:
+            if candidate.exists() and candidate not in self.state.search_paths:
+                self.state.search_paths.append(candidate)
 
     def load(
         self,

@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
 [project]
 name = "xindy"
 version = "0.1.0"
@@ -72,3 +76,14 @@ max-complexity = 10
 "src/xindy/cli.py" = ["B008"]
 "**/__init__.py" = ["F401", "F403"]
 "tests/**" = ["D", "T20", "S101", "ANN", "ARG002", "SLF001", "PT018", "ARG001", "TRY003"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/xindy"]
+force-include = {"xindy-src/xindy-2.1/modules" = "xindy/_modules"}
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/src",
+  "/xindy-src/xindy-2.1/modules",
+  "/README.md",
+]
