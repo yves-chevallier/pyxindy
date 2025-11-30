@@ -40,6 +40,9 @@ class MarkupConfig:
     letter_group_open: str = ""
     letter_group_close: str = ""
     letter_group_separator: str = ""
+    attr_group_open: str = ""
+    attr_group_sep: str = ""
+    attribute_order: list[str] = field(default_factory=list)
     entry_indent: str = "  "
     entry_template: str = "{indent}{term}{locrefs}"
     entry_templates_by_depth: dict[int, str] = field(default_factory=dict)
@@ -105,7 +108,7 @@ def render_index(
                     lines.append("")
                 prefix = prefix.lstrip("\n")
             lines.append(f"{prefix}{header}{cfg.letter_header_suffix}")
-        _render_nodes(group.nodes, lines, cfg, depth=0)
+        _render_nodes(group.nodes, lines, cfg, depth=0, style_state=style_state)
         if cfg.letter_group_separator and idx != len(index.groups) - 1:
             sep_str = cfg.letter_group_separator
             lines.extend(sep_str.splitlines())
@@ -124,6 +127,7 @@ def _render_node(
     lines: list[str],
     cfg: MarkupConfig,
     depth: int,
+    style_state: StyleState | None,
 ) -> None:
     indent = cfg.entry_indent * depth
     # choose locref format based on attribute (fallback to default)
@@ -137,7 +141,7 @@ def _render_node(
             separator=override.separator or locfmt.separator,
         )
 
-    locref_part = _render_locref_part(node, cfg, locfmt, depth)
+    locref_part = _render_locref_part(node, cfg, locfmt, depth, style_state)
 
     template = cfg.entry_templates_by_depth.get(depth, cfg.entry_template)
     line = template.format(
@@ -174,7 +178,7 @@ def _render_node(
     next_depth = depth + 1
     if cfg.max_depth is not None and next_depth > cfg.max_depth:
         return
-    _render_nodes(node.children, lines, cfg, depth=next_depth)
+    _render_nodes(node.children, lines, cfg, depth=next_depth, style_state=style_state)
 
 
 def _render_nodes(
@@ -182,6 +186,7 @@ def _render_nodes(
     lines: list[str],
     cfg: MarkupConfig,
     depth: int,
+    style_state: StyleState | None,
 ) -> None:
     if not nodes:
         return
@@ -189,7 +194,7 @@ def _render_nodes(
     if open_template:
         lines.append(open_template.format(depth=depth))
     for n_idx, node in enumerate(nodes):
-        _render_node(node, lines, cfg, depth=depth)
+        _render_node(node, lines, cfg, depth=depth, style_state=style_state)
         if cfg.entry_separator and n_idx != len(nodes) - 1:
             lines.append(cfg.entry_separator)
     close_template = cfg.entry_list_close_templates.get(depth)
@@ -202,49 +207,83 @@ def _render_locref_part(
     cfg: MarkupConfig,
     locfmt: LocrefFormat,
     depth: int,
+    style_state: StyleState | None,
 ) -> str:
     if not node.locrefs and not node.ranges:
         return ""
-    locrefs_by_class: dict[str, list[object]] = {}
+    locrefs_by_key: dict[tuple[str, str | None], list[object]] = {}
     locclass_map: dict[str, object] = {}
     for ref in node.locrefs:
         class_name = getattr(ref.locclass, "name", "")
         locclass_map[class_name] = ref.locclass
-        locrefs_by_class.setdefault(class_name, []).append(ref)
-    ranges_by_class: dict[str, list[tuple[object, object]]] = {}
+        locrefs_by_key.setdefault((class_name, ref.attribute), []).append(ref)
+    ranges_by_key: dict[tuple[str, str | None], list[tuple[object, object]]] = {}
     for start, end in node.ranges:
         class_name = getattr(start.locclass, "name", "")
-        ranges_by_class.setdefault(class_name, []).append((start, end))
+        ranges_by_key.setdefault((class_name, start.attribute), []).append((start, end))
+
+    # attribute order preference
+    attr_order: list[str] = list(cfg.attribute_order)
+    if style_state:
+        if style_state.attribute_groups:
+            attr_order = []
+            for group in style_state.attribute_groups:
+                attr_order.extend(group)
+        elif style_state.attributes:
+            attr_order = list(style_state.attributes.keys())
+
     parts: list[str] = []
-    for class_name, refs in locrefs_by_class.items():
-        class_ranges = ranges_by_class.get(class_name, [])
+    for (class_name, attr), refs in locrefs_by_key.items():
+        class_ranges = ranges_by_key.get((class_name, attr), [])
         locclass = locclass_map.get(class_name)
+        override_fmt = cfg.locref_formats.get(attr) if attr else None
+        fmt_base = _merge_locfmt(locfmt, override_fmt)
         content = _format_locrefs_for_class(
             refs,
             class_ranges,
             locclass,
             cfg,
             depth,
-            locfmt.separator,
+            fmt_base.separator,
         )
         if content:
-            parts.append(f"{locfmt.prefix}{locfmt.open}{content}{locfmt.close}")
+            parts.append((attr, fmt_base, f"{fmt_base.prefix}{fmt_base.open}{content}{fmt_base.close}"))
     if not parts and node.ranges:
-        for class_name, class_ranges in ranges_by_class.items():
+        for (class_name, attr), class_ranges in ranges_by_key.items():
+            locclass = locclass_map.get(class_name)
+            override_fmt = cfg.locref_formats.get(attr) if attr else None
+            fmt_base = _merge_locfmt(locfmt, override_fmt)
             content = _format_locrefs_for_class(
                 [],
                 class_ranges,
-                locclass_map.get(class_name),
+                locclass,
                 cfg,
                 depth,
-                locfmt.separator,
+                fmt_base.separator,
             )
             if content:
-                parts.append(f"{locfmt.prefix}{locfmt.open}{content}{locfmt.close}")
+                parts.append((attr, fmt_base, f"{fmt_base.prefix}{fmt_base.open}{content}{fmt_base.close}"))
+
     if not parts:
         return ""
+
+    # order attributes if possible
+    def sort_key(item: tuple[str | None, LocrefFormat, str]) -> int:
+        attr, _, _ = item
+        if attr is None:
+            return len(attr_order) + 1
+        if attr in attr_order:
+            return attr_order.index(attr)
+        return len(attr_order)
+
+    parts.sort(key=sort_key)
+    rendered_attrs = [chunk for _, _, chunk in parts]
+    sep = cfg.attr_group_sep or locfmt.separator
     spacer = " " if cfg.backend == "text" else ""
-    return spacer + locfmt.separator.join(parts)
+    body = sep.join(rendered_attrs)
+    if cfg.attr_group_open:
+        body = cfg.attr_group_open + body
+    return spacer + body
 
 
 def _format_locrefs_for_class(
@@ -476,10 +515,26 @@ def _get_locref_layer_format(
     return depth_map.get(depth, {}).get(layer_idx)
 
 
+def _merge_locfmt(base: LocrefFormat, override: LocrefFormat | None) -> LocrefFormat:
+    if override is None:
+        return base
+    return LocrefFormat(
+        prefix=override.prefix or base.prefix,
+        open=override.open or base.open,
+        close=override.close or base.close,
+        separator=override.separator or base.separator,
+    )
+
+
 def _config_from_style(style_state: StyleState) -> MarkupConfig:
     cfg = MarkupConfig()
     cfg.show_letter_headers = bool(style_state.letter_groups)
     opts = style_state.markup_options
+    if style_state.attribute_groups:
+        for group in style_state.attribute_groups:
+            cfg.attribute_order.extend(group)
+    elif style_state.attributes:
+        cfg.attribute_order.extend(style_state.attributes.keys())
 
     index_opts = opts.get("index", {})
     cfg.index_open = _normalize_markup_string(index_opts.get("open", cfg.index_open))
@@ -517,6 +572,14 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
     elif lg_opts:
         # if no explicit header, do not emit headers
         cfg.show_letter_headers = False
+    attr_group_opts = opts.get("attribute_group_list", {})
+    if attr_group_opts:
+        cfg.attr_group_open = _normalize_markup_string(
+            attr_group_opts.get("open", cfg.attr_group_open)
+        )
+        cfg.attr_group_sep = _normalize_markup_string(
+            attr_group_opts.get("sep", cfg.attr_group_sep)
+        )
 
     entry_list_opts = opts.get("indexentry_list", {})
     if "sep" in entry_list_opts:

@@ -178,6 +178,7 @@ class StyleInterpreter:
             "markup-locclass-list": self._handle_markup_locclass_list,
             "markup-crossref-list": self._handle_markup_crossref_list,
             "markup-range": self._handle_markup_range,
+            "markup-attribute-group-list": self._handle_markup_attribute_group_list,
             "progn": self._handle_progn,
         }
         if head.name == "mapc":
@@ -410,6 +411,10 @@ class StyleInterpreter:
     def _handle_markup_range(self, args: list[object]) -> None:
         kwargs = self._parse_markup_kwargs(args)
         self.state.markup_options["range"] = kwargs
+
+    def _handle_markup_attribute_group_list(self, args: list[object]) -> None:
+        kwargs = self._parse_markup_kwargs(args)
+        self.state.markup_options["attribute_group_list"] = kwargs
 
     def _parse_markup_kwargs(self, args: list[object]) -> dict[str, object]:
         kwargs: dict[str, object] = {}
