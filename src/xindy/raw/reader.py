@@ -55,13 +55,16 @@ def _entry_from_form(form: object) -> RawIndexEntry:
             raise RawIndexSyntaxError("indexentry properties must start with keywords")
         properties[key.name] = rest[i + 1]
 
-    key = _coerce_key(properties.get("key"))
+    key_prop = properties.get("key")
+    if key_prop is None and "tkey" in properties:
+        key_prop = properties.get("tkey")
+    key = _coerce_key(key_prop)
     locref = _coerce_optional_string(properties.get("locref"))
     attr = _coerce_optional_string(properties.get("attr"))
     extras = {
         name: value
         for name, value in properties.items()
-        if name not in {"key", "locref", "attr"}
+        if name not in {"key", "tkey", "locref", "attr"}
     }
     return RawIndexEntry(key=key, locref=locref, attr=attr, extras=extras)
 
@@ -71,9 +74,14 @@ def _coerce_key(value: object) -> tuple[str, ...]:
         raise RawIndexSyntaxError(":key must be a non-empty list")
     coerced: list[str] = []
     for part in value:
-        if not isinstance(part, str):
-            raise RawIndexSyntaxError(":key entries must be strings")
-        coerced.append(part)
+        if isinstance(part, list):
+            if not part or not isinstance(part[0], str):
+                raise RawIndexSyntaxError(":tkey entries must be string lists")
+            coerced.append(part[0])
+        else:
+            if not isinstance(part, str):
+                raise RawIndexSyntaxError(":key entries must be strings")
+            coerced.append(part)
     return tuple(coerced)
 
 

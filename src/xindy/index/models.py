@@ -49,10 +49,7 @@ class IndexNode:
 
     def add_locrefs(self, refs: Iterable[LayeredLocationReference]) -> bool:
         added = False
-        existing = {
-            (ref.locref_string, ref.attribute)
-            for ref in self.locrefs
-        }
+        existing = {(ref.locref_string, ref.attribute) for ref in self.locrefs}
         for ref in refs:
             signature = (ref.locref_string, ref.attribute)
             if signature in existing:
