@@ -1,9 +1,0 @@
-# TODO – Parité avec le xindy CLISP original
-
-- [x] Supporter `define-alphabet`, `define-alphabet*` et `define-enumeration` dans l’interpréteur `.xdy` pour enregistrer de nouveaux basetypes au lieu de lever `StyleError` sur ces formes (src/xindy/dsl/interpreter.py:174-205).
-- [x] Honorer `define-location-class-order` lors de la résolution/matching des `locref` et du choix de la classe par défaut (valeur stockée mais ignorée dans src/xindy/index/builder.py:25-110).
-- [x] Exploiter les métadonnées de `CategoryAttribute` (ordres de groupe/tri/processing, `last_in_group`, `type`, `markup`) lors de `define-attributes` et dans la construction/rendu des locrefs (champs jamais alimentés dans src/xindy/locref/references.py:11-38).
-- [x] Implémenter la gestion des classes de cross‑références (verified/unverified) : utiliser `StyleState.crossref_classes`, typer les xrefs, et propager le suffixe `unverified` côté rendu (actuellement seulement `extras["xref"]` est pris en compte ; voir src/xindy/dsl/interpreter.py:32-58 et src/xindy/index/builder.py:25-85).
-- [x] Couvrir les macros de markup manquantes et leurs effets : `markup-trace`, `markup-locref-class`, `markup-attribute-group`, distinction `markup-keyword`/`markup-keyword-list`, et l’effet `:tree/:flat/:hierdepth` de `markup-index` sur la hiérarchie/rendu (non pris en compte dans src/xindy/dsl/interpreter.py:189-205 et src/xindy/markup/renderer.py).
-- [x] Assouplir le builder pour émettre des avertissements comme l’implémentation CL (locrefs introuvables, attributs inconnus) au lieu de lever systématiquement `IndexBuilderError` qui stoppe le run (src/xindy/index/builder.py:36-85).
-- [x] Parité CLI avec `xindy.in`/`makeindex4.in` : options de filtrage `-f`, niveaux de log `-L`, mode interactif/try (`-i/-n`), flags de traçage markup et compatibilité stdin/flux pour tex2xindy/makeindex4 (src/xindy/cli.py, src/xindy/tex/*.py).
