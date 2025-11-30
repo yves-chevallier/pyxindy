@@ -1,6 +1,0 @@
-;;
-;; This file is the testbed for most other tests.
-;;
-
-(searchpath ("." "../modules"))
-

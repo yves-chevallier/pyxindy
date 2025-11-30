@@ -2,7 +2,7 @@
 
 (mapc #'(lambda (x)
 	  (pushnew x *features*))
-      '(STEP1 STEP2 STEP3 STEP4 STEP5 STEP6 STEP7 STEP8 STEP9 STEP10))
+      '(STEP1 STEP2 STEP3 STEP4 STEP5 STEP6 STEP7 STEP8 STEP9))
 
 #+STEP1
 (progn
@@ -40,7 +40,7 @@
   (sort-rule "é" "e")
   (sort-rule "ç" "c")
 
-  (sort-rule "\\texttt{(.*)}" "\1" :again :bregexp)
+  (sort-rule "\\texttt{(.*)}" "\1" :again)
   )
 
 #+STEP5
@@ -66,8 +66,10 @@
 (progn
   (define-location-class "appendices" ("ALPHA" :sep "-" "arabic-numbers")
     :hierdepth 2)
-  (markup-locref-list            :sep "; " :depth 0  :class "appendices")
-  (markup-locref-list :open "~~" :sep ", " :depth 1  :class "appendices")
+  (markup-locref-list              :sep "; " :depth 0  :class "appendices")
+  (markup-locref-list  :open "~~"  :sep ", " :depth 1  :class "appendices")
+  (markup-locref-layer :open "\textbf{" :close "}" :depth 0
+                      :layer 0 :class "appendices")
   )
 
 #+STEP9

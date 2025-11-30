@@ -2,7 +2,7 @@
 
 (mapc #'(lambda (x)
 	  (pushnew x *features*))
-      '(STEP1 STEP2 #|STEP3 STEP44 STEP55|#))
+      '(STEP1 STEP2 STEP3 STEP4 STEP5))
 
 #+STEP1
 (progn

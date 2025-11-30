@@ -14,3 +14,6 @@ Images referenced by the manual now live in `docs/assets/`.
 5. [Invoking xindy](invoking-xindy.md)
 6. [Command index](command-index.md)
 7. [References](references.md)
+8. [xindy by Topic (FAQ/how-to)](by-topic/index.md)
+9. Manpages: [xindy](manpages/xindy.md), [tex2xindy](manpages/tex2xindy.md), [makeindex4](manpages/makeindex4.md)
+10. [Legacy doc README](doc-readme.md)

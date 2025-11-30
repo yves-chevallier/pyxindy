@@ -1,5 +1,0 @@
-a: \imp{12}, \def{13}-\def{15}, \imp{16}, \def{18}, 14, 16
-b: \def{10}-\def{12}, \imp{13}, \imp{14}
-c: \imp{12}-\imp{14}, 10-12
-d: \def{12}-\def{14}, 10-12
-f: \folone{a}f., \foltwo{d}ff., \folthr{h}fff., \folmany{m--q}

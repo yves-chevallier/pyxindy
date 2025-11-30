@@ -125,7 +125,7 @@ substitutions that also include regular expression features.
 
 The following figure describes this:
 
-![](../assets/mappings.svg)
+![](../assets/mapping.svg)
 
 The merge-key is necessary to define the equality of
 index entry keys. See command `merge-rule` for further details about

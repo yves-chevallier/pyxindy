@@ -1,9 +1,0 @@
-;; Example raw-index file.
-
-(indexentry :key ("A")                      :locref "1")
-(indexentry :key ("A" "B")                  :locref "1")
-(indexentry :key ("A" "B" "C")              :locref "1")
-(indexentry :key ("A" "B" "C" "D")          :locref "1")
-(indexentry :key ("A" "B" "C" "D" "E")      :locref "1")
-(indexentry :key ("A" "B" "C" "D" "E" "F")  :locref "1")
-
