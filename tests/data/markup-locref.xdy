@@ -2,4 +2,4 @@
 (define-attributes (("def" "imp")))
 (markup-locref :attr "def" :open "<" :close ">" :sep "|")
 (markup-locref :attr "imp" :open "[" :close "]" :sep ";")
-(markup-indexentry-list :sep "||")
+(markup-indexentry-list :open "<<LIST>>" :close "<<ENDLIST>>" :sep "||")

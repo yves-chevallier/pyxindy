@@ -30,6 +30,8 @@ class MarkupConfig:
     entry_indent: str = "  "
     entry_template: str = "{indent}{term}{locrefs}"
     entry_templates_by_depth: dict[int, str] = field(default_factory=dict)
+    entry_list_open_templates: dict[int, str] = field(default_factory=dict)
+    entry_list_close_templates: dict[int, str] = field(default_factory=dict)
     entry_open_templates: dict[int, str] = field(default_factory=dict)
     entry_close_templates: dict[int, str] = field(default_factory=dict)
     entry_separator: str = ""
@@ -60,10 +62,7 @@ def render_index(
         if cfg.show_letter_headers:
             header = cfg.letter_header_template.format(label=group.label.upper())
             lines.append(f"{cfg.letter_header_prefix}{header}{cfg.letter_header_suffix}")
-        for n_idx, node in enumerate(group.nodes):
-            _render_node(node, lines, cfg, depth=0)
-            if cfg.entry_separator and n_idx != len(group.nodes) - 1:
-                lines.append(cfg.entry_separator)
+        _render_nodes(group.nodes, lines, cfg, depth=0)
         if cfg.letter_group_separator and idx != len(index.groups) - 1:
             lines.append(cfg.letter_group_separator)
         if cfg.letter_group_close:
@@ -130,8 +129,27 @@ def _render_node(
     next_depth = depth + 1
     if cfg.max_depth is not None and next_depth > cfg.max_depth:
         return
-    for child in node.children:
-        _render_node(child, lines, cfg, next_depth)
+    _render_nodes(node.children, lines, cfg, depth=next_depth)
+
+
+def _render_nodes(
+    nodes: list[IndexNode],
+    lines: list[str],
+    cfg: MarkupConfig,
+    depth: int,
+) -> None:
+    if not nodes:
+        return
+    open_template = cfg.entry_list_open_templates.get(depth)
+    if open_template:
+        lines.append(open_template.format(depth=depth))
+    for n_idx, node in enumerate(nodes):
+        _render_node(node, lines, cfg, depth=depth)
+        if cfg.entry_separator and n_idx != len(nodes) - 1:
+            lines.append(cfg.entry_separator)
+    close_template = cfg.entry_list_close_templates.get(depth)
+    if close_template:
+        lines.append(close_template.format(depth=depth))
 
 
 def _config_from_style(style_state: StyleState) -> MarkupConfig:
@@ -150,6 +168,10 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
     entry_list_opts = opts.get("indexentry_list", {})
     if "sep" in entry_list_opts:
         cfg.entry_separator = entry_list_opts["sep"]
+    if "open" in entry_list_opts:
+        cfg.entry_list_open_templates[0] = entry_list_opts["open"]
+    if "close" in entry_list_opts:
+        cfg.entry_list_close_templates[0] = entry_list_opts["close"]
 
     entries = opts.get("indexentries", {})
     for depth, entry_cfg in entries.items():

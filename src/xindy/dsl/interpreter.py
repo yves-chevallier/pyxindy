@@ -48,6 +48,7 @@ class StyleState:
     )
     merge_rules: list[tuple[str, str, bool]] = field(default_factory=list)
     markup_options: dict[str, object] = field(default_factory=dict)
+    features: set[str] = field(default_factory=set)
 
     def register_basetype(self, basetype: BaseType) -> None:
         self.basetypes[basetype.name] = basetype
@@ -120,6 +121,13 @@ class StyleInterpreter:
         head = form[0]
         if not isinstance(head, Symbol):
             return
+        # reader conditional #+FEATURE
+        if head.name.startswith("#+"):
+            feature = head.name[2:]
+            if feature in self.state.features:
+                for subform in form[1:]:
+                    self._eval_form(subform)
+            return
         dispatch = {
             "searchpath": self._handle_searchpath,
             "require": self._handle_require,
@@ -136,6 +144,9 @@ class StyleInterpreter:
             "markup-locref": self._handle_markup_locref,
             "markup-crossref-list": self._handle_markup_crossref_list,
         }
+        if head.name == "mapc":
+            self._handle_mapc(form[1:])
+            return
         handler = dispatch.get(head.name)
         if handler:
             handler(form[1:])
@@ -286,6 +297,23 @@ class StyleInterpreter:
             else:
                 idx += 1
         return kwargs
+
+    def _handle_mapc(self, args: list[object]) -> None:
+        # crude handling of (mapc #'(lambda (x) (pushnew x *features*)) '(STEP1 ...))
+        if len(args) != 2:
+            return
+        lst = args[1]
+        if (
+            isinstance(lst, list)
+            and lst
+            and isinstance(lst[0], Symbol)
+            and lst[0].name == "quote"
+        ):
+            feature_list = lst[1]
+            if isinstance(feature_list, list):
+                for sym in feature_list:
+                    if isinstance(sym, Symbol):
+                        self.state.features.add(sym.name)
 
     # ------------------------------------------------------------------ parsing helpers
 

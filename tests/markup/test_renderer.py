@@ -89,4 +89,5 @@ def test_locref_formats_are_attr_specific():
     output = render_index(index, style_state=state)
     assert "<1|2" in output
     assert "[3;4" in output
-    assert "||" in output
+    assert "<<LIST>>" in output
+    assert "<<ENDLIST>>" in output
