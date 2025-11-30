@@ -68,7 +68,7 @@ class StyleInterpreter:
         if not self.state.basetypes:
             self._register_default_basetypes()
         module_paths: list[Path] = []
-        repo_modules = Path(__file__).resolve().parents[3].joinpath("vendor", "xindy-2.1", "modules")
+        repo_modules = Path(__file__).resolve().parents[1].joinpath("_modules")
         module_paths.append(repo_modules)
         try:
             bundled = resources.files("xindy").joinpath("_modules")
@@ -227,7 +227,8 @@ class StyleInterpreter:
             if not candidate.is_absolute():
                 candidate = (self._current_dir() / candidate).resolve()
             new_paths.append(candidate)
-        self.state.search_paths = new_paths
+        existing = [p for p in self.state.search_paths if p not in new_paths]
+        self.state.search_paths = new_paths + existing
 
     def _handle_require(self, args: list[object]) -> None:
         if len(args) != 1:

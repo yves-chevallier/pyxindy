@@ -80,11 +80,11 @@ max-complexity = 10
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/xindy"]
-force-include = {"vendor/xindy-2.1/modules" = "xindy/_modules"}
+force-include = {"src/xindy/_modules" = "xindy/_modules"}
 
 [tool.hatch.build.targets.sdist]
 include = [
   "/src",
-  "/vendor/xindy-2.1/modules",
+  "/src/xindy/_modules",
   "/README.md",
 ]
