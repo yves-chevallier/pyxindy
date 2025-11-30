@@ -9,11 +9,9 @@ DATA_DIR = Path(__file__).resolve().parent / "data"
 
 
 def test_version_option_outputs_version(capsys):
-    with pytest.raises(SystemExit) as exc:
-        cli.main(["--version"])
-
-    assert exc.value.code == 0
+    code = cli.main(["--version"])
     captured = capsys.readouterr()
+    assert code == 0
     assert __version__ in captured.out
 
 

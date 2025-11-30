@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-import argparse
-from collections.abc import Sequence
 import os
+from collections.abc import Sequence
 from pathlib import Path
 import subprocess
 import sys
+
+import click
 
 from . import __version__
 from .dsl.interpreter import StyleError, StyleInterpreter
@@ -17,148 +18,190 @@ from .markup import render_index
 from .raw.reader import load_raw_index, parse_raw_index
 
 
-def build_argument_parser() -> argparse.ArgumentParser:
-    """Return the argparse configuration used by the CLI."""
-    parser = argparse.ArgumentParser(
-        prog="xindy",
-        description="Experimental Python port of the xindy index processor.",
+@click.command(
+    context_settings={"help_option_names": ["-h", "--help"]},
+    help="Experimental Python port of the xindy index processor.",
+)
+@click.version_option(__version__, message="%(prog)s %(version)s")
+@click.option(
+    "-o",
+    "--output",
+    type=click.Path(dir_okay=False, resolve_path=True, path_type=Path),
+    help="Write output to FILE instead of stdout.",
+)
+@click.option(
+    "-M",
+    "--module",
+    "--style",
+    "style",
+    type=click.Path(dir_okay=False, resolve_path=True, path_type=Path),
+    help="Style file (.xdy). Defaults to <raw>.xdy if omitted.",
+)
+@click.option(
+    "-f",
+    "--filter",
+    "filter_cmd",
+    help="Filter program to preprocess raw input (read from stdin, emit raw).",
+)
+@click.option(
+    "-L",
+    "--searchpath",
+    "searchpath",
+    multiple=True,
+    type=click.Path(resolve_path=True, path_type=Path),
+    help="Additional style search path (can be given multiple times).",
+)
+@click.option(
+    "--log-level",
+    "-V",
+    "loglevel",
+    type=int,
+    default=None,
+    help="Logging verbosity level (compat xindy.in -L).",
+)
+@click.option(
+    "-C",
+    "--codepage",
+    default="utf-8",
+    show_default=True,
+    help="Encoding used to write the output.",
+)
+@click.option(
+    "-l",
+    "--log",
+    "logfile",
+    type=click.Path(dir_okay=False, resolve_path=True, path_type=Path),
+    help="Write a brief log to FILE (best-effort).",
+)
+@click.option(
+    "-t",
+    "--trace",
+    is_flag=True,
+    help="Print tracebacks on errors.",
+)
+@click.option(
+    "--markup-trace",
+    is_flag=True,
+    help="Enable markup tracing (compat -t from xindy.in; best-effort).",
+)
+@click.option(
+    "-i",
+    "--interactive",
+    is_flag=True,
+    help="Compatibility flag (interactive mode not supported; ignored with warning).",
+)
+@click.option(
+    "-n",
+    "--try-run",
+    is_flag=True,
+    help="Compatibility flag (try-run/skip checks; ignored with warning).",
+)
+@click.argument("raw")
+@click.pass_context
+def cli(
+    ctx: click.Context,
+    raw: str,
+    output: Path | None,
+    style: Path | None,
+    filter_cmd: str | None,
+    searchpath: tuple[Path, ...],
+    loglevel: int | None,
+    codepage: str,
+    logfile: Path | None,
+    trace: bool,
+    markup_trace: bool,
+    interactive: bool,
+    try_run: bool,
+) -> int:
+    """Click entrypoint for the xindy CLI."""
+    return _run_cli(
+        ctx=ctx,
+        raw=raw,
+        output=output,
+        style=style,
+        filter_cmd=filter_cmd,
+        searchpath=list(searchpath),
+        loglevel=loglevel,
+        codepage=codepage,
+        logfile=logfile,
+        trace=trace,
+        markup_trace=markup_trace,
+        interactive=interactive,
+        try_run=try_run,
     )
-    parser.add_argument(
-        "--version",
-        action="version",
-        version=f"xindy {__version__}",
-        help="Print the xindy version and exit.",
-    )
-    parser.add_argument("-o", "--output", help="Write output to FILE instead of stdout.")
-    parser.add_argument(
-        "-M",
-        "--module",
-        dest="style",
-        help="Style file (.xdy). Defaults to <raw>.xdy if omitted.",
-    )
-    parser.add_argument(
-        "-f",
-        "--filter",
-        dest="filter_cmd",
-        help="Filter program to preprocess raw input (read from stdin, emit raw).",
-    )
-    parser.add_argument(
-        "-L",
-        "--searchpath",
-        action="append",
-        default=[],
-        help="Additional style search path (can be given multiple times).",
-    )
-    parser.add_argument(
-        "--log-level",
-        "-V",
-        dest="loglevel",
-        type=int,
-        default=None,
-        help="Logging verbosity level (compat xindy.in -L).",
-    )
-    parser.add_argument(
-        "-C",
-        "--codepage",
-        default="utf-8",
-        help="Encoding used to write the output (default: utf-8).",
-    )
-    parser.add_argument(
-        "-l",
-        "--log",
-        dest="logfile",
-        help="Write a brief log to FILE (best-effort).",
-    )
-    parser.add_argument(
-        "-t",
-        "--trace",
-        action="store_true",
-        help="Print tracebacks on errors.",
-    )
-    parser.add_argument(
-        "--markup-trace",
-        action="store_true",
-        help="Enable markup tracing (compat -t from xindy.in; best-effort).",
-    )
-    parser.add_argument(
-        "-i",
-        "--interactive",
-        action="store_true",
-        help="Compatibility flag (interactive mode not supported; ignored with warning).",
-    )
-    parser.add_argument(
-        "-n",
-        "--try-run",
-        action="store_true",
-        help="Compatibility flag (try-run/skip checks; ignored with warning).",
-    )
-    parser.add_argument(
-        "raw",
-        nargs=1,
-        help="Raw index file (.raw) to process.",
-    )
-    return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     """Entry point used by both python -m xindy and console scripts."""
-    parser = build_argument_parser()
-    args = parser.parse_args(argv)
+    try:
+        result = cli.main(args=list(argv) if argv is not None else None, standalone_mode=False)
+    except SystemExit as exc:
+        return int(exc.code)
+    except click.ClickException as exc:
+        exc.show()
+        return exc.exit_code
+    return int(result) if isinstance(result, int) else 0
 
-    raw_arg = args.raw[0]
-    if raw_arg == "-":
-        raw_path = None
-    else:
-        raw_path = Path(raw_arg).resolve()
-        if not raw_path.exists():
-            parser.error(f"raw file not found: {raw_path}")
 
-    style_path = (
-        Path(args.style).resolve()
-        if args.style
-        else (raw_path.with_suffix(".xdy") if raw_path else None)
-    )
+def _run_cli(
+    *,
+    ctx: click.Context,
+    raw: str,
+    output: Path | None,
+    style: Path | None,
+    filter_cmd: str | None,
+    searchpath: list[Path],
+    loglevel: int | None,
+    codepage: str,
+    logfile: Path | None,
+    trace: bool,
+    markup_trace: bool,
+    interactive: bool,
+    try_run: bool,
+) -> int:
+    raw_path = None if raw == "-" else Path(raw).resolve()
+    if raw_path is not None and not raw_path.exists():
+        raise click.UsageError(f"raw file not found: {raw_path}", ctx=ctx)
+
+    style_path = style if style else (raw_path.with_suffix(".xdy") if raw_path else None)
     if style_path is None or not style_path.exists():
-        parser.error(f"style file not found: {style_path}")
+        raise click.UsageError(f"style file not found: {style_path}", ctx=ctx)
 
     search_paths: list[Path] = []
     env_search = os.environ.get("XINDY_SEARCHPATH")
     if env_search:
         search_paths.extend(Path(p).resolve() for p in env_search.split(os.pathsep) if p.strip())
-    search_paths.extend(Path(p).resolve() for p in args.searchpath)
-    # ensure style directory is always searched for relative requires
+    search_paths.extend(searchpath)
     search_paths.append(style_path.parent)
-
-    logfile = Path(args.logfile).resolve() if args.logfile else None
 
     def _log(message: str) -> None:
         if logfile:
             logfile.parent.mkdir(parents=True, exist_ok=True)
             with logfile.open("a", encoding="utf-8") as fh:
                 fh.write(message + "\n")
-        elif args.loglevel:
+        elif loglevel:
             sys.stderr.write(message + "\n")
 
     try:
         interpreter = StyleInterpreter()
         state = interpreter.load(style_path, extra_search_paths=search_paths)
-        if args.markup_trace:
+        if markup_trace:
             state.markup_options.setdefault("trace", {})["enabled"] = True
-        if args.interactive:
+        if interactive:
             print(
                 "warning: interactive mode (-i) not supported in Python port; ignoring",
                 file=sys.stderr,
             )
-        if args.try_run:
+        if try_run:
             print("note: try-run (-n) has no effect in Python port", file=sys.stderr)
-        if args.loglevel is not None:
-            _log(f"log level set to {args.loglevel}")
+        if loglevel is not None:
+            _log(f"log level set to {loglevel}")
 
-        if args.filter_cmd:
-            raw_text = _read_raw_text(raw_path, args.codepage)
+        if filter_cmd:
+            raw_text = _read_raw_text(raw_path, codepage)
             filtered = subprocess.run(
-                args.filter_cmd,
-                input=raw_text.encode(args.codepage),
+                filter_cmd,
+                input=raw_text.encode(codepage),
                 capture_output=True,
                 shell=True,
             )
@@ -166,32 +209,31 @@ def main(argv: Sequence[str] | None = None) -> int:
                 raise RuntimeError(
                     f"filter command failed ({filtered.returncode}): {filtered.stderr.decode(errors='ignore')}"
                 ) from None
-            raw_entries = parse_raw_index(filtered.stdout.decode(args.codepage))
+            raw_entries = parse_raw_index(filtered.stdout.decode(codepage))
         elif raw_path is None:
-            raw_text = sys.stdin.buffer.read().decode(args.codepage)
+            raw_text = sys.stdin.buffer.read().decode(codepage)
             raw_entries = parse_raw_index(raw_text)
         else:
             raw_entries = load_raw_index(raw_path)
         index = build_index_entries(raw_entries, state)
-        output = render_index(index, style_state=state)
+        output_text = render_index(index, style_state=state)
     except (FileNotFoundError, StyleError, SExprSyntaxError) as exc:
         print(f"xindy error: {exc}", file=sys.stderr)
         _log(f"error: {exc}")
         return 1
     except Exception as exc:  # pragma: no cover - defensive path
-        if args.trace:
+        if trace:
             raise
         print(f"xindy error: {exc}", file=sys.stderr)
         _log(f"error: {exc}")
         return 1
 
-    if args.output:
-        out_path = Path(args.output).resolve()
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(output, encoding=args.codepage)
-        _log(f"wrote {out_path}")
+    if output:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(output_text, encoding=codepage)
+        _log(f"wrote {output}")
     else:
-        sys.stdout.write(output)
+        sys.stdout.write(output_text)
     return 0
 
 
