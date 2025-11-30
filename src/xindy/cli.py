@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import subprocess
 import os
 from pathlib import Path
 import sys
@@ -13,7 +14,7 @@ from .dsl.interpreter import StyleError, StyleInterpreter
 from .dsl.sexpr import SExprSyntaxError
 from .index import build_index_entries
 from .markup import render_index
-from .raw.reader import load_raw_index
+from .raw.reader import load_raw_index, parse_raw_index
 
 
 def build_argument_parser() -> argparse.ArgumentParser:
@@ -36,11 +37,25 @@ def build_argument_parser() -> argparse.ArgumentParser:
         help="Style file (.xdy). Defaults to <raw>.xdy if omitted.",
     )
     parser.add_argument(
+        "-f",
+        "--filter",
+        dest="filter_cmd",
+        help="Filter program to preprocess raw input (read from stdin, emit raw).",
+    )
+    parser.add_argument(
         "-L",
         "--searchpath",
         action="append",
         default=[],
         help="Additional style search path (can be given multiple times).",
+    )
+    parser.add_argument(
+        "--log-level",
+        "-V",
+        dest="loglevel",
+        type=int,
+        default=None,
+        help="Logging verbosity level (compat xindy.in -L).",
     )
     parser.add_argument(
         "-C",
@@ -61,6 +76,23 @@ def build_argument_parser() -> argparse.ArgumentParser:
         help="Print tracebacks on errors.",
     )
     parser.add_argument(
+        "--markup-trace",
+        action="store_true",
+        help="Enable markup tracing (compat -t from xindy.in; best-effort).",
+    )
+    parser.add_argument(
+        "-i",
+        "--interactive",
+        action="store_true",
+        help="Compatibility flag (interactive mode not supported; ignored with warning).",
+    )
+    parser.add_argument(
+        "-n",
+        "--try-run",
+        action="store_true",
+        help="Compatibility flag (try-run/skip checks; ignored with warning).",
+    )
+    parser.add_argument(
         "raw",
         nargs=1,
         help="Raw index file (.raw) to process.",
@@ -73,12 +105,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = build_argument_parser()
     args = parser.parse_args(argv)
 
-    raw_path = Path(args.raw[0]).resolve()
-    if not raw_path.exists():
-        parser.error(f"raw file not found: {raw_path}")
+    raw_arg = args.raw[0]
+    if raw_arg == "-":
+        raw_path = None
+    else:
+        raw_path = Path(raw_arg).resolve()
+        if not raw_path.exists():
+            parser.error(f"raw file not found: {raw_path}")
 
-    style_path = Path(args.style).resolve() if args.style else raw_path.with_suffix(".xdy")
-    if not style_path.exists():
+    style_path = Path(args.style).resolve() if args.style else (raw_path.with_suffix(".xdy") if raw_path else None)
+    if style_path is None or not style_path.exists():
         parser.error(f"style file not found: {style_path}")
 
     search_paths: list[Path] = []
@@ -98,11 +134,40 @@ def main(argv: Sequence[str] | None = None) -> int:
             logfile.parent.mkdir(parents=True, exist_ok=True)
             with logfile.open("a", encoding="utf-8") as fh:
                 fh.write(message + "\n")
+        elif args.loglevel:
+            sys.stderr.write(message + "\n")
 
     try:
         interpreter = StyleInterpreter()
         state = interpreter.load(style_path, extra_search_paths=search_paths)
-        raw_entries = load_raw_index(raw_path)
+        if args.markup_trace:
+            state.markup_options.setdefault("trace", {})["enabled"] = True
+        if args.interactive:
+            print("warning: interactive mode (-i) not supported in Python port; ignoring", file=sys.stderr)
+        if args.try_run:
+            print("note: try-run (-n) has no effect in Python port", file=sys.stderr)
+        if args.loglevel is not None:
+            _log(f"log level set to {args.loglevel}")
+
+        if args.filter_cmd:
+            raw_text = _read_raw_text(raw_path, args.codepage)
+            filtered = subprocess.run(
+                args.filter_cmd,
+                input=raw_text.encode(args.codepage),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                shell=True,
+            )
+            if filtered.returncode != 0:
+                raise RuntimeError(
+                    f"filter command failed ({filtered.returncode}): {filtered.stderr.decode(errors='ignore')}"
+                )
+            raw_entries = parse_raw_index(filtered.stdout.decode(args.codepage))
+        elif raw_path is None:
+            raw_text = sys.stdin.buffer.read().decode(args.codepage)
+            raw_entries = parse_raw_index(raw_text)
+        else:
+            raw_entries = load_raw_index(raw_path)
         index = build_index_entries(raw_entries, state)
         output = render_index(index, style_state=state)
     except (FileNotFoundError, StyleError, SExprSyntaxError) as exc:
@@ -124,6 +189,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     else:
         sys.stdout.write(output)
     return 0
+
+
+def _read_raw_text(raw_path: Path | None, encoding: str) -> str:
+    if raw_path is None:
+        return sys.stdin.buffer.read().decode(encoding)
+    try:
+        return raw_path.read_text(encoding=encoding)
+    except UnicodeDecodeError:
+        return raw_path.read_text(encoding="latin-1")
 
 
 if __name__ == "__main__":

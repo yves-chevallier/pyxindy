@@ -78,6 +78,8 @@ def render_index(
     style_state: StyleState | None = None,
 ) -> str:
     cfg = config or (_config_from_style(style_state) if style_state else MarkupConfig())
+    if style_state and "max_depth" in style_state.markup_options:
+        cfg.max_depth = style_state.markup_options.get("max_depth")
     if cfg.backend == "tex" and cfg.entry_template == "{indent}{term}{locrefs}":
         cfg.entry_template = "{term}{locrefs}"
     lines: list[str] = []
@@ -149,7 +151,7 @@ def _render_node(
             else:
                 body = f"{cfg.crossref_prefix}{refs}{cfg.crossref_suffix}"
             suffix = ""
-            if crossref.attribute and crossref.attribute.lower() == "unverified":
+            if not getattr(crossref, "verified", True):
                 suffix = cfg.crossref_unverified_suffix
             crossref_parts.append(f"{body}{suffix}")
     template = cfg.entry_templates_by_depth.get(depth, cfg.entry_template)
@@ -235,7 +237,11 @@ def _render_locref_part(
             for group in style_state.attribute_groups:
                 attr_order.extend(group)
         elif style_state.attributes:
-            attr_order = list(style_state.attributes.keys())
+            ordered_attrs = sorted(
+                style_state.attributes.values(),
+                key=lambda cat: getattr(cat, "sort_ordnum", float("inf")),
+            )
+            attr_order = [cat.name for cat in ordered_attrs]
 
     parts: list[tuple[str | None, LocrefFormat, list[object], list[tuple[object, object]], object]] = []
     for (class_name, attr), refs in locrefs_by_key.items():
@@ -726,6 +732,13 @@ def _get_locref_list_format(
     class_name: str,
     depth: int,
 ) -> LocrefListFormat | None:
+    # locref_class markup overrides list formatting for a specific class
+    class_fmt = cfg.locref_list_formats.get(class_name)
+    if class_fmt and depth in class_fmt:
+        return class_fmt[depth]
+    class_fmt = cfg.locref_list_formats.get("__default__")
+    if class_fmt and depth in class_fmt:
+        return class_fmt[depth]
     return (
         cfg.locref_list_formats.get(class_name, {}).get(depth)
         or cfg.locref_list_formats.get("__default__", {}).get(depth)
@@ -879,6 +892,14 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
         cfg.default_locref_format.prefix = _normalize_markup_string(
             locclass_list["open"]
         )
+    locref_class_opts = opts.get("locref_class", {})
+    for class_name, raw_cfg in locref_class_opts.items():
+        fmt = LocrefListFormat()
+        if "open" in raw_cfg:
+            fmt.open = _normalize_markup_string(raw_cfg["open"])
+        if "sep" in raw_cfg:
+            fmt.sep = _normalize_markup_string(raw_cfg["sep"])
+        cfg.locref_list_formats.setdefault(class_name, {})[0] = fmt
 
     locref_layers = opts.get("locref_layers", {})
     for class_name, depth_map in locref_layers.items():

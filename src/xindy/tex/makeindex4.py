@@ -6,6 +6,7 @@ import argparse
 import sys
 import tempfile
 from pathlib import Path
+import sys
 from typing import Iterable, Sequence
 
 from xindy.dsl.interpreter import StyleInterpreter
@@ -91,12 +92,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("-s", help="(makeindex -s) not supported, emits warning")
     args = parser.parse_args(argv)
 
-    idx_path = Path(args.idx)
-    base = idx_path.with_suffix("")
-    out_path = Path(args.output) if args.output else base.with_suffix(".ind")
-    log_path = Path(args.log) if args.log else base.with_suffix(".ilg")
+    idx_path = Path(args.idx) if args.idx != "-" else None
+    base = idx_path.with_suffix("") if idx_path else Path("stdin")
+    out_path = Path(args.output) if args.output else (base.with_suffix(".ind") if idx_path else Path("-"))
+    log_path = Path(args.log) if args.log else (base.with_suffix(".ilg") if idx_path else Path("-"))
 
-    entries = convert_idx_to_raw_entries(idx_path, encoding=args.input_encoding)
+    if idx_path is None:
+        idx_text = sys.stdin.buffer.read().decode(args.input_encoding)
+        entries = [e.to_raw() for e in parse_idx(idx_text)]
+    else:
+        entries = convert_idx_to_raw_entries(idx_path, encoding=args.input_encoding)
     if args.c:
         entries = [_compress_key_parts(e) for e in entries]
     attrs = {e.attr for e in entries if e.attr}
@@ -116,8 +121,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         state = StyleInterpreter().load(style_path)
         index = build_index_entries(entries, state)
         output = render_index(index, style_state=state)
-        out_path.write_text(output, encoding=args.output_encoding)
-        log_path.write_text(f"Processed {len(entries)} entries\n", encoding="utf-8")
+        if out_path == Path("-"):
+            sys.stdout.write(output)
+        else:
+            out_path.write_text(output, encoding=args.output_encoding)
+        log_content = f"Processed {len(entries)} entries\n"
+        if log_path == Path("-"):
+            sys.stderr.write(log_content)
+        else:
+            log_path.write_text(log_content, encoding="utf-8")
     for flag, name in [(args.g, "-g"), (args.q, "-q"), (args.r, "-r"), (bool(args.p), "-p"), (bool(args.s), "-s")]:
         if flag:
             print(f"Warning: makeindex option {name} not supported by Python wrapper", file=sys.stderr)

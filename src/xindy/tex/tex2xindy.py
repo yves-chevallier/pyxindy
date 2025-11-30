@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from pathlib import Path
+import sys
 from typing import Iterable, Sequence
 
 from xindy.raw.reader import RawIndexEntry
@@ -68,7 +69,10 @@ def convert_idx_to_raw_entries(
     encoding: str = "latin-1",
 ) -> list[RawIndexEntry]:
     """Read an .idx file and return corresponding RawIndexEntry objects."""
-    text = Path(path).read_text(encoding=encoding)
+    if str(path) == "-":
+        text = sys.stdin.buffer.read().decode(encoding)
+    else:
+        text = Path(path).read_text(encoding=encoding)
     idx_entries = parse_idx(text)
     return [entry.to_raw() for entry in idx_entries]
 

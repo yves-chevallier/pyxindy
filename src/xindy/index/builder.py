@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Iterable
 
 from xindy.dsl.interpreter import StyleState
@@ -22,6 +23,9 @@ class IndexBuilderError(RuntimeError):
     """Raised when raw entries cannot be mapped to style constructs."""
 
 
+logger = logging.getLogger(__name__)
+
+
 def build_index_entries(
     raw_entries: Iterable[RawIndexEntry],
     style_state: StyleState,
@@ -34,51 +38,78 @@ def build_index_entries(
     first_display_for_canon: dict[tuple[str, ...], tuple[str, ...]] = {}
     for idx, raw in enumerate(raw_entries):
         target_attrs = _expand_attributes(raw.attr, style_state)
+        xref_target = _parse_xref_target(raw.extras.get("xref"))
+        if xref_target is not None:
+            try:
+                xref_attr, xref_verified = _resolve_crossref_class(style_state, raw.attr)
+            except IndexBuilderError as exc:
+                logger.warning("Skipping crossref entry %s: %s", raw.key, exc)
+                continue
+            canonical_key = tuple(apply_merge_rules(part, style_state) for part in raw.key)
+            if canonical_key not in first_display_for_canon:
+                first_display_for_canon[canonical_key] = raw.display_key or raw.key
+            entry = IndexEntry(
+                key=raw.key,
+                display_key=first_display_for_canon[canonical_key],
+                canonical_key=canonical_key,
+                attribute=xref_attr,
+                xref_target=xref_target,
+                xref_verified=xref_verified,
+                position=idx,
+            )
+            entries.append(entry)
+            continue
         if not target_attrs:
-            raise IndexBuilderError("No target attributes resolved for entry")
+            logger.warning("Skipping entry %s: no target attributes resolved", raw.key)
+            continue
         canonical_key = tuple(apply_merge_rules(part, style_state) for part in raw.key)
         if canonical_key not in first_display_for_canon:
             first_display_for_canon[canonical_key] = raw.display_key or raw.key
-        xref_target = _parse_xref_target(raw.extras.get("xref"))
-        if xref_target is None and raw.locref is None:
-            raise IndexBuilderError("Missing :locref for non-crossref entry")
         entry = IndexEntry(
             key=raw.key,
             display_key=first_display_for_canon[canonical_key],
             canonical_key=canonical_key,
             attribute=target_attrs[0][0],
-            xref_target=xref_target,
             position=idx,
         )
-        if xref_target is None:
-            base_locref = None
-            for target_attr, is_merge, drop in target_attrs:
-                resolved_attr, catattr = _resolve_attribute(style_state, target_attr)
-                if catattr is None:
-                    raise IndexBuilderError("No category attribute available for entry")
-                locref = None
-                for loccls in locclasses:
-                    locref = build_location_reference(
-                        loccls, raw.locref, catattr, resolved_attr
-                    )
-                    if locref:
-                        break
-                if not locref:
-                    raise IndexBuilderError(
-                        f"Could not build location reference for {raw.locref!r}"
-                    )
-                if "open-range" in raw.extras:
-                    locref.state = "open-range"
-                if "close-range" in raw.extras:
-                    locref.state = "close-range"
-                locref.attribute = resolved_attr
-                if base_locref is None:
-                    base_locref = locref
-                if is_merge:
-                    locref.virtual = True
-                    locref.merge_drop = drop
-                    locref.origin = base_locref
-                entry.add_location_reference(locref)
+        if raw.locref is None:
+            logger.warning("Skipping entry %s: missing :locref", raw.key)
+            continue
+        base_locref = None
+        for target_attr, is_merge, drop in target_attrs:
+            resolved_attr, catattr = _resolve_attribute(style_state, target_attr)
+            if catattr is None:
+                logger.warning("Skipping entry %s: no category attribute available", raw.key)
+                base_locref = None
+                break
+            locref = None
+            for loccls in locclasses:
+                locref = build_location_reference(
+                    loccls, raw.locref, catattr, resolved_attr
+                )
+                if locref:
+                    break
+            if not locref:
+                logger.warning(
+                    "Skipping entry %s: could not build locref for %r", raw.key, raw.locref
+                )
+                base_locref = None
+                break
+            if "open-range" in raw.extras:
+                locref.state = "open-range"
+            if "close-range" in raw.extras:
+                locref.state = "close-range"
+            locref.attribute = resolved_attr
+            if base_locref is None:
+                base_locref = locref
+            if is_merge:
+                locref.virtual = True
+                locref.merge_drop = drop
+                locref.origin = base_locref
+            entry.add_location_reference(locref)
+        if base_locref is None and not entry.locrefs:
+            logger.warning("Skipping entry %s: no valid location references", raw.key)
+            continue
         entries.append(entry)
     grouped = group_entries_by_letter(entries, style_state)
     progress = _compute_progress_markers(len(entries))
@@ -96,8 +127,10 @@ def _resolve_location_class(
         return loccls
     if not style_state.location_classes:
         raise IndexBuilderError("No location classes defined in style")
-    # dict preserves insertion order -> first defined class becomes default
-    return next(iter(style_state.location_classes.values()))
+    ordered = _ordered_locclasses(style_state)
+    if not ordered:
+        raise IndexBuilderError("No location classes resolved for style")
+    return ordered[0]
 
 
 def _resolve_location_classes(
@@ -106,7 +139,7 @@ def _resolve_location_classes(
 ) -> list[LayeredLocationClass]:
     if provided:
         return [_resolve_location_class(style_state, provided)]
-    return list(style_state.location_classes.values())
+    return _ordered_locclasses(style_state)
 
 
 def _resolve_attribute(
@@ -122,6 +155,11 @@ def _resolve_attribute(
     if catattr is None:
         catattr = make_category_attribute(name)
         style_state.attributes[name] = catattr
+        # basic ordering fallback when attribute was not declared explicitly
+        catattr.catattr_grp_ordnum = len(style_state.attribute_groups) or 1
+        catattr.sort_ordnum = len(style_state.attributes)
+        catattr.processing_ordnum = catattr.sort_ordnum
+        catattr.last_in_group = name
     return name, catattr
 
 
@@ -180,6 +218,43 @@ def _compute_progress_markers(total_entries: int) -> list[int]:
     for percent in range(10, 110, 10):
         markers.append(max(1, int(total_entries * (percent / 100))))
     return markers
+
+
+def _resolve_crossref_class(
+    style_state: StyleState,
+    attr_name: str | None,
+) -> tuple[str | None, bool]:
+    name = attr_name
+    if name is None and style_state.crossref_classes:
+        name = next(iter(style_state.crossref_classes))
+    if style_state.crossref_classes and name and name not in style_state.crossref_classes:
+        raise IndexBuilderError(f"Unknown crossref class {name!r}")
+    unverified = False
+    if name:
+        if style_state.crossref_classes:
+            unverified = bool(style_state.crossref_classes.get(name, False))
+        elif isinstance(name, str) and name.lower() == "unverified":
+            unverified = True
+    return name, not unverified
+
+
+def _ordered_locclasses(style_state: StyleState) -> list[LayeredLocationClass]:
+    """Return location classes honoring define-location-class-order if provided."""
+    if not style_state.location_classes:
+        return []
+    ordered: list[LayeredLocationClass] = []
+    seen: set[str] = set()
+    for name in getattr(style_state, "location_class_order", []) or []:
+        loccls = style_state.location_classes.get(name)
+        if loccls and name not in seen:
+            ordered.append(loccls)
+            seen.add(name)
+    for name, loccls in style_state.location_classes.items():
+        if name in seen:
+            continue
+        ordered.append(loccls)
+        seen.add(name)
+    return ordered
 
 
 __all__ = ["IndexBuilderError", "build_index_entries"]

@@ -180,6 +180,9 @@ class StyleInterpreter:
             "define-letter-group": self._handle_define_letter_group,
             "define-location-class-order": self._handle_define_location_class_order,
             "define-sort-rule-orientations": self._handle_define_sort_orientations,
+            "define-alphabet": self._handle_define_alphabet,
+            "define-alphabet*": self._handle_define_alphabet,
+            "define-enumeration": self._handle_define_enumeration,
             "sort-rule": self._handle_sort_rule,
             "define-rule-set": self._handle_define_rule_set,
             "use-rule-set": self._handle_use_rule_set,
@@ -192,16 +195,19 @@ class StyleInterpreter:
             "markup-indexentry": self._handle_markup_indexentry,
             "markup-indexentry-list": self._handle_markup_indexentry_list,
             "markup-keyword-list": self._handle_markup_keyword_list,
-            "markup-keyword": self._handle_markup_keyword_list,
+            "markup-keyword": self._handle_markup_keyword,
             "markup-locref": self._handle_markup_locref,
             "markup-locref-list": self._handle_markup_locref_list,
             "markup-locref-layer": self._handle_markup_locref_layer,
+            "markup-locref-class": self._handle_markup_locref_class,
             "markup-locclass-list": self._handle_markup_locclass_list,
+            "markup-attribute-group": self._handle_markup_attribute_group,
             "markup-crossref-list": self._handle_markup_crossref_list,
             "markup-crossref-layer-list": self._handle_markup_crossref_layer_list,
             "markup-crossref-layer": self._handle_markup_crossref_layer,
             "markup-range": self._handle_markup_range,
             "markup-attribute-group-list": self._handle_markup_attribute_group_list,
+            "markup-trace": self._handle_markup_trace,
             "progn": self._handle_progn,
         }
         if head.name == "mapc":
@@ -284,6 +290,7 @@ class StyleInterpreter:
                         attr_name
                     )
         self.state.attribute_groups.extend(attr_groups)
+        self._initialize_category_attributes()
 
     def _handle_define_letter_groups(self, args: list[object]) -> None:
         if len(args) != 1 or not isinstance(args[0], list):
@@ -321,6 +328,29 @@ class StyleInterpreter:
         if name not in groups:
             groups.append(name)
         self.state.letter_groups = groups
+
+    def _handle_define_alphabet(self, args: list[object]) -> None:
+        if len(args) < 2:
+            raise StyleError("define-alphabet requires a name and symbols")
+        name = self._stringify(args[0])
+        symbols = self._coerce_symbol_list(args[1])
+        try:
+            alphabet = Alphabet(name=name, symbols=tuple(symbols))
+        except ValueError as exc:
+            raise StyleError(str(exc)) from exc
+        self.state.register_basetype(alphabet)
+
+    def _handle_define_enumeration(self, args: list[object]) -> None:
+        if len(args) < 2:
+            raise StyleError("define-enumeration requires a name and matcher")
+        name = self._stringify(args[0])
+        matcher_spec = args[1]
+        base_symbols: tuple[str, ...] = ()
+        if len(args) >= 3:
+            base_symbols = tuple(self._coerce_symbol_list(args[2]))
+        match_func = self._extract_enumeration_matcher(name, matcher_spec)
+        enum = Enumeration(name=name, base_alphabet=base_symbols, match_func=match_func)
+        self.state.register_basetype(enum)
 
     def _handle_define_sort_orientations(self, args: list[object]) -> None:
         if not args:
@@ -497,7 +527,21 @@ class StyleInterpreter:
 
     # ---------------------------- markup placeholders ----------------------------
     def _handle_markup_index(self, args: list[object]) -> None:
-        self.state.markup_options["index"] = self._parse_markup_kwargs(args)
+        kwargs = self._parse_markup_kwargs(args)
+        tree = kwargs.pop("tree", False)
+        flat = kwargs.pop("flat", False)
+        hierdepth = kwargs.pop("hierdepth", None)
+        if tree and flat:
+            raise StyleError("Cannot set both :tree and :flat on markup-index")
+        if flat:
+            self.state.markup_options["max_depth"] = 1
+        if hierdepth is not None:
+            try:
+                depth_val = int(hierdepth)
+                self.state.markup_options["max_depth"] = depth_val
+            except (TypeError, ValueError):
+                raise StyleError("hierdepth must be numeric")
+        self.state.markup_options["index"] = kwargs
 
     def _handle_markup_letter_group_list(self, args: list[object]) -> None:
         self.state.markup_options["letter_group_list"] = self._parse_markup_kwargs(args)
@@ -517,6 +561,9 @@ class StyleInterpreter:
     def _handle_markup_keyword_list(self, args: list[object]) -> None:
         # Placeholder: keyword markup is ignored in text backend but we store options.
         self.state.markup_options["keyword_list"] = self._parse_markup_kwargs(args)
+
+    def _handle_markup_keyword(self, args: list[object]) -> None:
+        self.state.markup_options["keyword"] = self._parse_markup_kwargs(args)
 
     def _handle_markup_locref(self, args: list[object]) -> None:
         locrefs = self.state.markup_options.setdefault("locref", {})
@@ -556,6 +603,12 @@ class StyleInterpreter:
         kwargs = self._parse_markup_kwargs(args)
         self.state.markup_options["locclass_list"] = kwargs
 
+    def _handle_markup_locref_class(self, args: list[object]) -> None:
+        kwargs = self._parse_markup_kwargs(args)
+        class_name = kwargs.pop("class", None)
+        key = self._stringify(class_name) if class_name else "__default__"
+        self.state.markup_options.setdefault("locref_class", {})[key] = kwargs
+
     def _handle_markup_crossref_list(self, args: list[object]) -> None:
         self.state.markup_options["crossref_list"] = self._parse_markup_kwargs(args)
 
@@ -573,6 +626,16 @@ class StyleInterpreter:
     def _handle_markup_attribute_group_list(self, args: list[object]) -> None:
         kwargs = self._parse_markup_kwargs(args)
         self.state.markup_options["attribute_group_list"] = kwargs
+
+    def _handle_markup_attribute_group(self, args: list[object]) -> None:
+        kwargs = self._parse_markup_kwargs(args)
+        group_name = kwargs.pop("group", None)
+        key = self._stringify(group_name) if group_name else "__default__"
+        self.state.markup_options.setdefault("attribute_group", {})[key] = kwargs
+
+    def _handle_markup_trace(self, args: list[object]) -> None:
+        kwargs = self._parse_markup_kwargs(args)
+        self.state.markup_options["trace"] = kwargs
 
     def _parse_markup_kwargs(self, args: list[object]) -> dict[str, object]:
         kwargs: dict[str, object] = {}
@@ -707,6 +770,84 @@ class StyleInterpreter:
                 break
             content = updated
         return content
+
+    # ------------------------------------------------------------------ definition helpers
+
+    def _coerce_symbol_list(self, value: object) -> list[str]:
+        if not isinstance(value, list):
+            raise StyleError("Expected list of symbols/strings")
+        symbols: list[str] = []
+        for item in value:
+            if isinstance(item, Symbol):
+                symbols.append(item.name)
+            elif isinstance(item, str):
+                symbols.append(item)
+            elif isinstance(item, (int, float)):
+                symbols.append(str(item))
+            else:
+                raise StyleError(f"Unsupported symbol entry {item!r}")
+        if not symbols:
+            raise StyleError("Alphabet/enumeration requires at least one symbol")
+        return symbols
+
+    def _extract_enumeration_matcher(
+        self,
+        name: str,
+        spec: object,
+    ):
+        """Best-effort extraction of matcher (radix/roman) from a Lisp-ish form."""
+
+        def find_radix(expr: object) -> int | None:
+            if isinstance(expr, list):
+                for idx, item in enumerate(expr):
+                    if isinstance(item, Symbol) and item.name == "prefix-match-for-radix-numbers":
+                        if idx + 2 < len(expr) and isinstance(expr[idx + 2], (int, float)):
+                            return int(expr[idx + 2])
+                    rad = find_radix(item)
+                    if rad is not None:
+                        return rad
+            return None
+
+        radix = find_radix(spec)
+        if radix is not None:
+            return lambda text, r=radix: prefix_match_for_radix_numbers(text, r)
+
+        lower = "lower" in name or "lowercase" in name
+        if "roman-numbers" in name or "roman" in name:
+            return lambda text, low=lower: prefix_match_for_roman_numbers(
+                text, lowercase=low
+            )
+
+        if "arabic" in name:
+            return lambda text: prefix_match_for_radix_numbers(text, 10)
+
+        return None
+
+    def _initialize_category_attributes(self) -> None:
+        """Populate category attribute metadata (group/order markers)."""
+        if not self.state.attribute_groups:
+            # no grouping specified; assign stable order based on insertion
+            for idx, (name, catattr) in enumerate(self.state.attributes.items(), start=1):
+                catattr.catattr_grp_ordnum = 1
+                catattr.sort_ordnum = idx
+                catattr.processing_ordnum = idx
+                catattr.last_in_group = name
+            return
+        sort_ordnum = 0
+        for group_idx, group in enumerate(self.state.attribute_groups, start=1):
+            if not group:
+                continue
+            last_name = group[-1]
+            for attr_name in group:
+                catattr = self.state.attributes.get(attr_name)
+                if catattr is None:
+                    catattr = make_category_attribute(attr_name)
+                    self.state.attributes[attr_name] = catattr
+                sort_ordnum += 1
+                catattr.catattr_grp_ordnum = group_idx
+                catattr.sort_ordnum = sort_ordnum
+                catattr.processing_ordnum = sort_ordnum
+                catattr.last_in_group = last_name
 
 
 __all__ = ["StyleInterpreter", "StyleState", "StyleError"]

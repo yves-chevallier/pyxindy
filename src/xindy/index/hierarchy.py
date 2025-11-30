@@ -33,7 +33,11 @@ def build_hierarchy(
             if entry.attribute and node.attribute is None:
                 node.attribute = entry.attribute
             if entry.xref_target:
-                node.add_crossref(entry.xref_target, entry.attribute)
+                node.add_crossref(
+                    entry.xref_target,
+                    entry.attribute,
+                    getattr(entry, "xref_verified", True),
+                )
                 continue
             changed = node.add_locrefs(entry.locrefs)
             # defer range detection to final sweep

@@ -19,6 +19,7 @@ class IndexEntry:
     position: int = 0
     locrefs: list[LayeredLocationReference] = field(default_factory=list)
     xref_target: tuple[str, ...] | None = None
+    xref_verified: bool = True
 
     def add_location_reference(self, locref: LayeredLocationReference) -> None:
         self.locrefs.append(locref)
@@ -28,6 +29,7 @@ class IndexEntry:
 class IndexCrossReference:
     target: tuple[str, ...]
     attribute: str | None
+    verified: bool = True
 
 
 @dataclass(slots=True)
@@ -63,8 +65,12 @@ class IndexNode:
             added = True
         return added
 
-    def add_crossref(self, target: tuple[str, ...], attribute: str | None) -> None:
-        self.crossrefs.append(IndexCrossReference(target=target, attribute=attribute))
+    def add_crossref(
+        self, target: tuple[str, ...], attribute: str | None, verified: bool = True
+    ) -> None:
+        self.crossrefs.append(
+            IndexCrossReference(target=target, attribute=attribute, verified=verified)
+        )
 
 
 @dataclass(slots=True)
