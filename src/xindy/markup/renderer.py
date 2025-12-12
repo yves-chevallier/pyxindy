@@ -29,6 +29,15 @@ class LocrefLayerFormat:
 
 
 @dataclass(slots=True)
+class RangeFormat:
+    sep: str | None = None
+    open: str = ""
+    close: str = ""
+    length: int | None = None
+    ignore_end: bool = False
+
+
+@dataclass(slots=True)
 class MarkupConfig:
     show_letter_headers: bool = True
     letter_header_template: str = "{label}"
@@ -68,6 +77,7 @@ class MarkupConfig:
     enable_crossrefs: bool = True
     max_depth: int | None = None
     backend: str = "text"  # "text" or "tex"
+    range_formats: dict[str, list["RangeFormat"]] = field(default_factory=dict)
 
 
 def render_index(
@@ -364,7 +374,7 @@ def _render_locref_part(
             segment = part_lookup.get(attr)
             if not segment:
                 continue
-            fmt_base, class_ranges, _ = segment
+            fmt_base, class_ranges, locclass = segment
             refs_filtered, ranges_filtered, covered = allowed_by_attr.get(attr, ([], [], set()))
             if separator is None:
                 separator = cfg.attr_group_sep or fmt_base.separator
@@ -378,6 +388,7 @@ def _render_locref_part(
                     cfg,
                     depth,
                     fmt_base,
+                    per_item_format,
                 )
                 if content:
                     ord_candidates = [_loc_ordnum(ref) for ref in refs_filtered] + [
@@ -392,7 +403,9 @@ def _render_locref_part(
                 ordnum_raw = _loc_ordnum(start)
                 ordnum = ordnum_raw if suppress_covered else float("inf")
                 key = (ordnum if ordnum is not None else float("inf"), attr_idx, 1)
-                text = _format_range_value(start, end, fmt_base, cfg, per_item_format)
+                class_name = getattr(locclass, "name", "__default__")
+                range_fmt = _select_range_format(cfg, class_name, start, end)
+                text = _format_range_value(start, end, fmt_base, cfg, per_item_format, range_fmt)
                 attr_items.append((key, text))
             for ref in refs_filtered:
                 ordnum = _loc_ordnum(ref)
@@ -459,9 +472,11 @@ def _format_locrefs_for_class(
     cfg: MarkupConfig,
     depth: int,
     fmt: LocrefFormat,
+    per_item_format: bool,
 ) -> str:
     orig_refs = list(refs)
     hierdepth = getattr(locclass, "hierdepth", 0) or 0
+    class_name = getattr(locclass, "name", "__default__")
 
     # stable sort by ordnum if available, otherwise by locref string
     def ref_key(ref: object) -> tuple[int, str]:
@@ -528,8 +543,19 @@ def _format_locrefs_for_class(
             if s > e:
                 s, e = e, s
             covered.update(range(int(s), int(e) + 1))
+            range_fmt = _select_range_format(cfg, class_name, start, end)
             items.append(
-                (s, f"{wrap(start.locref_string)}{cfg.range_separator}{wrap(end.locref_string)}")
+                (
+                    s,
+                    _format_range_value(
+                        start,
+                        end,
+                        fmt,
+                        cfg,
+                        per_item_format,
+                        range_fmt,
+                    ),
+                )
             )
         for ref in orig_refs:
             ordnum = ord_or_inf(ref)
@@ -551,8 +577,19 @@ def _format_locrefs_for_class(
             if s > e:
                 s, e = e, s
             covered.update(range(s, e + 1))
+            range_fmt = _select_range_format(cfg, class_name, start, end)
             items.append(
-                (s, f"{wrap(start.locref_string)}{cfg.range_separator}{wrap(end.locref_string)}")
+                (
+                    s,
+                    _format_range_value(
+                        start,
+                        end,
+                        fmt,
+                        cfg,
+                        per_item_format,
+                        range_fmt,
+                    ),
+                )
             )
     for ref in orig_refs:
         try:
@@ -573,10 +610,62 @@ def _format_range_value(
     fmt: LocrefFormat,
     cfg: MarkupConfig,
     per_item_format: bool,
+    range_fmt: RangeFormat | None,
 ) -> str:
+    if range_fmt:
+        sep = range_fmt.sep or cfg.range_separator
+        start_val = start.locref_string
+        end_val = end.locref_string
+        if per_item_format and not (range_fmt.open or range_fmt.close):
+            if fmt.open or fmt.close:
+                start_val = f"{fmt.open}{start_val}{fmt.close}"
+                end_val = f"{fmt.open}{end_val}{fmt.close}"
+        if range_fmt.ignore_end:
+            core = start_val
+        else:
+            core = f"{start_val}{sep}{end_val}"
+        if range_fmt.open or range_fmt.close:
+            return f"{range_fmt.open or ''}{core}{range_fmt.close or ''}"
+        return core
+
+    sep = cfg.range_separator
+    open_token = ""
+    close_token = ""
     if per_item_format:
-        return f"{fmt.open}{start.locref_string}{fmt.close}{cfg.range_separator}{fmt.open}{end.locref_string}{fmt.close}"
-    return f"{start.locref_string}{cfg.range_separator}{end.locref_string}"
+        open_token = fmt.open
+        close_token = fmt.close
+    if open_token or close_token:
+        start_val = f"{open_token}{start.locref_string}{close_token}"
+        end_val = f"{open_token}{end.locref_string}{close_token}"
+    else:
+        start_val = start.locref_string
+        end_val = end.locref_string
+    return f"{start_val}{sep}{end_val}"
+
+
+def _range_length(start: object, end: object) -> int | None:
+    start_ord = _loc_ordnum(start)
+    end_ord = _loc_ordnum(end)
+    if start_ord is None or end_ord is None:
+        return None
+    return abs(end_ord - start_ord)
+
+
+def _select_range_format(
+    cfg: MarkupConfig, class_name: str, start: object, end: object
+) -> RangeFormat | None:
+    formats = cfg.range_formats.get(class_name) or cfg.range_formats.get("__default__")
+    if not formats:
+        return None
+    length = _range_length(start, end)
+    fallback: RangeFormat | None = None
+    for fmt in formats:
+        if fmt.length is None:
+            fallback = fallback or fmt
+            continue
+        if length is not None and length == fmt.length:
+            return fmt
+    return fallback
 
 
 def _loc_ordnum(ref: object) -> int | None:
@@ -897,9 +986,44 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
     if "sep" in layer_opts:
         cfg.crossref_layer_separator = layer_opts["sep"]
 
-    range_opts = opts.get("range", {})
-    if "sep" in range_opts:
-        cfg.range_separator = range_opts["sep"]
+    range_opts_raw = opts.get("range", {})
+    range_map: dict[str, list[dict[str, object]]] = {}
+    if range_opts_raw:
+        # Newer handler stores ranges per class; older styles may provide a flat dict
+        if isinstance(range_opts_raw, dict) and any(
+            isinstance(val, list) for val in range_opts_raw.values()
+        ):
+            range_map = {key: list(val) for key, val in range_opts_raw.items()}
+        else:
+            range_map = {"__default__": [range_opts_raw]}
+
+    for class_name, formats in range_map.items():
+        parsed: list[RangeFormat] = []
+        for raw_cfg in formats:
+            sep_val = raw_cfg.get("sep") if isinstance(raw_cfg, dict) else None
+            sep_norm = _normalize_markup_string(sep_val) if sep_val is not None else None
+            open_val = _normalize_markup_string(raw_cfg.get("open", "")) if isinstance(raw_cfg, dict) else ""
+            close_val = _normalize_markup_string(raw_cfg.get("close", "")) if isinstance(raw_cfg, dict) else ""
+            length_val = raw_cfg.get("length") if isinstance(raw_cfg, dict) else None
+            try:
+                length_int = int(length_val) if length_val is not None else None
+            except (ValueError, TypeError):
+                length_int = None
+            parsed.append(
+                RangeFormat(
+                    sep=sep_norm or None,
+                    open=open_val,
+                    close=close_val,
+                    length=length_int,
+                    ignore_end=bool(raw_cfg.get("ignore_end")) if isinstance(raw_cfg, dict) else False,
+                )
+            )
+        cfg.range_formats[class_name] = parsed
+    if "__default__" in cfg.range_formats:
+        for fmt in cfg.range_formats["__default__"]:
+            if fmt.sep:
+                cfg.range_separator = fmt.sep
+                break
 
     return cfg
 
