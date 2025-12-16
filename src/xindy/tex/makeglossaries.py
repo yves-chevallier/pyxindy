@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import argparse
+from collections.abc import Iterable, Sequence
+from dataclasses import dataclass
 import os
+from pathlib import Path
 import re
 import sys
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Iterable, Sequence
 
 from xindy.cli import main as xindy_main
 from xindy.tex import makeindex4
@@ -463,8 +463,7 @@ def run_xindy_job(
 
     if language and not quiet:
         print(
-            f"Note: language '{language}' recorded in .aux; current xindy port uses style "
-            "modules."
+            f"Note: language '{language}' recorded in .aux; current xindy port uses style modules."
         )
 
     cmd_display = "xindy " + " ".join(cli_args)

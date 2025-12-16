@@ -1,6 +1,6 @@
 import pytest
-
 from tests_paths import XINDY_TESTS_DIR as FIXTURES
+
 from xindy.raw.reader import RawIndexSyntaxError, load_raw_index, parse_raw_index
 
 

@@ -1,7 +1,8 @@
 """Pytest configuration."""
 
-import sys
 from pathlib import Path
+import sys
+
 
 # Ensure helper modules at repository root (e.g. tests_paths.py) are importable.
 REPO_ROOT = Path(__file__).resolve().parents[1]

@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling>=1.25"]
+requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
 name = "pyxindy"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Python port of the xindy (flexible index) processor."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -16,10 +16,18 @@ texindy-py = "xindy.tex.tex2xindy:main"
 makeindex-py = "xindy.tex.makeindex4:main"
 makeglossaries-py = "xindy.tex.makeglossaries:main"
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
-    "pytest>=8.3",
-    "ruff>=0.5",
+    "pytest>=8.4.2",
+    "ruff>=0.14.1",
+    "nox[pbs]>=2024.4.16",
+    "pytest-cov>=7.0.0"
+]
+docs = [
+    "mkdocs>=1.6.1",
+    "mkdocs-awesome-nav>=3.2.0",
+    "mkdocs-material>=9.7.0",
+    "mkdocstrings[python]>=1.0.0",
 ]
 
 [tool.pytest.ini_options]
@@ -89,10 +97,8 @@ include = [
   "/README.md",
 ]
 
-[dependency-groups]
-docs = [
-    "mkdocs>=1.6.1",
-    "mkdocs-awesome-nav>=3.2.0",
-    "mkdocs-material>=9.7.0",
-    "mkdocstrings[python]>=1.0.0",
-]
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.version.raw-options]
+local_scheme = "no-local-version"

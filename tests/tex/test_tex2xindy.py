@@ -1,4 +1,5 @@
 from tests_paths import XINDY_TESTS_DIR as TESTS_DIR
+
 from xindy.raw.reader import load_raw_index
 from xindy.tex.tex2xindy import convert_idx_to_raw_entries, parse_idx_line
 

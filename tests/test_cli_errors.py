@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from tests_paths import XINDY_TESTS_DIR as TESTS_DIR
+
 from xindy import cli
 
 

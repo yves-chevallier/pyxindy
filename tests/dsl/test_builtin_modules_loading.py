@@ -1,8 +1,8 @@
 from pathlib import Path
 
 import pytest
-
 from tests_paths import XINDY_MODULES_DIR as MODULES_DIR
+
 from xindy.dsl.interpreter import StyleInterpreter
 
 

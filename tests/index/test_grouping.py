@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from tests_paths import XINDY_TESTS_DIR as TESTS_DIR
+
 from xindy.dsl.interpreter import StyleInterpreter
 from xindy.index.builder import build_index_entries
 from xindy.raw.reader import load_raw_index

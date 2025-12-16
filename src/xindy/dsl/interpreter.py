@@ -612,10 +612,7 @@ class StyleInterpreter:
     def _handle_markup_range(self, args: list[object]) -> None:
         kwargs = self._parse_markup_kwargs(args)
         class_name = kwargs.pop("class", None)
-        if class_name is None:
-            class_key = "__default__"
-        else:
-            class_key = self._stringify(class_name)
+        class_key = "__default__" if class_name is None else self._stringify(class_name)
         self.state.markup_options.setdefault("range", {}).setdefault(class_key, []).append(kwargs)
 
     def _handle_markup_attribute_group_list(self, args: list[object]) -> None:

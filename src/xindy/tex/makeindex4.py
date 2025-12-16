@@ -99,7 +99,9 @@ class _Logger:
         if self.path == Path("-"):
             return
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.path.write_text("\n".join(self._lines) + ("\n" if self._lines else ""), encoding="utf-8")
+        self.path.write_text(
+            "\n".join(self._lines) + ("\n" if self._lines else ""), encoding="utf-8"
+        )
 
 
 def _format_error(exc: Exception) -> str:

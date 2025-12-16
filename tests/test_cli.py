@@ -1,7 +1,5 @@
 from pathlib import Path
 
-import pytest
-
 from xindy import __version__, cli
 
 

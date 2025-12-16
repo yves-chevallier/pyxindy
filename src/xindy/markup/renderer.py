@@ -77,7 +77,7 @@ class MarkupConfig:
     enable_crossrefs: bool = True
     max_depth: int | None = None
     backend: str = "text"  # "text" or "tex"
-    range_formats: dict[str, list["RangeFormat"]] = field(default_factory=dict)
+    range_formats: dict[str, list[RangeFormat]] = field(default_factory=dict)
 
 
 def render_index(
@@ -616,14 +616,10 @@ def _format_range_value(
         sep = range_fmt.sep or cfg.range_separator
         start_val = start.locref_string
         end_val = end.locref_string
-        if per_item_format and not (range_fmt.open or range_fmt.close):
-            if fmt.open or fmt.close:
-                start_val = f"{fmt.open}{start_val}{fmt.close}"
-                end_val = f"{fmt.open}{end_val}{fmt.close}"
-        if range_fmt.ignore_end:
-            core = start_val
-        else:
-            core = f"{start_val}{sep}{end_val}"
+        if per_item_format and not (range_fmt.open or range_fmt.close) and (fmt.open or fmt.close):
+            start_val = f"{fmt.open}{start_val}{fmt.close}"
+            end_val = f"{fmt.open}{end_val}{fmt.close}"
+        core = start_val if range_fmt.ignore_end else f"{start_val}{sep}{end_val}"
         if range_fmt.open or range_fmt.close:
             return f"{range_fmt.open or ''}{core}{range_fmt.close or ''}"
         return core
@@ -1002,8 +998,16 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
         for raw_cfg in formats:
             sep_val = raw_cfg.get("sep") if isinstance(raw_cfg, dict) else None
             sep_norm = _normalize_markup_string(sep_val) if sep_val is not None else None
-            open_val = _normalize_markup_string(raw_cfg.get("open", "")) if isinstance(raw_cfg, dict) else ""
-            close_val = _normalize_markup_string(raw_cfg.get("close", "")) if isinstance(raw_cfg, dict) else ""
+            open_val = (
+                _normalize_markup_string(raw_cfg.get("open", ""))
+                if isinstance(raw_cfg, dict)
+                else ""
+            )
+            close_val = (
+                _normalize_markup_string(raw_cfg.get("close", ""))
+                if isinstance(raw_cfg, dict)
+                else ""
+            )
             length_val = raw_cfg.get("length") if isinstance(raw_cfg, dict) else None
             try:
                 length_int = int(length_val) if length_val is not None else None
@@ -1015,7 +1019,9 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
                     open=open_val,
                     close=close_val,
                     length=length_int,
-                    ignore_end=bool(raw_cfg.get("ignore_end")) if isinstance(raw_cfg, dict) else False,
+                    ignore_end=bool(raw_cfg.get("ignore_end"))
+                    if isinstance(raw_cfg, dict)
+                    else False,
                 )
             )
         cfg.range_formats[class_name] = parsed

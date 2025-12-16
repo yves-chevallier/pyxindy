@@ -90,9 +90,8 @@ jobs:
         run: uv sync --all-groups --frozen
 
       # Build MkDocs HTML documentation
-      - name: Build documentation (HTML + LaTeX)
-        run: |
-          make docs
+      - name: Build documentation (MkDocs)
+        run: uv run mkdocs build --clean
 
       # Build the main Python package distribution
       - name: Build distributions

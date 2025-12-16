@@ -1,4 +1,5 @@
 from tests_paths import XINDY_TESTS_DIR as TESTS_DIR
+
 from xindy.dsl.interpreter import StyleInterpreter
 
 
