@@ -132,7 +132,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: release-assets
-          path: .
+          path: dist
 
       # Install uv for deploying the docs
       - name: Install uv
