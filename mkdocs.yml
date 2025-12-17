@@ -4,6 +4,36 @@ site_author: Yves Chevallier
 repo_name: yves-chevallier/pyxindy
 repo_url: https://github.com/yves-chevallier/pyxindy
 copyright: Copyright &copy; 2025 Yves Chevallier
+nav:
+  - index.md
+  - Home:
+      - Introduction: home/index.md
+      - Features: home/features.md
+      - About: home/about.md
+  - Tutorial:
+      - Overview: tutorial/index.md
+      - Basic introduction: tutorial/basic-introduction.md
+      - Advanced features: tutorial/advanced-features.md
+      - About xindy: tutorial/about-xindy.md
+      - References: tutorial/tutorial-references.md
+  - Manual:
+      - Overview: manual/index.md
+      - By topic:
+          - Overview: manual/by-topic/index.md
+          - How-to: manual/by-topic/how-to.md
+          - Practical tips: manual/by-topic/practical-tips.md
+          - Errors and problems: manual/by-topic/errors-and-problems.md
+          - References: manual/by-topic/by-topic-references.md
+      - Manpages:
+          - xindy: manual/manpages/xindy.md
+          - tex2xindy: manual/manpages/tex2xindy.md
+          - makeindex4: manual/manpages/makeindex4.md
+      - Invoking xindy: manual/invoking-xindy.md
+      - Command reference: manual/command-reference.md
+      - How the index processor works: manual/how-the-index-processor-works.md
+      - Processing phases: manual/processing-phases.md
+      - References: manual/references.md
+      - Documentation README: manual/doc-readme.md
 theme:
   language: en
   name: material
@@ -43,7 +73,6 @@ plugins:
   - search
   - mike:
       alias_type: redirect
-  - awesome-nav
   - autorefs:
       resolve_closest: true
   - mkdocstrings:
