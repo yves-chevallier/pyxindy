@@ -1,0 +1,7 @@
+:root > * {
+  --md-default-bg-color: #FFFFF0;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-default-bg-color: #2E3440;
+}
