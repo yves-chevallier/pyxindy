@@ -1,5 +1,6 @@
 ---
 title: PyXindy
+nav_exclude: true
 hide:
   - navigation
   - toc
