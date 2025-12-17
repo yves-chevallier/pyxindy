@@ -1,6 +1,4 @@
-# Tutorial
-
-## About xindy
+# About xindy
 
 **xindy** means *fle**x**ible **ind**exing s**y**stem*. It can generate
 book-like indexes for many document preparation systems (TeX/LaTeX, the
@@ -23,4 +21,3 @@ that make it a strong choice:
 
 - **Highly configurable markup**: environment-based markup system for
   TeX/LaTeX, SGML/HTML, GNU Info, RTF, Nroff, and more.
-

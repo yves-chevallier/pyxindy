@@ -252,7 +252,7 @@ distinguishes these two forms of encapsulators as opposed to
 `makeindex` and our plug-in `makeindex4` generates the
 appropriate definitions of the cross-reference classes as well.
 
-## 1.9 How works the actual key feature of `makeindex` with xindy?
+## How works the actual key feature of `makeindex` with xindy?
 
 The treatment of the actual key (usually denoted with `@`, the
 at-sign) has changed with **xindy**. Specifying index entries with a

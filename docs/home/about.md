@@ -1,5 +1,11 @@
 # About this Manual
 
+## Python Port of Xindy
+
+This manual is also a port/mirror of the original xindy manual. It was ported to MkDocs with minimal changes to the context and mostly with an automatic conversion. **This is not the authoritative source of the xindy manual.** For the authoritative source, please refer to the original xindy distribution.
+
+## Introduction
+
 We assume that the reader is already familiar with the task of an
 index processor and has basic experience in using a markup-based
 document preparation systems such as TeX/LaTeX [1, 2],

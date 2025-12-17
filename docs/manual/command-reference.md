@@ -481,34 +481,30 @@ a colon-separated string of directory names. If this path ends with a
 colon the default search path is added to the end of the path list.
 Example:
 
-> ```text
->
->   (searchpath ".:/usr/local/lib/xindy:/usr/local/lib/xindy/english:")
->
-> ```
->
-> adds the specified directories to the search path. Since the last path
-> ends with a colon, the built-in search path is added at the end.
-> Specifying
+```text
+  (searchpath ".:/usr/local/lib/xindy:/usr/local/lib/xindy/english:")
+```
 
-> ```text
->
->   (searchpath ("."
->                "/usr/local/lib/xindy"
->                "/usr/local/lib/xindy/english"
->                :default))
->
-> ```
->
-> yields exactly the same result as the example above. Here
-> `path-list` must be a list of strings and/or the keyword(s)
-> `:default` and `:last`. The keyword `:default` signifies that
-> the default pathnames are to be inserted at the specified position in
-> the list. The keyword `:last` allows to insert the currently active
-> paths at the indicated position. Since this allows to insert the
-> built-in paths at any position and incrementally adding new paths to
-> the search path, this version of the command ist more flexible than
-> the first version.
+adds the specified directories to the search path. Since the last path
+ends with a colon, the built-in search path is added at the end.
+Specifying
+
+```text
+  (searchpath ("."
+               "/usr/local/lib/xindy"
+               "/usr/local/lib/xindy/english"
+               :default))
+```
+
+yields exactly the same result as the example above. Here
+`path-list` must be a list of strings and/or the keyword(s)
+`:default` and `:last`. The keyword `:default` signifies that
+the default pathnames are to be inserted at the specified position in
+the list. The keyword `:last` allows to insert the currently active
+paths at the indicated position. Since this allows to insert the
+built-in paths at any position and incrementally adding new paths to
+the search path, this version of the command ist more flexible than
+the first version.
 
 ### sort-rule
 
@@ -560,7 +556,7 @@ phase 2 the other rule sets have to be applied.
 
 For a discussion on rule sets refer to command `define-rule-set`.
 
-## 3.2 Markup Commands
+## Markup Commands
 
 The following commands can be used to define the markup of the index.
 They don't have any influence on the indexing process. Since the
@@ -1087,7 +1083,7 @@ combined with the command
   (markup-trace :open "\ignore{" :close "}")
 ```
 
-## 3.3 Raw Index Interface
+## Raw Index Interface
 
 This section can be skipped if the reader is not interested in
 adapting xindy to a new document preparation system.

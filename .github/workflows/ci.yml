@@ -126,6 +126,8 @@ jobs:
       # Checkout repository (needed by mike deploy)
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+            fetch-depth: 0
 
       # Download all build artifacts generated previously
       - name: Download release artifacts
