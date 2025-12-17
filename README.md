@@ -1,5 +1,14 @@
 # PyXindy (Python port of xindy)
 
+[![GitHub issues](https://img.shields.io/github/issues/yves-chevallier/pyxindy.svg)](https://github.com/yves-chevallier/pyxindy/issues)
+[![GitHub last commit](https://img.shields.io/github/last-commit/yves-chevallier/pyxindy.svg)](https://github.com/yves-chevallier/pyxindy/commits/main)
+![CI](https://github.com/yves-chevallier/pyxindy/actions/workflows/ci.yml/badge.svg)
+![Python](https://img.shields.io/pypi/pyversions/pyxindy)
+[![PyPI version](https://img.shields.io/pypi/v/pyxindy)](https://pypi.org/project/pyxindy/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/pyxindy)](https://pypi.org/project/pyxindy/#files)
+[![License](https://img.shields.io/pypi/l/pyxindy)](https://github.com/yves-chevallier/pyxindy/blob/main/LICENSE)
+[![codecov](https://codecov.io/github/yves-chevallier/pyxindy/branch/main/graph/badge.svg)](https://codecov.io/github/yves-chevallier/pyxindy)
+
 Python reimplementation of **xindy**, the flexible index processor originally written in CLISP. PyXindy aims to be a drop-in replacement where the original xindy is difficult to install or integrate (for example with Tectonic or minimal TeX setups).
 
 ![PyXindy](docs/assets/pyxindy.svg)
