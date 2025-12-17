@@ -2,6 +2,8 @@
 
 Python reimplementation of **xindy**, the flexible index processor originally written in CLISP. PyXindy aims to be a drop-in replacement where the original xindy is difficult to install or integrate (for example with Tectonic or minimal TeX setups).
 
+![PyXindy](../assets/pyxindy.svg)
+
 ## Background and history
 
 - **makeindex**: introduced in 1987 by Pehong Chen, bundled with TeX distributions through the late 1980s and 1990s as the default indexer for LaTeX. It remains widely available in TeX Live and MiKTeX.
