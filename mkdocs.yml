@@ -5,7 +5,6 @@ repo_name: yves-chevallier/pyxindy
 repo_url: https://github.com/yves-chevallier/pyxindy
 copyright: Copyright &copy; 2025 Yves Chevallier
 nav:
-  - index.md
   - Home:
       - Introduction: home/index.md
       - Features: home/features.md
@@ -37,6 +36,7 @@ nav:
 theme:
   language: en
   name: material
+  logo: assets/logo.svg
   features:
     - search
     - navigation.instant
