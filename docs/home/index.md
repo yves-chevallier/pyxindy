@@ -50,10 +50,10 @@ lualatex document.tex
 
 - `xindy-py`: core processor; reads `.raw` plus `.xdy` style and renders the formatted index.
 - `texindy-py`: TeX converter; turns `.idx` into `.raw` suitable for xindy processing.
-- `makeindex-py`: makeindex-compatible wrapper layered on the xindy engine; accepts common `-c/-l/-o/-t` flags.
+- `makeindex-py`: makeindex-compatible wrapper layered on the xindy engine; supports `-c/-l/-o/-t` plus `-g/-q/-r/-p/-s` and multiple `.idx` inputs.
 - `makeglossaries-py`: glossaries helper; inspects LaTeX `.aux` to drive `makeindex-py`/xindy for glossary files.
 
-Historical xindy modules/styles (`vendor/xindy-2.1/modules`) are resolved automatically via `require`. The wrapper `makeindex-py` supports the usual `-l/-c/-o/-t` flags.
+Historical xindy modules/styles (`vendor/xindy-2.1/modules`) are resolved automatically via `require`. The wrapper `makeindex-py` supports `-l/-c/-o/-t`, plus `-g/-q/-r/-p/-s` and multiple input files.
 
 ## xindy CLI
 
@@ -80,11 +80,17 @@ uv run texindy-py input.idx -o output.raw --input-encoding latin-1 --output-enco
 ## makeindex4
 
 ```bash
-uv run makeindex-py input.idx -o output.ind -t output.ilg [-c] [-l]
+uv run makeindex-py input.idx -o output.ind -t output.ilg [-c] [-l] [-g] [-q] [-r] [-p start] [-s style]
 ```
 
 - `-c`: compress spaces in keys (makeindex behavior)
 - `-l`: ignore spaces for sorting (adds `sort-rule " " ""`)
+- `-g`: German ordering (loads `lang/german/din5007.xdy`)
+- `-q`: quiet mode (suppress stderr output)
+- `-r`: disable implicit page ranges
+- `-p`: set starting page number (numeric or `any|odd|even` using `.log`)
+- `-s`: load a `.xdy` style or a subset of `.ist` settings
+- `-i`: read from stdin; output defaults to stdout when `-o` is omitted
 - `--debug`: print tracebacks; otherwise errors are summarized and written to the `.ilg` log
 - Generates a temporary style, detects attributes/crossrefs, loads `tex/makeidx4.xdy`.
 

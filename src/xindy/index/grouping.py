@@ -15,6 +15,8 @@ from .order import apply_sort_rules, sort_entries
 def group_entries_by_letter(
     entries: Iterable[IndexEntry],
     style_state: StyleState,
+    *,
+    enable_ranges: bool = True,
 ) -> list[IndexLetterGroup]:
     sorted_entries = sort_entries(entries, style_state)
     groups = _resolve_letter_groups(style_state)
@@ -35,6 +37,7 @@ def group_entries_by_letter(
             entries,
             allowed_range_attrs=_range_attrs(style_state),
             suppress_covered_ranges=bool(style_state.markup_options),
+            enable_ranges=enable_ranges,
         )
         if nodes:
             result.append(
@@ -45,7 +48,11 @@ def group_entries_by_letter(
                 )
             )
     if not result and sorted_entries:
-        nodes = build_hierarchy(sorted_entries, allowed_range_attrs=_range_attrs(style_state))
+        nodes = build_hierarchy(
+            sorted_entries,
+            allowed_range_attrs=_range_attrs(style_state),
+            enable_ranges=enable_ranges,
+        )
         result.append(
             IndexLetterGroup(
                 label=fallback_label,

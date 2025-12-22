@@ -51,6 +51,10 @@ investigation, since one cannot use all of its features with
 `makeindex4`. You will be informed about unsupported command-line
 arguments when running `makeindex4`.
 
+Python port note: this implementation supports `-g/-q/-r/-p/-s` and
+multiple `.idx` files; `.ist` files are partially converted and may
+emit warnings for unsupported keys.
+
 If you have written special style files for `makeindex` they will
 no longer work with `makeindex4`. Go ahead and write a new style
 file for **xindy**.

@@ -92,6 +92,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("-L", "--language", help="Xindy language override (xindy only).")
     parser.add_argument("-C", "--codepage", help="Xindy codepage override (xindy only).")
     parser.add_argument(
+        "-i",
+        dest="stdin",
+        action="store_true",
+        help="Ignored for compatibility with the Perl script.",
+    )
+    parser.add_argument(
         "-l",
         dest="letter_ordering",
         action="store_true",

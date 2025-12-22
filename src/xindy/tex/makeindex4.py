@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 from collections.abc import Iterable, Sequence
 from pathlib import Path
+import re
 import sys
 import tempfile
 import traceback
@@ -28,6 +29,7 @@ def _build_temp_style(
     *,
     ignore_blanks: bool = False,
     crossref_attrs: Iterable[str] = (),
+    extra_requires: Iterable[str] = (),
 ) -> Path:
     attr_list = list(dict.fromkeys(a for a in attrs if a))
     # ensure deterministic order
@@ -67,6 +69,8 @@ def _build_temp_style(
             '(require "tex/makeidx4.xdy")',
         ]
     )
+    for module in extra_requires:
+        lines.append(f'(require "{module}")')
     dest.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return dest
 
@@ -74,10 +78,12 @@ def _build_temp_style(
 class _Logger:
     """Minimal logger that mirrors to stderr when requested and writes .ilg output."""
 
-    def __init__(self, path: Path):
+    def __init__(self, path: Path, *, mirror: bool | None = None):
         self.path = path
         self._lines: list[str] = []
-        self._mirror = path == Path("-")
+        if mirror is None:
+            mirror = path == Path("-")
+        self._mirror = mirror
 
     def info(self, message: str, *, mirror: bool | None = None) -> None:
         self._write(message, mirror=mirror)
@@ -118,48 +124,225 @@ def _format_error(exc: Exception) -> str:
     return str(exc)
 
 
+def _escape_module_path(path: Path) -> str:
+    return str(path).replace("\\", "\\\\")
+
+
+def _unescape_ist_string(value: str) -> str:
+    result: list[str] = []
+    idx = 0
+    while idx < len(value):
+        ch = value[idx]
+        if ch == "\\" and idx + 1 < len(value):
+            nxt = value[idx + 1]
+            if nxt in {'"', "\\"}:
+                result.append(nxt)
+                idx += 2
+                continue
+            result.append("\\")
+            idx += 1
+            continue
+        result.append(ch)
+        idx += 1
+    return "".join(result)
+
+
+def _parse_ist(path: Path, *, quiet: bool) -> dict[str, str]:
+    values: dict[str, str] = {}
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    for raw_line in text.splitlines():
+        line = raw_line.split("%", 1)[0].strip()
+        if not line:
+            continue
+        parts = line.split(None, 1)
+        if len(parts) != 2:
+            if not quiet:
+                print(f"Warning: could not parse style line: {raw_line}", file=sys.stderr)
+            continue
+        key, rest = parts
+        rest = rest.strip()
+        if rest.startswith('"') and rest.count('"') >= 2:
+            buf = []
+            escape = False
+            for ch in rest[1:]:
+                if ch == '"' and not escape:
+                    break
+                if ch == "\\" and not escape:
+                    escape = True
+                    buf.append(ch)
+                    continue
+                buf.append(ch)
+                escape = False
+            value = "".join(buf)
+        elif rest.startswith("'") and rest.count("'") >= 2:
+            value = rest.split("'", 2)[1]
+        else:
+            value = rest.split()[0]
+        values[key] = _unescape_ist_string(value)
+    return values
+
+
+def _ist_to_xdy_lines(values: dict[str, str], *, quiet: bool) -> list[str]:
+    lines: list[str] = []
+    supported = {
+        "preamble",
+        "postamble",
+        "group_skip",
+        "item_0",
+        "item_1",
+        "item_2",
+        "delim_0",
+        "delim_1",
+        "delim_2",
+        "delim_n",
+        "delim_r",
+        "lethead_prefix",
+        "lethead_suffix",
+    }
+    for key in values:
+        if key not in supported and not quiet:
+            print(f"Warning: makeindex style key '{key}' not supported.", file=sys.stderr)
+
+    def _xdy_string(value: str) -> str:
+        converted = value.replace("\\n", "~n")
+        return converted.replace('"', '\\"')
+
+    if "preamble" in values or "postamble" in values:
+        parts = ["(markup-index"]
+        if "preamble" in values:
+            parts.append(f':open "{_xdy_string(values["preamble"])}"')
+        if "postamble" in values:
+            parts.append(f':close "{_xdy_string(values["postamble"])}"')
+        parts.append(")")
+        lines.append(" ".join(parts))
+    if "group_skip" in values:
+        lines.append(f'(markup-letter-group-list :sep "{_xdy_string(values["group_skip"])}")')
+    for depth in range(3):
+        key = f"item_{depth}"
+        if key in values:
+            lines.append(f'(markup-indexentry :open "{_xdy_string(values[key])}" :depth {depth})')
+    sep = values.get("delim_n") or values.get("delim_0")
+    if sep:
+        lines.append(f'(markup-locref-list :sep "{_xdy_string(sep)}")')
+    if "delim_r" in values:
+        lines.append(f'(markup-range :sep "{_xdy_string(values["delim_r"])}")')
+    if "lethead_prefix" in values or "lethead_suffix" in values:
+        prefix = _xdy_string(values.get("lethead_prefix", ""))
+        suffix = _xdy_string(values.get("lethead_suffix", ""))
+        lines.append(f'(markup-letter-group :open_head "{prefix}" :close_head "{suffix}")')
+    if not quiet:
+        for key in ("delim_1", "delim_2"):
+            if key in values and sep and values[key] != sep:
+                print(
+                    f"Warning: makeindex style '{key}' ignored; using '{sep}'.",
+                    file=sys.stderr,
+                )
+    return lines
+
+
+def _resolve_start_page(
+    token: str | None,
+    *,
+    log_path: Path,
+    quiet: bool,
+) -> int | None:
+    if not token:
+        return None
+    if token.isdigit():
+        return int(token)
+    normalized = token.lower()
+    if normalized not in {"any", "odd", "even"}:
+        if not quiet:
+            print(f"Warning: makeindex -p {token} not recognized.", file=sys.stderr)
+        return None
+    if not log_path.exists():
+        if not quiet:
+            print(f"Warning: log file '{log_path}' not found for -p {token}.", file=sys.stderr)
+        return None
+    text = log_path.read_text(encoding="utf-8", errors="ignore")
+    matches = list(re.finditer(r"\\[(\\d+)\\]", text))
+    if not matches:
+        if not quiet:
+            print(
+                f"Warning: unable to determine last page from '{log_path}' for -p {token}.",
+                file=sys.stderr,
+            )
+        return None
+    last_page = int(matches[-1].group(1))
+    start = last_page + 1
+    if normalized == "odd" and start % 2 == 0:
+        start += 1
+    if normalized == "even" and start % 2 != 0:
+        start += 1
+    return start
+
+
+def _inject_start_page(output: str, page: int) -> str:
+    marker = "\\begin{theindex}"
+    insertion = f"{marker}\n\\setcounter{{page}}{{{page}}}"
+    if marker in output:
+        return output.replace(marker, insertion, 1)
+    return f"\\setcounter{{page}}{{{page}}}\n{output}"
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="makeindex4",
         description="makeindex-compatible wrapper around xindy (Python port).",
     )
-    parser.add_argument("idx", help="Input .idx file")
+    parser.add_argument("idx", nargs="*", help="Input .idx files")
     parser.add_argument("-o", "--output", help="Output .ind file (default: basename.idx -> .ind)")
     parser.add_argument("-t", "--log", help="Log file (default: basename.ilg)")
     parser.add_argument(
         "-c", action="store_true", help="Compress whitespace in keys (makeindex -c)"
     )
+    parser.add_argument("-i", action="store_true", help="Read input from stdin (makeindex -i)")
     parser.add_argument("-l", action="store_true", help="Ignore blanks in sorting (makeindex -l)")
     parser.add_argument("--input-encoding", default="latin-1", help="Encoding of .idx input")
     parser.add_argument("--output-encoding", default="utf-8", help="Encoding of .ind output")
+    parser.add_argument("-g", action="store_true", help="German ordering (makeindex -g)")
+    parser.add_argument("-q", action="store_true", help="Quiet mode (makeindex -q)")
     parser.add_argument(
-        "-g", action="store_true", help="(makeindex -g) not supported, emits warning"
+        "-r",
+        action="store_true",
+        help="Disable implicit page ranges (makeindex -r)",
     )
-    parser.add_argument(
-        "-q", action="store_true", help="(makeindex -q) not supported, emits warning"
-    )
-    parser.add_argument(
-        "-r", action="store_true", help="(makeindex -r) not supported, emits warning"
-    )
-    parser.add_argument("-p", help="(makeindex -p) not supported, emits warning")
-    parser.add_argument("-s", help="(makeindex -s) not supported, emits warning")
+    parser.add_argument("-p", help="Set starting page number (makeindex -p)")
+    parser.add_argument("-s", help="Style file (.xdy or .ist)")
     parser.add_argument("--debug", action="store_true", help="Show tracebacks on errors.")
     args = parser.parse_args(argv)
 
-    idx_path = Path(args.idx) if args.idx != "-" else None
-    base = idx_path.with_suffix("") if idx_path else Path("stdin")
+    if args.i and args.idx:
+        parser.error("Do not pass input files when -i is used.")
+    if not args.idx and not args.i:
+        parser.error("Input .idx file required unless -i is used.")
+    idx_paths = args.idx
+    first_arg = idx_paths[0] if idx_paths else "-"
+    first_path = None if first_arg == "-" else Path(first_arg)
+    base = first_path.with_suffix("") if first_path else Path("stdin")
     out_path = (
-        Path(args.output) if args.output else (base.with_suffix(".ind") if idx_path else Path("-"))
+        Path(args.output)
+        if args.output
+        else (base.with_suffix(".ind") if first_path else Path("-"))
     )
-    log_path = Path(args.log) if args.log else (base.with_suffix(".ilg") if idx_path else Path("-"))
-    logger = _Logger(log_path)
+    log_path = (
+        Path(args.log) if args.log else (base.with_suffix(".ilg") if first_path else Path("-"))
+    )
+    logger = _Logger(log_path, mirror=None if not args.q else False)
 
+    start_page: int | None = None
     try:
-        if idx_path is None:
+        if args.i:
             idx_text = sys.stdin.buffer.read().decode(args.input_encoding)
             entries = [e.to_raw() for e in parse_idx(idx_text)]
         else:
-            entries = convert_idx_to_raw_entries(idx_path, encoding=args.input_encoding)
+            entries = []
+            for idx in idx_paths:
+                if idx == "-":
+                    idx_text = sys.stdin.buffer.read().decode(args.input_encoding)
+                    entries.extend([e.to_raw() for e in parse_idx(idx_text)])
+                else:
+                    entries.extend(convert_idx_to_raw_entries(idx, encoding=args.input_encoding))
         if args.c:
             entries = [_compress_key_parts(e) for e in entries]
         attrs = {e.attr for e in entries if e.attr}
@@ -167,18 +350,46 @@ def main(argv: Sequence[str] | None = None) -> int:
         crossref_attrs = {e.attr for e in entries if e.attr and e.extras.get("xref")}
 
         with tempfile.TemporaryDirectory() as tmpdir:
+            extra_requires: list[str] = []
+            if args.g:
+                extra_requires.append("lang/german/din5007.xdy")
+            if args.s:
+                style_path = Path(args.s)
+                suffix = style_path.suffix.lower()
+                if suffix == ".xdy":
+                    extra_requires.append(_escape_module_path(style_path.resolve()))
+                elif suffix == ".ist":
+                    ist_values = _parse_ist(style_path, quiet=args.q)
+                    ist_lines = _ist_to_xdy_lines(ist_values, quiet=args.q)
+                    if ist_lines:
+                        ist_xdy = Path(tmpdir) / "makeindex4-ist.xdy"
+                        ist_xdy.write_text("\n".join(ist_lines) + "\n", encoding="utf-8")
+                        extra_requires.append(_escape_module_path(ist_xdy))
+                elif not args.q:
+                    print(
+                        f"Warning: makeindex style '{style_path}' not supported.",
+                        file=sys.stderr,
+                    )
             style_path = _build_temp_style(
                 attrs,
                 Path(tmpdir) / "makeindex4.xdy",
                 ignore_blanks=args.l,
                 crossref_attrs=crossref_attrs,
+                extra_requires=extra_requires,
             )
             raw_path = Path(tmpdir) / "tmp.raw"
             write_raw(entries, raw_path, encoding=args.output_encoding)
 
             state = StyleInterpreter().load(style_path)
-            index = build_index_entries(entries, state)
+            index = build_index_entries(entries, state, enable_ranges=not args.r)
             output = render_index(index, style_state=state)
+            start_page = _resolve_start_page(
+                args.p,
+                log_path=base.with_suffix(".log"),
+                quiet=args.q,
+            )
+            if start_page is not None:
+                output = _inject_start_page(output, start_page)
             if out_path == Path("-"):
                 sys.stdout.write(output)
             else:
@@ -188,23 +399,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.debug:
             traceback.print_exc()
         friendly = _format_error(exc)
-        print(f"makeindex4 error: {friendly}", file=sys.stderr)
+        if not args.q:
+            print(f"makeindex4 error: {friendly}", file=sys.stderr)
         logger.error(friendly, mirror=False)
         logger.flush()
         return 1
 
-    for flag, name in [
-        (args.g, "-g"),
-        (args.q, "-q"),
-        (args.r, "-r"),
-        (bool(args.p), "-p"),
-        (bool(args.s), "-s"),
-    ]:
-        if flag:
-            message = f"makeindex option {name} not supported by Python wrapper"
-            if log_path != Path("-"):
-                print(f"Warning: {message}", file=sys.stderr)
-            logger.warn(message)
+    if args.p and start_page is None and not args.q:
+        message = f"makeindex option -p {args.p} could not be applied"
+        if log_path != Path("-"):
+            print(f"Warning: {message}", file=sys.stderr)
+        logger.warn(message)
     logger.flush()
     return 0
 

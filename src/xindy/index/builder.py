@@ -31,6 +31,7 @@ def build_index_entries(
     style_state: StyleState,
     *,
     default_locclass: str | None = None,
+    enable_ranges: bool = True,
 ) -> Index:
     """Convert raw entries into structured :class:`IndexEntry` objects."""
     locclasses = _resolve_location_classes(style_state, default_locclass)
@@ -109,7 +110,7 @@ def build_index_entries(
             logger.warning("Skipping entry %s: no valid location references", raw.key)
             continue
         entries.append(entry)
-    grouped = group_entries_by_letter(entries, style_state)
+    grouped = group_entries_by_letter(entries, style_state, enable_ranges=enable_ranges)
     progress = _compute_progress_markers(len(entries))
     return Index(groups=grouped, total_entries=len(entries), progress_markers=progress)
 

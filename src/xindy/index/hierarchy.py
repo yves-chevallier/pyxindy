@@ -13,6 +13,7 @@ def build_hierarchy(
     entries: Iterable[IndexEntry],
     allowed_range_attrs: Sequence[str] | None = None,
     suppress_covered_ranges: bool = False,
+    enable_ranges: bool = True,
 ) -> list[IndexNode]:
     roots: list[IndexNode] = []
     range_allowed = set(allowed_range_attrs or [])
@@ -41,8 +42,9 @@ def build_hierarchy(
                 continue
             node.add_locrefs(entry.locrefs)
             # defer range detection to final sweep
-    for node in roots:
-        _finalize_ranges(node, range_allowed, allow_all_ranges, suppress_covered_ranges)
+    if enable_ranges:
+        for node in roots:
+            _finalize_ranges(node, range_allowed, allow_all_ranges, suppress_covered_ranges)
     return roots
 
 
