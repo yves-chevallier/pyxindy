@@ -20,3 +20,9 @@ def test_require_is_idempotent():
     before = len(state.loaded_files)
     interpreter.load(TESTS_DIR / "attr1.xdy")
     assert len(state.loaded_files) == before
+
+
+def test_preprocess_preserves_empty_string_literals():
+    interpreter = StyleInterpreter()
+    content = '(markup-locref :open "x" :close "" :attr "page")'
+    assert interpreter._preprocess_content(content) == content

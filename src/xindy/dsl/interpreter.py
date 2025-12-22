@@ -754,9 +754,10 @@ class StyleInterpreter:
         content = re.sub(r'"(\\~)"\{\}"', r'"\1{}"', content)
         content = re.sub(r'"(\\~)"\\([A-Za-z])"', r'"\1\\\2"', content)
         # Concatenate adjacent string literals which xindy modules use heavily.
-        string_pair = re.compile(r'"((?:\\.|[^"\\])*)""((?:\\.|[^"\\])*)"')
+        # Anchor to a token boundary so we don't eat closing quotes (e.g. ':close ""').
+        string_pair = re.compile(r'(^|[\\s(])"((?:\\.|[^"\\])*)""((?:\\.|[^"\\])*)"')
         while True:
-            updated = string_pair.sub(lambda m: f'"{m.group(1)}{m.group(2)}"', content)
+            updated = string_pair.sub(lambda m: f'{m.group(1)}"{m.group(2)}{m.group(3)}"', content)
             if updated == content:
                 break
             content = updated

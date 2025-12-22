@@ -92,3 +92,11 @@ def test_locref_formats_are_attr_specific():
     assert "[3;4" in output
     assert "<<LIST>>" in output
     assert "<<ENDLIST>>" in output
+
+
+def test_locclass_list_close_wraps_locrefs():
+    state = StyleInterpreter().load(DATA_DIR / "locclass-close.xdy")
+    raw_entries = load_raw_index(DATA_DIR / "locclass-close.raw")
+    index = build_index_entries(raw_entries, state)
+    output = render_index(index, style_state=state)
+    assert "<<1, 2>>" in output

@@ -67,6 +67,7 @@ class MarkupConfig:
         default_factory=dict
     )
     default_locref_format: LocrefFormat = field(default_factory=LocrefFormat)
+    locref_list_close: str = ""
     range_separator: str = "-"
     crossref_prefix: str = "see "
     crossref_suffix: str = ""
@@ -462,6 +463,8 @@ def _render_locref_part(
     body = sep.join(all_items)
     if cfg.attr_group_open:
         body = cfg.attr_group_open + body
+    if cfg.locref_list_close and not body.endswith(cfg.locref_list_close):
+        body = body + cfg.locref_list_close
     return spacer + body
 
 
@@ -949,6 +952,8 @@ def _config_from_style(style_state: StyleState) -> MarkupConfig:
     locclass_list = opts.get("locclass_list", {})
     if locclass_list.get("open"):
         cfg.default_locref_format.prefix = _normalize_markup_string(locclass_list["open"])
+    if locclass_list.get("close"):
+        cfg.locref_list_close = _normalize_markup_string(locclass_list["close"])
     locref_class_opts = opts.get("locref_class", {})
     for class_name, raw_cfg in locref_class_opts.items():
         fmt = LocrefListFormat()
